@@ -1,0 +1,14 @@
+.header h2 {
+  margin: 0;
+  font-weight: bold;
+  font-size: 22px;
+  color: #fff;
+}
+
+.header h3{
+  font-size: 20px;
+  font-weight: bold;
+  text-align: right;
+  color: #fff;
+  margin-bottom: 15px;
+}
