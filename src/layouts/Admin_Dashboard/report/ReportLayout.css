@@ -1,0 +1,69 @@
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dashboard-layout {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(116.82deg, rgba(10,0,126,1) 0%, rgba(255,255,255,1) 100%);
+}
+
+.sidebar {
+  flex-grow: 0;
+  width: 210px;
+  height: auto;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: auto;
+}
+
+.header {
+  height: 90px;
+  width: 100%;
+}
+
+.charts-section {
+  flex-grow: 1;
+  width: 100%;
+  height: auto;
+}
+
+.report-layout-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(116.82deg, rgba(10,0,126,1) 0%, rgba(255,255,255,1) 100%);
+}
+
+.sidebar {
+  flex-grow: 0;
+  width: 210px;
+  height: auto;
+}
+
+.report-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: auto;
+  background: linear-gradient(116.82deg, rgb(21,14,95) 1%, rgb(20,10,88) 22%, rgb(42,27,130) 28%, rgb(182,174,206) 100%);
+}
+
+.header {
+  height: 90px;
+  width: 100%;
+}
+
+.charts-section {
+  flex-grow: 1;
+  width: 100%;
+  height: auto;
+}

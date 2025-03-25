@@ -1,0 +1,110 @@
+.payroll-table {
+  width: 100%;
+  min-width: 1200px;
+  color: #fff;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  background: #0c014d;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  height: 49px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #2306a4;
+}
+
+.table-row {
+  display: flex;
+  align-items: center;
+  height: 51px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #2306a4;
+  border-top: none;
+}
+
+.header-cell, .table-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 10px;
+  text-align: center;
+}
+
+.id-cell {
+  width: 50px;
+}
+
+.name-cell {
+  width: 185px;
+}
+
+.dept-cell {
+  width: 150px;
+}
+
+.header-cell:not(.id-cell):not(.name-cell):not(.dept-cell):not(.action-cell),
+.table-cell:not(.id-cell):not(.name-cell):not(.dept-cell):not(.action-cell) {
+  flex: 1;
+}
+
+.action-cell {
+  width: 230px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.edit-button {
+  width: 41px;
+  height: 29px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.view-details {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  font-style: italic;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.view-details:hover {
+  opacity: 0.8;
+}
+
+.edit-button:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 1200px) {
+  .payroll-table {
+    overflow-x: auto;
+  }
+
+  .table-header, .table-row {
+    min-width: 1200px;
+  }
+}
+
