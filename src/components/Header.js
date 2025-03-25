@@ -1,13 +1,39 @@
-import React from "react";
-import "../styles/Header.css";
+import React from 'react';
+import '../styles/Header.css';
 
-const Header = () => {
+const Header = ({ userName = 'Tuan', userRole = 'HR manager' }) => {
   return (
-    <header className="header">
-      <h3>Payroll Manager</h3>
-      <h2>Payroll List</h2>
-    </header>
+    <div className="header-container">
+      <div className="header-background">
+        <div className="header-content">
+          {/* Notification Icons */}
+
+          {/* Role Title */}
+          <div className="role-title">
+            {userRole}
+          </div>
+          <div className="notification-section">
+            <div className="icon-wrapper">
+              <img src="https://dashboard.codeparrot.ai/api/image/Z-Evp2s0ZhD5c3df/ic-round.png" alt="notifications" className="icon" />
+            </div>
+            <div className="icon-wrapper">
+              <img src="https://dashboard.codeparrot.ai/api/image/Z-Evp2s0ZhD5c3df/bi-chat.png" alt="chat" className="icon" />
+            </div>
+            
+            {/* User Info */}
+            <div className="user-info">
+              <img src="https://dashboard.codeparrot.ai/api/image/Z-Evp2s0ZhD5c3df/ellipse.png" alt="user" className="user-avatar" />
+              <div className="user-name-wrapper">
+                <span className="user-greeting">Hi, {userName}</span>
+                <img src="https://dashboard.codeparrot.ai/api/image/Z-Evp2s0ZhD5c3df/frame-10.png" alt="dropdown" className="dropdown-icon" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
 export default Header;
+

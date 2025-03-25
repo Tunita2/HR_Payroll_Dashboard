@@ -1,0 +1,49 @@
+.table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 49px;
+    background: rgba(255, 255, 255, 0.03);
+    color: #FFFFFF;
+    font-family: Inter, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  
+  .header-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    flex-grow: 1;
+  }
+  
+  .id {
+    min-width: 50px;
+  }
+  
+  .header-cell.name {
+    padding-right: 90px;
+  }
+  
+  .department {
+    min-width: 150px;
+  }
+  
+  
+  .action {
+    min-width: 230px;
+  }
+  
+  @media (max-width: 768px) {
+    .table-header {
+      font-size: 12px;
+    }
+  
+    .header-cell {
+      padding: 0 5px;
+    }
+  }
+  

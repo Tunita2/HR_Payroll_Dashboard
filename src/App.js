@@ -1,10 +1,9 @@
-import PayrollDashboard from "./pages/PayrollDashboard";
-import Payroll from "./pages/Payroll";
+import PayrollView from "./pages/PayrollView";
 function App() {
   return (
     <div className="App">
-      {/* <Payroll /> */}
-      <PayrollDashboard />
+      <PayrollView />
+      {/* <PayrollDashboard /> */}
     </div>
   );
 }
