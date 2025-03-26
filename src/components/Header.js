@@ -1,5 +1,6 @@
 import React from 'react';
 import '../styles/Header.css';
+import SearchBar from './SearchBar';
 
 const Header = ({ userName = 'Tuan', userRole = 'Payroll manager' }) => {
   return (
@@ -12,6 +13,7 @@ const Header = ({ userName = 'Tuan', userRole = 'Payroll manager' }) => {
           <div className="role-title">
             {userRole}
           </div>
+          <SearchBar></SearchBar>
           <div className="notification-section">
             <div className="icon-wrapper">
               <img src="https://dashboard.codeparrot.ai/api/image/Z-Evp2s0ZhD5c3df/ic-round.png" alt="notifications" className="icon" />
