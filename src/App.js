@@ -13,7 +13,7 @@ function App() {
       {/* <PayrollLayout /> */}
       {/* <AttendanceLayout /> */}
       {/* <ReportLayout /> */}
-      {/* <DashboardLayout /> */}
+      <DashboardLayout />
     </div>
   );
 }

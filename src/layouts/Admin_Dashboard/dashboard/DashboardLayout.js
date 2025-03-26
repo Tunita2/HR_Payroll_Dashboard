@@ -67,7 +67,7 @@ const DashboardLayout = () => {
               birthdays={birthdays}
               anniversaries={anniversaries}
             />
-            <DepartmentStatistics />
+            {/* <DepartmentStatistics /> */}
           </div>
         </div>
       </div>
