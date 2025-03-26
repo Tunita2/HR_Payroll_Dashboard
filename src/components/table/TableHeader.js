@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../styles/table/TableHeader.css';
+import '../../styles/table/Table.css';
 
 const TableHeader = () => {
   return (
@@ -12,7 +12,7 @@ const TableHeader = () => {
       <div className="header-cell deductions">Deductions</div>
       <div className="header-cell net-salary">Net salary</div>
       <div className="header-cell status">Status</div>
-      <div className="header-cell action">Action</div>
+      <div className="header-cell action">Edit</div>
     </div>
   );
 };
