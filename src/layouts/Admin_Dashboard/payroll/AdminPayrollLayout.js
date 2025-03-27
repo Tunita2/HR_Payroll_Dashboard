@@ -4,7 +4,7 @@ import Sidebar from "../../../components/Sidebar";
 import PayrollTable from "./PayrollTable";
 import "./PayrollLayout.css";
 
-const PayrollLayout = () => {
+const AdminPayrollLayout = () => {
   return (
     <div className="layout-container">
       <Sidebar className="sidebar" />
@@ -19,4 +19,4 @@ const PayrollLayout = () => {
   );
 };
 
-export default PayrollLayout;
+export default AdminPayrollLayout;

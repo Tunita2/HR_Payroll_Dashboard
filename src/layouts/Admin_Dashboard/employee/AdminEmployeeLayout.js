@@ -4,7 +4,7 @@ import Sidebar from "../../../components/Sidebar";
 import EmployeeTable from "./EmployeeTable";
 import "./EmployeeLayout.css";
 
-const EmployeeLayout = () => {
+const AdminEmployeeLayout = () => {
   return (
     <div className="dashboard-layout">
       <Sidebar />
@@ -20,4 +20,4 @@ const EmployeeLayout = () => {
   );
 };
 
-export default EmployeeLayout;
+export default AdminEmployeeLayout;

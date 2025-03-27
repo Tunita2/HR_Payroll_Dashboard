@@ -1,0 +1,39 @@
+.search-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #060070;
+  height: 39px;
+  min-width: 332px;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 10px;
+}
+
+.search-icon {
+  width: 13.49px;
+  height: 13.49px;
+  margin-right: 10px;
+}
+
+.search-input {
+  flex-grow: 1;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  outline: none;
+}
+
+@media (max-width: 400px) {
+  .search-bar {
+    min-width: 100%;
+  }
+}
+

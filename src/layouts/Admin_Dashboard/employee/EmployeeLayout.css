@@ -36,11 +36,12 @@
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
   font-size: 14px;
-  padding: 10px 20px;
+  padding: 10px 30px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  min-width: 200px;
 }
 
 .add-employee-button:hover {
