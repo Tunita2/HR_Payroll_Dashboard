@@ -3,10 +3,10 @@ import Sidebar from "../../../components/Sidebar";
 import Header from "../../../components/Header";
 import DashboardMetrics from "./DashboardMetrics";
 import EmployeeStatistics from "./EmployeeStatistics";
-import DepartmentStatistics from "./DepartmentStatistics";
+// import DepartmentStatistics from "./DepartmentStatistics";
 import "./DashboardLayout.css";
 
-const DashboardLayout = () => {
+const EmployeeDashboardLayout = () => {
   const birthdays = [
     {
       name: "John Smith",
@@ -75,4 +75,4 @@ const DashboardLayout = () => {
   );
 };
 
-export default DashboardLayout;
+export default EmployeeDashboardLayout;

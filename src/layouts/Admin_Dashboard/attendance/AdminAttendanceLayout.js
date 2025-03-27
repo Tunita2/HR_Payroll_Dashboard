@@ -5,7 +5,7 @@ import AddEmployeeButton from "./AddEmployeeButton";
 import AttendanceTable from "./AttendanceTable";
 import "./AttendanceLayout.css";
 
-const AttendanceLayout = () => {
+const AdminEmployeeListLayout = () => {
   return (
     <div className="layout-container">
       <div className="sidebar-container">
@@ -30,4 +30,4 @@ const AttendanceLayout = () => {
   );
 };
 
-export default AttendanceLayout;
+export default AdminEmployeeListLayout;

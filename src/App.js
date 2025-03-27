@@ -1,19 +1,32 @@
-import PayrollView from "./pages/PayrollView";
-import EmployeeLayout from "./layouts/Admin_Dashboard/employee/EmployeeLayout";
-import PayrollLayout from "./layouts/Admin_Dashboard/payroll/PayrollLayout";
-import AttendanceLayout from "./layouts/Admin_Dashboard/attendance/AttendanceLayout";
-import ReportLayout from "./layouts/Admin_Dashboard/report/ReportLayout";
-import DashboardLayout from "./layouts/Admin_Dashboard/dashboard/DashboardLayout";
+// Admin
+// import AdminEmployeeLayout from "./layouts/Admin_Dashboard/employee/AdminEmployeeLayout";
+// import AdminPayrollLayout from "./layouts/Admin_Dashboard/payroll/AdminPayrollLayout";
+// import AdminAttendanceLayout from "./layouts/Admin_Dashboard/attendance/AdminAttendanceLayout";
+// import AdminReportLayout from "./layouts/Admin_Dashboard/report/AdminReportLayout";
+// import AdminDashboardLayout from "./layouts/Admin_Dashboard/dashboard/AdminDashboardLayout";
 
+// Payroll
+import PayrollLayout from "./layouts/Payroll_Dashboard/PayrollList/PayrollLayout";
+import PayrollDashboardLayout from "./layouts/Payroll_Dashboard/dashboard/PayrollDashboardLayout";
+import PayrollHistoryLayout from "./layouts/Payroll_Dashboard/PayrollHistory/PayrollHistoryLayout";
+import AttendanceLayout from "./layouts/Payroll_Dashboard/AttendanceList/AttendanceLayout";
+import ReportLayout from "./layouts/Payroll_Dashboard/Report/ReportLayout";
 function App() {
   return (
     <div className="App">
-      {/* <PayrollView /> */}
-      {/* <EmployeeLayout /> */}
+      {/* Admin */}
+      {/* <AdminEmployeeLayout /> */}
+      {/* <AdminPayrollLayout /> */}
+      {/* <AdminAttendanceLayout /> */}
+      {/* <AdminReportLayout /> */}
+      {/* <AdminDashboardLayout /> */}
+
+      {/* Payroll */}
       {/* <PayrollLayout /> */}
+      {/* <PayrollDashboardLayout /> */}
+      {/* <PayrollHistoryLayout /> */}
       {/* <AttendanceLayout /> */}
-      {/* <ReportLayout /> */}
-      <DashboardLayout />
+      <ReportLayout />
     </div>
   );
 }

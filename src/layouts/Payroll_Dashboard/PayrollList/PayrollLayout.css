@@ -1,0 +1,31 @@
+.payroll-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(116.82deg, rgb(21, 14, 95) 1%, rgb(20, 10, 88) 22%, rgb(42, 27, 130) 28%, rgb(182, 174, 206) 100%);
+}
+
+.sidebar {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 210px;
+  height: auto;
+}
+
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}
+
+.header {
+  height: auto;
+}
+
+.payroll-table {
+  flex-grow: 1;
+  height: auto;
+  padding: 30px 20px 0 40px;
+}

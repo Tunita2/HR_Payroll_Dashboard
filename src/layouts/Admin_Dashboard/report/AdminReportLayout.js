@@ -4,7 +4,7 @@ import Sidebar from "../../../components/Sidebar";
 import ChartsSection_ReportSummary from "./ChartsSectionReportSummary";
 import "./ReportLayout.css";
 
-const ReportLayout = () => {
+const AdminReportLayout = () => {
   return (
     <div className="report-layout-container">
       <Sidebar className="sidebar" />
@@ -16,4 +16,4 @@ const ReportLayout = () => {
   );
 };
 
-export default ReportLayout;
+export default AdminReportLayout;
