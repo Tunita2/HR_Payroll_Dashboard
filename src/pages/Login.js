@@ -150,3 +150,73 @@ const Login = () => {
 };
 
 export default Login;
+
+// import React, { useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import '../styles/Login.css';
+// import { 
+//   Form, 
+//   Input, 
+//   Button, 
+//   Checkbox, 
+//   Divider ,
+//   message,
+// } from 'antd';
+// import { 
+//   GoogleOutlined, 
+//   AppleFilled, 
+//   MailOutlined, 
+//   LockOutlined,
+//   UserOutlined 
+// } from '@ant-design/icons';
+// import backgroundLogin from '../assets/background_login.jpg';
+
+
+// const Login = () => {
+//   const navigate = useNavigate();
+//   const [loading, setLoading] = useState(false);
+
+//   const onFinish = async (values) => {
+//     try {
+//       const response = await fetch('http://localhost:5000/api/login', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify(values)
+//       });
+  
+//       const data = await response.json();
+//       if (response.ok) {
+//         message.success(data.message);
+//         // Điều hướng theo role
+//         if (data.role === 'admin') navigate('/admin');
+//         else if (data.role === 'hr_manager') navigate('/hr-manager');
+//         else if (data.role === 'payroll_manager') navigate('/payroll-manager');
+//         else navigate('/employee');
+//       } else {
+//         message.error(data.error);
+//       }
+//     } catch (error) {
+//       message.error("Lỗi kết nối đến server!");
+//     }
+//   };
+  
+
+//   return (
+//     <div className="login-container">
+//       <h1>Login</h1>
+//       <Form name="login" onFinish={onFinish}>
+//         <Form.Item name="email" rules={[{ required: true, message: 'Please input your email!' }]}> 
+//           <Input placeholder="Email" />
+//         </Form.Item>
+//         <Form.Item name="password" rules={[{ required: true, message: 'Please input your password!' }]}> 
+//           <Input.Password placeholder="Password" />
+//         </Form.Item>
+//         <Form.Item>
+//           <Button type="primary" htmlType="submit" loading={loading}>Login</Button>
+//         </Form.Item>
+//       </Form>
+//     </div>
+//   );
+// };
+
+// export default Login;
