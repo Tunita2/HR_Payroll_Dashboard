@@ -10,7 +10,8 @@ thead {
   background: rgba(35, 6, 164, 0.37);
 }
 
-th, td {
+th,
+td {
   padding: 16px 30px;
   color: #fff;
   font-family: "Poppins", sans-serif;
@@ -57,4 +58,19 @@ tr:hover {
 
 .action-button:hover {
   opacity: 0.8;
+}
+.error-message,
+.delete-error-message {
+  display: flex;
+  align-items: center;
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.error-icon {
+  margin-right: 10px;
+  font-size: 1.5em;
 }
