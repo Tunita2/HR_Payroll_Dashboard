@@ -1,0 +1,87 @@
+@font-face {
+  font-family: "Post No Bills Colombo";
+  src: url("../../assets/fonts/postnobillscolombo-bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("../../assets/fonts/Poppins-Medium.otf") format("truetype");
+}
+
+.navbar {
+  background: none;
+  min-width: 190px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  color: white;
+  font-family: "Poppins", sans-serif;
+}
+
+.logo h1 {
+  font-size: 75px;
+  font-weight: 400;
+  margin: 0;
+  text-align: center;
+  font-family: "Post No Bills Colombo";
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-family: 'Poppins';
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.menu-item:hover {
+  background-color: rgba(74, 150, 255, 0.7);
+}
+
+.menu-item.active {
+  background-color: #4a96ff;  /* Màu xanh khi active */
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.menu-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.menu-item span {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+}
+
+.settings {
+  margin-top: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-family: 'Poppins';
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    min-width: 100px;
+  }
+
+  .logo h1 {
+    font-size: 50px;
+  }
+
+  .menu-item span {
+    display: none;
+  }
+}
