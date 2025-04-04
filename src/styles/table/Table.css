@@ -19,7 +19,6 @@
   align-items: center;
   gap: 10px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.03);
   color: #ffffff;
   font-family: Inter, sans-serif;
   font-size: 14px;
@@ -30,10 +29,12 @@
   border-bottom: 1px solid rgba(35, 6, 164, 0.9);
   padding-top: 20px;
   padding-bottom: 20px;
+  background-color: #0C014D;
 }
 
 .table-row {
   border-bottom: 1px solid rgba(35, 6, 164, 0.5);
+  background-color:rgb(17, 0, 110);
 }
 
 .cell {

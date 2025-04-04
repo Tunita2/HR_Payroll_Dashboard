@@ -1,36 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../styles/table/Table.css';
 import { FaRegEdit } from "react-icons/fa";
+
+const formatCurrency = (amount) => {
+  return amount ? amount.toLocaleString('vi-VN') + ' đ' : '0 đ';
+};
+
+const getStatusBadgeClass = (status) => {
+  const statusMap = {
+    'active': 'present',  // Hiển thị active dưới dạng "present"
+    'inactive': 'absence' // Hiển thị inactive dưới dạng "absence"
+  };
+  return statusMap[status.toLowerCase()] || 'default';
+};
+
 
 const TableRow = ({ 
   index, 
   name, 
   department, 
-  salary, 
+  base_salary, 
   bonus, 
-  deductions,
+  deductions, 
   total, 
   status 
 }) => {
-  // Function to get badge class based on status
-  const getStatusBadgeClass = (status) => {
-    const statusMap = {
-      'Present': 'present',
-      'Absence': 'absence',
-      'Leave': 'leave',
-    };
-    return statusMap[status] || 'default';
-  };
-
   return (
     <div className="table-row">
       <div className="cell index">{index}</div>
       <div className="cell name">{name}</div>
       <div className="cell department">{department}</div>
-      <div className="cell amount">{salary}</div>
-      <div className="cell amount">{bonus}</div>
-      <div className="cell amount">{deductions}</div>
-      <div className="cell amount">{total}</div>
+      <div className="cell amount">{formatCurrency(base_salary)}</div>
+      <div className="cell amount">{formatCurrency(bonus)}</div>
+      <div className="cell amount">{formatCurrency(deductions)}</div>
+      <div className="cell amount">{formatCurrency(total)}</div>
       <div className="cell status">
         <div className={`status-badge ${getStatusBadgeClass(status)}`}>
           {status}
@@ -48,63 +51,26 @@ const TableRow = ({
   );
 };
 
-function EmployeeTable() {
-  // Salary calculation function
-  const calculateTotal = (salary, bonus, deductions) => {
-    // Remove '$' and ',' and convert to number
-    const baseSalary = parseFloat(salary.replace('$', '').replace(',', ''));
-    const bonusAmount = parseFloat(bonus.replace('$', '').replace(',', ''));
-    const deductionAmount = parseFloat(deductions.replace('$', '').replace(',', ''));
-    
-    // Calculate total
-    const total = baseSalary + bonusAmount - deductionAmount;
-    
-    // Return formatted total
-    return `$${total.toLocaleString()}`;
-  };
 
-  // Updated employee data with calculation
-  const employeeData = [
-    {
-      index: 1,
-      name: 'Nguyễn Văn A',
-      department: 'IT',
-      salary: '$1,000',
-      bonus: '$200',
-      deductions: '$100',
-      status: 'Present'
-    },
-    {
-      index: 2,
-      name: 'Trần Thị B',
-      department: 'HR',
-      salary: '$900',
-      bonus: '$150',
-      deductions: '$50',
-      status: 'Absence'
-    },
-    {
-      index: 3,
-      name: 'Lê Văn C',
-      department: 'Finance',
-      salary: '$1,100',
-      bonus: '$250',
-      deductions: '$75',
-      status: 'Leave'
-    }
-  ].map(employee => ({
-    ...employee,
-    total: calculateTotal(employee.salary, employee.bonus, employee.deductions)
-  }));
+function EmployeeTable() {
+  const [employeeData, setEmployeeData] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:3001/api/employee-payroll')
+      .then(res => res.json())
+      .then(data => setEmployeeData(data))
+      .catch(error => console.error('Lỗi fetch dữ liệu:', error));
+  }, []);
 
   return (
     <div className="table-container">
-      {employeeData.map((employee) => (
-        <TableRow 
-          key={employee.index}
-          {...employee}
-        />
-      ))}
+      {employeeData.length > 0 ? (
+        employeeData.map((employee, index) => (
+          <TableRow key={index} index={index + 1} {...employee} />
+        ))
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import Header from "../../../components/Header";
-import Sidebar from "../../../components/Sidebar";
+import Sidebar from "../../../components/Sidebar_Payroll";
 import Table from "./PayrollTable";
 import "./PayrollLayout.css";
 

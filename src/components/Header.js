@@ -7,12 +7,6 @@ const Header = ({ userName = 'Tuan', userRole = 'Payroll manager' }) => {
     <div className="header-container">
       <div className="header-background">
         <div className="header-content">
-          {/* Notification Icons */}
-
-          {/* Role Title */}
-          <div className="role-title">
-            {userRole}
-          </div>
           <SearchBar></SearchBar>
           <div className="notification-section">
             <div className="icon-wrapper">

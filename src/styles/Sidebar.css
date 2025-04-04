@@ -1,77 +1,91 @@
-.sidebar {
-  width: 210px;
-  min-height: 100vh;
+@font-face {
+  font-family: "Post No Bills Colombo";
+  src: url("../assets/fonts/postnobillscolombo-bold.ttf") format("truetype");
+}
+ 
+@font-face {
+  font-family: "Poppins";
+  src: url("../assets/fonts/Poppins-Medium.otf") format("truetype");
+} 
+
+.navbar {
+  background: none;
+  min-width: 190px;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  padding: 0;
   color: white;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
-.sidebar-title {
-  font-size: 32px;
+.logo h1 {
+  font-size: 50px;
   font-weight: 400;
-  text-align: center;
-  padding: 22px 0;
   margin: 0;
+  padding: 10px;
+  text-align: center;
+  font-family: "Post No Bills Colombo";
 }
 
-.menu-container {
+.menu {
   display: flex;
   flex-direction: column;
-  margin-top: 20px;
+  gap: 1px;
+  font-family: 'Poppins';
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 16px 22px;
+  gap: 20px;
+  padding: 10px 20px;
   cursor: pointer;
   transition: background-color 0.3s;
+  color: white;
+  text-decoration: none;
 }
 
 .menu-item:hover {
-  background-color: #4a96ff;
+  background-color: rgba(74, 150, 255, 0.7);
 }
 
 .menu-item.active {
-  background-color: #4a96ff;
+  background-color: #4a96ff;  /* Màu xanh khi active */
+  border-radius: 10px;
+  font-weight: bold;
 }
 
 .menu-icon {
-  width: 22px;
-  height: 22px;
-  margin-right: 7px;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 .menu-item span {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
 }
 
-.bottom-menu {
-  margin-top: auto;
-  padding-bottom: 30px;
+.settings {
+  margin-top: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-family: 'Poppins';
 }
 
-/* Responsive adjustments */
-@media screen and (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    min-height: auto;
+@media (max-width: 768px) {
+  .navbar {
+    min-width: 100px;
   }
 
-  .menu-item {
-    justify-content: center;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .sidebar-title {
-    font-size: 24px;
+  .logo h1 {
+    font-size: 50px;
   }
 
   .menu-item span {
-    font-size: 14px;
+    display: none;
   }
 }

@@ -1,39 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import "./EmployeeTable.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faTrash, 
-  faUserCheck, 
-  faUserClock, 
-  faUserTimes, 
   faExclamationTriangle 
 } from "@fortawesome/free-solid-svg-icons";
+import { fetchEmployees, deleteEmployee } from '../../../services/API';
+import { getStatusIcon } from '../../../utils/Employee_Status';
+import "./EmployeeTable.css";
 
 function EmployeeTable() {
-  const [employees, setEmployees] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // khai báo state 
+  const [employees, setEmployees] = useState([]); // dữ liệu mặc định là rỗng setEmployees[ ]
+  // có thể hiểu thế này: setEmployees(employees[])
+  const [isLoading, setIsLoading] = useState(true); // 
   const [error, setError] = useState(null);
   const [deleteError, setDeleteError] = useState(null);
 
-  const fetchEmployees = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get('http://localhost:3001/api/employees');
-      setEmployees(response.data);
-      setIsLoading(false);
-      setError(null);
-    } catch (err) {
-      console.error('Lỗi tải danh sách nhân viên:', err);
-      setError('Không thể tải danh sách nhân viên');
-      setIsLoading(false);
-    }
-  };
-
+  // Lấy danh sách nhân viên khi component được mount
   useEffect(() => {
-    fetchEmployees();
-  }, []);
+    const loadEmployees = async () => {
+      try {
+        //nhiệm vụ chính
+        setIsLoading(true);
+        const data = await fetchEmployees();// lưu kết quả của hàm vào data
+        setEmployees(data); // Khi API trả dữ liệu, setEmployees(data) cập nhật state, làm component render lại với danh sách mới
+       
+        // nhiệm vụ phụ
+        setError(null);
+      } catch (err) {
+        setError('Không thể tải danh sách nhân viên');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    loadEmployees();
+  }, []);// [ ] (dependency array rỗng): Đảm bảo useEffect không chạy lại khi state thay đổi.
+
+  // Xử lý xóa nhân viên
   const handleDeleteEmployee = async (employeeId) => {
     try {
       // Hiển thị xác nhận trước khi xóa
@@ -41,34 +45,23 @@ function EmployeeTable() {
       
       if (!isConfirmed) return;
 
-      const response = await axios.delete(`http://localhost:3001/api/employees/${employeeId}`);
+      await deleteEmployee(employeeId);
       
       // Cập nhật trạng thái nhân viên thay vì xóa khỏi danh sách
       const updatedEmployees = employees.map(emp => 
         emp.id === employeeId 
           ? { ...emp, status: 'inactive' } 
           : emp
-      );
+      ); 
       
       setEmployees(updatedEmployees);
       setDeleteError(null);
     } catch (err) {
-      console.error('Lỗi cập nhật trạng thái nhân viên:', err);
       setDeleteError(err.response?.data?.message || 'Không thể cập nhật trạng thái nhân viên');
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch(status) {
-      case 'active':
-        return { icon: faUserCheck, className: 'active' };
-      case 'inactive':
-        return { icon: faUserClock, className: 'inactive' };
-      default:
-        return { icon: faUserTimes, className: 'unknown' };
-    }
-  };
-
+  // Hiển thị trạng thái loading
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -78,6 +71,7 @@ function EmployeeTable() {
     );
   }
 
+  // Hiển thị lỗi nếu có
   if (error) {
     return (
       <div className="error-message">
@@ -87,6 +81,7 @@ function EmployeeTable() {
     );
   }
 
+  // Render bảng nhân viên
   return (
     <div className="employee-table-container">
       {deleteError && (
