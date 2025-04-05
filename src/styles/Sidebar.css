@@ -10,7 +10,7 @@
 
 .navbar {
   background: none;
-  min-width: 190px;
+  max-width: 210px;
   height: 100%;
   display: flex;
   flex-direction: column;

@@ -17,20 +17,20 @@ const Sidebar_Payroll = ({ menuItems = [] }) => {
       id: "dashboard",
       icon: GoHomeFill,
       text: "Dashboard",
-      // active: true,
-      // path: "/payroll-dashboard",
+      active: true,
+      path: "/payroll-dashboard",
     },
     {
       id: "salaries",
       icon: GiPayMoney,
       text: "Salaries",
-      path: "/payroll-management"
+      path: "/salary"
     },
     {
       id: "attendance",
       icon: IoIosPeople,
       text: "Attendance",
-      // path: "/admin/attendance-management"
+      path: "/attendance"
     },
     {
       id: "schedule",
@@ -41,8 +41,8 @@ const Sidebar_Payroll = ({ menuItems = [] }) => {
     {
       id: "report",
       icon: TbReportSearch,
-      text: "Salaries",
-      // path: "/admin/employee-management"
+      text: "Report",
+      path: "/payroll-report"
     }]
   const settingItems = [
     {

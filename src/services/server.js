@@ -166,7 +166,7 @@ app.get('/api/employee-payroll', async (req, res) => {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
 });
-
+// lấy chấm công, điểm danh
 app.get('/api/attendance', async (req, res) => {
   try {
     const { month } = req.query;
@@ -177,16 +177,21 @@ app.get('/api/attendance', async (req, res) => {
     // Lấy dữ liệu theo tháng
     const query = `
       SELECT 
-        e.employee_id AS id,
-        CONCAT(e.first_name, ' ', e.last_name) AS fullName,
-        d.department_name AS department,
-        a.date AS date,
-        a.status
+        e.Employee_id AS id,
+        e.FullName AS fullName,
+        d.DepartmentName AS department,
+        p.Position AS position,
+        a.WorkDays AS workdays,
+        a.AbsentDays AS absendays,
+        a.LeaveDays AS leavedays,
+        a.AttendanceMonth AS attendancemonth,
+        a.CreatedAt AS createdat
+        e.Status
       FROM employees e
-      JOIN attendance a ON e.employee_id = a.employee_id
+      JOIN attendance a ON e.employeeID = a.employeeID
       JOIN departments d ON e.department_id = d.department_id
-      WHERE DATE_FORMAT(a.date, '%Y-%m') = ?
-      ORDER BY a.date ASC;
+      WHERE DATE_FORMAT(a.CreatedAt, '%Y-%m') = ?
+      ORDER BY a.C ASC;
     `;
     const [rows] = await promisePool.query(query, [month]);
     res.json(rows);

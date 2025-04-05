@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import "./AttendanceTable.css";
 
-const AttendanceTable = ({ data = [] }) => {
+const AttendanceTable = ({ data = [] , style = {}}) => {
   const getStatusStyle = (status) => {
     switch (status?.toLowerCase()) {
       case "present":
@@ -16,7 +16,7 @@ const AttendanceTable = ({ data = [] }) => {
   };
 
   return (
-    <div className="attendance-table">
+    <div className="attendance-table" style={style}>
       <div className="table-header">
         <div className="header-cell">ID</div>
         <div className="header-cell">Họ và tên</div>
