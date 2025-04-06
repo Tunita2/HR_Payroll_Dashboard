@@ -18,32 +18,32 @@ const Sidebar_HR = ({ menuItems = [] }) => {
       icon: GoHomeFill,
       text: "Dashboard",
       // active: true,
-    //   path: "/hr-dashboard",
+      //   path: "/hr-dashboard",
     },
     {
       id: "staff",
       icon: GiPayMoney,
       text: "Staff",
-    //   path: "/staff"
+      //   path: "/staff"
     },
     {
       id: "department",
       icon: IoIosPeople,
       text: "Department",
-    //   path: "/department"
+      //   path: "/department"
     },
     {
-        id: "job",
-        icon: IoIosPeople,
-        text: "Jobs",
+      id: "job",
+      icon: IoIosPeople,
+      text: "Jobs",
       //   path: "/department"
-      },
+    },
     {
-        id: "applicant",
-        icon: IoIosPeople,
-        text: "Applicant",
-        // path: "/applicant"
-      },
+      id: "applicant",
+      icon: IoIosPeople,
+      text: "Applicant",
+      // path: "/applicant"
+    },
     {
       id: "schedule",
       icon: GrSchedule,
@@ -54,7 +54,7 @@ const Sidebar_HR = ({ menuItems = [] }) => {
       id: "report",
       icon: TbReportSearch,
       text: "Report",
-    //   path: ""
+      //   path: ""
     }]
   const settingItems = [
     {
@@ -66,7 +66,7 @@ const Sidebar_HR = ({ menuItems = [] }) => {
       id: "logout",
       icon: RiLogoutBoxLine,
       text: "Log out",
-      path: "/login",
+      path: "/",
     },
   ]
   return (
@@ -91,10 +91,15 @@ const Sidebar_HR = ({ menuItems = [] }) => {
 
       <div className="settings">
         {settingItems.map((item) => (
-          <div key={item.id} className="menu-item">
+          <Link
+            to={item.path}
+            key={item.id}
+            className={`menu-item ${activeItem === item.path ? "active" : ""}`}
+            onClick={() => setActiveItem(item.path)}
+          >
             <item.icon className="menu-icon" />
             <span>{item.text}</span>
-          </div>
+          </Link>
         ))}
       </div>
     </nav>

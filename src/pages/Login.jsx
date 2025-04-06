@@ -28,7 +28,7 @@ const Login = () => {
       message.success('Login Successful!');
       
       // Navigate to homepage after successful login
-      navigate('/admin/employee-management');
+      navigate('/payroll-dashboard');
     } else {
       message.error('Login Failed. Please check your credentials.');
     }

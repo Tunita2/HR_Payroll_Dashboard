@@ -21,7 +21,6 @@ function App() {
           <Route path="/payroll-management" element={<PayrollView />} />
           <Route path="/admin/employee-management" element={<Admin_Employee_Management />} />
           <Route path="/admin/employee-management/add_employee" element={<Add_Employee_Page />} />
-          <Route path="/admin/attendance-management" element={<Admin_Attendance_Management />} />
     
           <Route path="/hr-dashboard" element={<LayoutHR_Dashboard />} />
           <Route path="/admin-dashboard" element={<LayoutAdmin_Dashboard />} />

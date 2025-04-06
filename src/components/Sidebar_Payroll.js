@@ -54,7 +54,7 @@ const Sidebar_Payroll = ({ menuItems = [] }) => {
       id: "logout",
       icon: RiLogoutBoxLine,
       text: "Log out",
-      path: "/login",
+      path: "/",
     },
   ]
   return (
@@ -79,10 +79,15 @@ const Sidebar_Payroll = ({ menuItems = [] }) => {
 
       <div className="settings">
         {settingItems.map((item) => (
-          <div key={item.id} className="menu-item">
+          <Link
+            to={item.path}
+            key={item.id}
+            className={`menu-item ${activeItem === item.path ? "active" : ""}`}
+            onClick={() => setActiveItem(item.path)}
+          >
             <item.icon className="menu-icon" />
             <span>{item.text}</span>
-          </div>
+          </Link>
         ))}
       </div>
     </nav>
