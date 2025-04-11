@@ -1,0 +1,167 @@
+@font-face {
+  font-family: "Post No Bills Colombo";
+  src: url("../../assets/fonts/postnobillscolombo-bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("../../assets/fonts/Poppins-Medium.otf") format("truetype");
+}
+
+.navbar {
+  background: none;
+  max-width: 210px;
+  height: 100vh; /* ✅ Chiếm toàn bộ chiều cao màn hình */
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  color: white;
+  font-family: "Poppins", sans-serif;
+}
+
+.logo h1 {
+  font-size: 50px;
+  font-weight: 400;
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+  font-family: "Post No Bills Colombo";
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Poppins';
+  flex: 1;
+  overflow-y: auto;
+  justify-content: space-between;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  color: white;
+  text-decoration: none;
+}
+
+.menu-item:hover {
+  background-color: rgba(74, 150, 255, 0.7);
+}
+
+.menu-item.active {
+  background-color: #4a96ff;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.menu-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.menu-item span {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+}
+
+.settings {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-family: 'Poppins';
+  padding-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    min-width: 100px;
+  }
+
+  .logo h1 {
+    font-size: 50px;
+  }
+
+  .menu-item span {
+    display: none;
+  }
+}
+
+/* Admin Sidebar Custom */
+.admin-sidebar .menu-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-sidebar .submenu-toggle {
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.admin-sidebar .submenu {
+  display: flex;
+  flex-direction: column;
+  padding-left: 20px;
+  margin-top: 2px;
+  margin-bottom: 4px;
+}
+
+.admin-sidebar .submenu-item {
+  padding: 6px 20px;
+  font-size: 13px;
+  text-decoration: none;
+  color: white;
+  transition: background-color 0.3s, color 0.3s;
+  border-radius: 6px;
+  margin: 2px 0;
+}
+
+.admin-sidebar .submenu-item:hover {
+  background-color: rgba(74, 150, 255, 0.2);
+  color: #4a96ff;
+}
+
+.admin-sidebar .submenu-item.active {
+  background-color: #4a96ff;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+}
+
+/* Optional: Search bar styles (if used) */
+.search-bar {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  height: 45px;
+  border-radius: 5px;
+  transition: all 0.2s ease-in-out;
+}
+
+.search-bar input {
+  width: 400px;
+  height: 65%;
+  background-color: #ffffff00;
+  border-radius: 5px;
+  border: 1px solid white;
+  font-size: 14px;
+  padding-left: 10px;
+  color: white;
+}
+
+.search-icon {
+  width: 24px;
+  height: 24px;
+  margin-left: -30px;
+  object-fit: contain;
+}
+
+.search-icon:hover {
+  opacity: 0.8;
+}
