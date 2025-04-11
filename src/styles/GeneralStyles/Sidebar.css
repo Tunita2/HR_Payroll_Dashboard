@@ -9,6 +9,7 @@
 }
 
 .navbar {
+  position: fixed;
   background: none;
   max-width: 210px;
   height: 100vh; /* ✅ Chiếm toàn bộ chiều cao màn hình */

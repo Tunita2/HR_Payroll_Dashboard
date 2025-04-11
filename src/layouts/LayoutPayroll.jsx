@@ -10,7 +10,7 @@ const LayoutPayroll = () => {
   const location = useLocation();
   return (
     <div className="dashboard-layout">
-      <Sidebar 
+      <Sidebar
         menuConfig={ menuConfig }
         settingItems = { settingItems }
         userRole = "Payroll"

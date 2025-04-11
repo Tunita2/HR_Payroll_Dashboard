@@ -128,12 +128,12 @@ const Login = () => {
               <Checkbox>Remember me</Checkbox>
             </Form.Item>
 
-            <button 
+            <a 
             className="login-forgot-password" 
             onClick={() => message.info("Chức năng đang phát triển")}
             >
             Forgot password
-            </button>
+            </a>
 
           </Form.Item>
 
