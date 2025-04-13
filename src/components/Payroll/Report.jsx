@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
   PieChart, Pie, Cell, ResponsiveContainer,
 } from 'recharts';
-import "../../styles/PayrollStyles/reportPayroll.css"
+import "../../styles/PayrollStyles/reportPayroll.css";
 
 const Reports = () => {
     // Mock data - trong thực tế sẽ được lấy từ API kết nối với database
