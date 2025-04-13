@@ -2,10 +2,10 @@ import React from "react";
 import { Route } from "react-router-dom";
 import LayoutAdmin from "../layouts/LayoutAdmin";
 // HR
-import StaffTable from "../components/Admin/HumanResource/StaffTable";
-import ApplicantTable from "../components/Admin/HumanResource/ApplicantTable";
+import EmployeeTable from "../components/Admin/HumanResource/EmployeeTable";
+import DividendTable from "../components/Admin/HumanResource/DividendTable";
 import DepartmentTable from "../components/Admin/HumanResource/DepartmentTable";
-import JobTitleTable from "../components/Admin/HumanResource/JobTitleTable";
+import PositionTable from "../components/Admin/HumanResource/PositionTable";
 // Payroll
 import SalaryTable from "../components/Admin/Payroll/SalaryTable";
 import AttendanceTable from "../components/Admin/Payroll/AttendanceTable";
@@ -16,10 +16,10 @@ import AlertNotifications from "../components/Admin/AlertNotifications";
 const AdminRoutes = () => {
   return (
     <Route path="/admin" element={<LayoutAdmin />}>
-          <Route path="staffs" element={<StaffTable />} />
-          <Route path="applicants" element={<ApplicantTable />} />
+          <Route path="employees" element={<EmployeeTable />} />
+          <Route path="dividends" element={<DividendTable />} />
           <Route path="departments" element={<DepartmentTable />} />
-          <Route path="jobtitles" element={<JobTitleTable />} />
+          <Route path="positions" element={<PositionTable />} />
           <Route path="salaries" element={<SalaryTable />} />
           <Route path="attendances" element={<AttendanceTable />} />
           <Route path="reports" element={<Reports />} />

@@ -21,10 +21,10 @@ export const menuConfig = [
     icon: IoIosPeople,
     text: "Employee",
     children: [
-      { text: "Staffs", path: "/admin/staffs" },
-      { text: "Applicants", path: "/admin/applicants" },
+      { text: "Employees", path: "/admin/employees" },
+      { text: "Dividends", path: "/admin/dividends" },
       { text: "Departments", path: "/admin/departments" },
-      { text: "Job Titles", path: "/admin/jobtitles" },
+      { text: "Positions", path: "/admin/positions" },
     ],
   },
   {

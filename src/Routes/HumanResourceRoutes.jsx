@@ -1,20 +1,20 @@
 import React from "react";
 import { Route } from "react-router-dom";
 import LayoutHumanResource from "../layouts/LayoutHumanResource";
-import StaffTable from "../components/HumanResource/StaffTable";
-import ApplicantTable from "../components/HumanResource/ApplicantTable";
-import DepartmentTable from "../components/HumanResource/DepartmentTable";
-import JobTitleTable from "../components/HumanResource/JobTitleTable";
-import Report from "../components/HumanResource/Report"
+import HR_EmployeeTable from "../components/HumanResource/HR_EmployeeTable";
+import HR_DividendTable from "../components/HumanResource/HR_DividendTable";
+import HR_PositionTable from "../components/HumanResource/HR_PositionTable";
+import HR_DepartmentTable from "../components/HumanResource/HR_DepartmentTable";
+import HR_Report from "../components/HumanResource/HR_Report";
 
 const HumanResourceRoutes = () => {
   return (
-    <Route path="/human-resource" element={<LayoutHumanResource />}>
-      <Route path="staff" element={<StaffTable />} />
-      <Route path="applicant" element={<ApplicantTable />} />
-      <Route path="department" element={<DepartmentTable />} />
-      <Route path="jobtitle" element={<JobTitleTable />} />
-      <Route path="report" element={<Report />} />
+    <Route path="/human" element={<LayoutHumanResource />}>
+      <Route path="/human/employee" element={<HR_EmployeeTable />} />
+      <Route path="/human/dividend" element={<HR_DividendTable />} />
+      <Route path="/human/position" element={<HR_PositionTable />} />
+      <Route path="/human/department" element={<HR_DepartmentTable />} />
+      <Route path="/human/report" element={<HR_Report />} />
     </Route>
   );
 };

@@ -1,0 +1,95 @@
+/* Container chính */
+.dividend-table-container {
+  width: 100%;
+  padding: 20px;
+  background-color: #0c014d;
+  margin-top: 50px;
+  position: relative;
+}
+
+/* Phần header gồm 2 nút add và delete */
+.dividend-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 12px 0px;
+  /* background: linear-gradient(to right, #3b3b98, #262673); */
+  border-radius: 8px;
+  font-size: 20px;
+  color: white;
+  font-family: 'Poppins';
+  width: 1300px;
+}
+
+.dividend-table-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: inherit;
+}
+
+.table-button-container {
+  display: flex;
+  gap: 10px;
+}
+
+.table-button {
+  width: 100px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid #5c30fb;
+  background-color: #060070;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.table-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Bảng cổ đông */
+.dividend-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  border-style: solid;
+  border-width: 10px;
+  border-color: white;
+  font-family: "Poppins", sans-serif;
+}
+
+.dividend-table thead {
+  background-color: #2a0b55;
+  color: white;
+}
+
+.dividend-table th {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-weight: 700;
+  padding: 14px 20px;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dividend-table td {
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  max-height: 60vh;
+  padding: 20px;
+}
+
+.dividend-table-row:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
