@@ -24,6 +24,7 @@ const LayoutPayroll = () => {
                 location.pathname === "/payroll/salary" ||
                 location.pathname === "/payroll/attendance" ||
                 location.pathname === "/payroll/schedule" ||
+                location.pathname === "/payroll/salary/history" ||
                 location.pathname === "/payroll/report"   ? (
                     <Outlet />
                 ) : (

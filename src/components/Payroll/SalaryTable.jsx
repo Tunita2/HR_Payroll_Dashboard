@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import "../../styles/PayrollStyles/tableSalaries.css"
+
 
 const SalaryTable = () => {
   const [dataSalary, setSalary] = useState([]);
@@ -48,7 +50,9 @@ const SalaryTable = () => {
       <div class="appli-table-header">
         <div>Salary list</div>
         <div className="button-group">
-          <div className="history">Salaries history</div>
+          <Link to={'/payroll/salary/history'} style={{ color: 'white' }}>
+            <div className="history">Salary history</div>
+          </Link>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <label htmlFor="month-filter">Sort by month:</label>
             <select
@@ -100,7 +104,7 @@ const SalaryTable = () => {
           </tbody>
         </table>
       </div>
-    </div>
+    </div >
   );
 };
 
