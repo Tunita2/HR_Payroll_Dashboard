@@ -1,11 +1,9 @@
 import React from 'react';
-
-const AdminDashboard = () => {
+import HRDividendTable from "../../HumanResource/HR_DividendTable";
+const DividendTable = () => {
   return (
-    <div>
-      <h1>Applicant list</h1>
-    </div>
+    <HRDividendTable />
   );
 };
 
-export default AdminDashboard;
+export default DividendTable;

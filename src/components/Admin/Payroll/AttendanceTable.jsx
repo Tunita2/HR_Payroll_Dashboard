@@ -1,11 +1,9 @@
 import React from 'react';
-
-const AdminDashboard = () => {
+import PayrollAttendanceTable from "../../Payroll/AttendanceTable";
+const AttendanceTable = () => {
   return (
-    <div>
-      <h1>Attendance list</h1>
-    </div>
+    <PayrollAttendanceTable />
   );
 };
 
-export default AdminDashboard;
+export default AttendanceTable;
