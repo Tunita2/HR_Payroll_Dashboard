@@ -1,5 +1,5 @@
-Container phần chính
-.dashboard-layout-report {
+/* Container phần chính */
+.hr-dashboard-layout-report {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -9,21 +9,21 @@ Container phần chính
   max-width: 100vw;
 }
 
-.dashboard-main {
+.hr-dashboard-main {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
 /* Phần header gồm tiêu đề và thẻ thông tin công ty */
-.dashboard-header-report {
+.hr-dashboard-header-report {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.dashboard-title-report {
+.hr-dashboard-title-report {
   color: #ffffff;
   font-size: 20px;
   font-family: Poppins;
@@ -31,9 +31,9 @@ Container phần chính
 }
 
 /* Phần thông tin */
-.report-details-container {
+.hr-report-details-container {
   width: 100%;
-  max-width: 340px;
+  max-width: 380px;
   height: auto;
   padding: 20px;
   background: rgba(2, 0, 61, 0.7);
@@ -49,14 +49,14 @@ Container phần chính
   justify-content: space-between;
 } */
 
-.report-details-row {
+.hr-report-details-row {
   display: grid;
   grid-template-columns: 160px 10px 1fr; /* 3 cột: label - colon - value */
   align-items: center;
   gap: 10px;
 }
 
-.report-details-label {
+.hr-report-details-label {
   font-size: 13px;
   font-family: Poppins;
   font-weight: 500;
@@ -64,7 +64,7 @@ Container phần chính
   color: rgba(255, 255, 255, 0.7);
 }
 
-.report-details-colon {
+.hr-report-details-colon {
   font-size: 16px;
   font-family: Poppins;
   font-weight: 500;
@@ -73,7 +73,7 @@ Container phần chính
   text-align: center;
 }
 
-.report-details-value {
+.hr-report-details-value {
   font-size: 13px;
   font-family: Poppins;
   font-weight: 700;
@@ -82,7 +82,7 @@ Container phần chính
   color: rgba(255, 255, 255, 0.7);
 }
 
-.report-details-report-date {
+.hr-report-details-report-date {
   font-size: 13px;
   font-family: Poppins;
   font-weight: 700;
@@ -93,7 +93,7 @@ Container phần chính
 
 /* Phần mục chọn của report */
 
-.tabs-container {
+.hr-tabs-container {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -104,7 +104,7 @@ Container phần chính
   height: 45px;
 }
 
-.tab-button {
+.hr-tab-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -122,20 +122,20 @@ Container phần chính
   max-width: 250px;
 }
 
-.tab-button:hover {
+.hr-tab-button:hover {
   opacity: 0.9;
 }
 
-.tab-button.active {
+.hr-tab-button.active {
   background: #060070;
 }
 
-.tab-button.inactive {
+.hr-tab-button.inactive {
   background: #5c30fb;
 }
 
 /* Đường line chia */
-.line {
+.hr-line {
   margin: 10px;
 }
 
@@ -147,7 +147,7 @@ Container phần chính
   flex-wrap: wrap;
 } */
 
-.card-container {
+.hr-card-container {
   display: grid;
   grid-template-columns: repeat(5, 1fr); /* Chia đều 5 cột */
   gap: 20px;
@@ -155,13 +155,13 @@ Container phần chính
   margin-top: 20px;
 }
 
-.card {
+.hr-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  width: 150px;
-  height: 80px;
+  width: 190px;
+  height: 100px;
   padding: 20px;
   background: #121843;
   border-radius: 30px;
@@ -170,19 +170,18 @@ Container phần chính
   transition: transform 0.2s ease-in-out;
 }
 
-.card-title {
+.hr-card-title {
   font-family: Poppins;
   font-size: 16px;
   font-weight: 500;
-  line-height: 15px;
+  line-height: 10px;
   margin: 0;
-  
 }
 
-.card-value {
+.hr-card-value {
   font-family: Poppins;
   font-size: 40px;
   font-weight: 700;
-  line-height: 50px;
+  line-height: 70px;
   margin: 0;
 }
