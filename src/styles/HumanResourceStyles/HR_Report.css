@@ -33,7 +33,7 @@
 /* Phần thông tin */
 .report-details-container {
   width: 100%;
-  max-width: 448px;
+  max-width: 340px;
   height: auto;
   padding: 20px;
   background: rgba(2, 0, 61, 0.7);
@@ -43,10 +43,17 @@
   gap: 15px;
 }
 
-.report-details-row {
+/* .report-details-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+} */
+
+.report-details-row {
+  display: grid;
+  grid-template-columns: 160px 10px 1fr; /* 3 cột: label - colon - value */
+  align-items: center;
+  gap: 10px;
 }
 
 .report-details-label {
