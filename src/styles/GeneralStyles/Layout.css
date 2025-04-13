@@ -24,4 +24,5 @@
   margin-top: 1rem;
   flex-grow: 1;
   padding: 20px;
+  max-width: 1260px;
 }

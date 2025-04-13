@@ -4,58 +4,59 @@ import { GoHomeFill } from "react-icons/go";
 import { GiPayMoney } from "react-icons/gi";
 import { IoIosPeople } from "react-icons/io";
 import { GrSchedule } from "react-icons/gr";
-import { TbReportSearch } from "react-icons/tb"; 
+import { TbReportSearch } from "react-icons/tb";
+import { FaAddressCard } from "react-icons/fa";
 
- export const menuConfig = [
-    {
-      id: "dashboard",
-      icon: GoHomeFill,
-      text: "Dashboard",
-      active: true,
-      path: "/human-resource",
-    },
-    {
-      id: "applicant",
-      icon: GiPayMoney,
-      text: "Applicant",
-      path: "/human-resource/applicant"
-    },
-    {
-      id: "staff",
-      icon: IoIosPeople,
-      text: "Staff",
-      path: "/human-resource/staff",
-    },
-    {
-      id: "jobTitle",
-      icon: GrSchedule,
-      text: "Job Title",
-      path: "/human-resource/jobtitle",
-    },
-    {
-      id: "department",
-      icon: TbReportSearch,
-      text: "Department",
-      path: "/human-resource/department",
-    },
-    {
-      id: "report",
-      icon: TbReportSearch,
-      text: "Report",
-      path: "/human-resource/report"
-    },
-  ];
+export const menuConfig = [
+  {
+    id: "dashboard",
+    icon: GoHomeFill,
+    text: "Dashboard",
+    active: true,
+    path: "/human",
+  },
+  {
+    id: "employee",
+    icon: FaAddressCard,
+    text: "Employee",
+    path: "/human/employee",
+  },
+  {
+    id: "dividend",
+    icon: GiPayMoney,
+    text: "Dividend",
+    path: "/human/dividend",
+  },
+  {
+    id: "position",
+    icon: GrSchedule,
+    text: "Position",
+    path: "/human/position",
+  },
+  {
+    id: "department",
+    icon: IoIosPeople,
+    text: "Department",
+    path: "/human/department",
+  },
+  {
+    id: "report",
+    icon: TbReportSearch,
+    text: "Report",
+    path: "/human/report",
+  },
+];
 
 export const settingItems = [
-    {
-      id: "setting",
-      icon: IoSettings,
-      text: "Setting",
-    },
-    {
-      id: "logout",
-      icon: RiLogoutBoxLine,
-      text: "Log out",
-      path: "/",
-    },
-  ];
+  {
+    id: "setting",
+    icon: IoSettings,
+    text: "Setting",
+  },
+  {
+    id: "logout",
+    icon: RiLogoutBoxLine,
+    text: "Log out",
+    path: "/",
+  },
+];

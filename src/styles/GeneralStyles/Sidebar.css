@@ -20,10 +20,10 @@
 }
 
 .logo h1 {
-  font-size: 50px;
+  font-size: 80px;
   font-weight: 400;
   margin: 0;
-  padding: 10px;
+  /* padding: 10px; */
   text-align: center;
   font-family: "Post No Bills Colombo";
 }
@@ -31,7 +31,7 @@
 .content {
   display: flex;
   flex-direction: column;
-  font-family: 'Poppins';
+  font-family: "Poppins";
   flex: 1;
   overflow-y: auto;
   justify-content: space-between;
@@ -75,7 +75,7 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  font-family: 'Poppins';
+  font-family: "Poppins";
   padding-bottom: 20px;
 }
 
