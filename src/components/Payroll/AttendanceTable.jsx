@@ -1,77 +1,67 @@
-import React from 'react';
-import "../../styles/PayrollStyles/tableAttendance.css"
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import "../../styles/PayrollStyles/tableAttendance.css";
 
 const AttendanceTable = () => {
-  const list_attendance = [
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      workDays: "200",
-      AbsentDays: "19",
-      LeaveDays: "19",
-      AttendanceMonth: "June",
-      Created_at: "20/10/2025",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      workDays: "200",
-      AbsentDays: "19",
-      LeaveDays: "19",
-      AttendanceMonth: "April",
-      Created_at: "20/10/2025",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      workDays: "200",
-      AbsentDays: "19",
-      LeaveDays: "19",
-      AttendanceMonth: "March",
-      Created_at: "20/10/2025",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      workDays: "200",
-      AbsentDays: "19",
-      LeaveDays: "19",
-      AttendanceMonth: "February",
-      Created_at: "20/10/2025",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      workDays: "200",
-      AbsentDays: "19",
-      LeaveDays: "19",
-      AttendanceMonth: "January",
-      Created_at: "20/10/2025",
-    },
-  ];
+  const [dataAttendance, setAttendance] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState("all");
+
+  useEffect(() => {
+    const fetchAttendance = async () => {
+      try {
+        const res = await axios.get('http://localhost:3001/api/payroll/attendance');
+        const sortedData = res.data.sort((a, b) => a.AttendanceID - b.AttendanceID);
+        setAttendance(sortedData);
+      } catch (err) {
+        console.error("Failed to fetch attendance data", err);
+      }
+    };
+    fetchAttendance();
+  }, []);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  const getMonthYear = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return `${date.getMonth() + 1}-${date.getFullYear()}`;
+  };
+
+  const allMonths = Array.from(
+    new Set(dataAttendance.map((item) => getMonthYear(item.AttendanceMonth)))
+  );
+
+  const filteredData = selectedMonth === "all"
+    ? dataAttendance
+    : dataAttendance.filter(item => getMonthYear(item.AttendanceMonth) === selectedMonth);
+
   return (
     <div>
-      <div class="appli-table-header">
+      <div className="appli-table-header">
         <div>Attendance list</div>
-        <img src="https://dashboard.codeparrot.ai/api/image/Z-oMCgz4-w8v6Rpi/refresh.png" alt="Refresh" style={{ width: '30px', height: '30px', marginRight: '10px' }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <label htmlFor="month-filter">Sort by month:</label>
+          <select
+            id="month-filter"
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+          >
+            <option value="all">Tất cả</option>
+            {allMonths.map((month, index) => (
+              <option key={index} value={month}>{month}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* Bảng Dữ liệu attendance */}
       <div>
         <table className="appli-table">
           <thead>
@@ -84,23 +74,23 @@ const AttendanceTable = () => {
               <th>Work Days</th>
               <th>Absent Days</th>
               <th>Leave Days</th>
-              <th>Attendance month</th>
-              <th>Create At</th>
+              <th>Attendance Month</th>
+              <th>Created At</th>
             </tr>
           </thead>
           <tbody>
-            {list_attendance.map((employee, index) => (
+            {filteredData.map((employee, index) => (
               <tr key={index} className="appli-table-row">
-                <td>{employee.id}</td>
-                <td>{employee.employee_id}</td>
-                <td>{employee.fullname}</td>
-                <td>{employee.department}</td>
-                <td>{employee.position}</td>
-                <td>{employee.workDays}</td>
+                <td>{employee.AttendanceID}</td>
+                <td>{employee.EmployeeID}</td>
+                <td>{employee.FullName}</td>
+                <td>{employee.DepartmentName}</td>
+                <td>{employee.PositionName}</td>
+                <td>{employee.WorkDays}</td>
                 <td>{employee.AbsentDays}</td>
                 <td>{employee.LeaveDays}</td>
-                <td>{employee.AttendanceMonth}</td>
-                <td>{employee.Created_at}</td>
+                <td>{formatDate(employee.AttendanceMonth)}</td>
+                <td>{formatDate(employee.CreatedAt)}</td>
               </tr>
             ))}
           </tbody>

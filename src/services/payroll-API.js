@@ -9,7 +9,7 @@ router.get('/attendance', async (req, res) => {
     try {
         const [rows] = await promisePool.query(`
             SELECT 
-                a.EmployeeID, e.FullName, d.DepartmentName, 
+                a.AttendanceID, a.EmployeeID, e.FullName, d.DepartmentName, 
                 p.PositionName, a.WorkDays, a.AbsentDays, a.LeaveDays, 
                 a.AttendanceMonth, a.CreatedAt, e.Status
             FROM attendance a
@@ -29,7 +29,7 @@ router.get('/salaries', async(req,res) =>{
     try{
         const [rows] = await promisePool.query(`
             SELECT 
-                s.EmployeeID, e.FullName, d.DepartmentName, 
+                s.SalaryID, s.EmployeeID, e.FullName, d.DepartmentName, 
                 p.PositionName, s.SalaryMonth, s.BaseSalary, s.Bonus, 
                 s.Deductions, s.NetSalary, s.CreatedAt, e.Status
             FROM salaries s
