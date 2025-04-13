@@ -21,7 +21,7 @@
   font-size: 20px;
   color: white;
   font-family: 'Poppins';
-  width: 1300px;;
+  width: 1260px;
 }
 
 .table-header {
@@ -71,6 +71,7 @@
   border-width: 10px;
   border-color: white;
   font-family: "Poppins", sans-serif;
+  
 }
 
 .employ-table thead {

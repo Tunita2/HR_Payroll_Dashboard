@@ -19,10 +19,10 @@
   font-size: 20px;
   color: white;
   font-family: 'Poppins';
-  width: 1300px;
+  width: 1260px;
 }
 
-.dividend-table-header {
+/* .dividend-table-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
@@ -30,7 +30,8 @@
   top: 0;
   z-index: 1;
   background-color: inherit;
-}
+  
+} */
 
 .table-button-container {
   display: flex;
@@ -63,6 +64,7 @@
   border-width: 10px;
   border-color: white;
   font-family: "Poppins", sans-serif;
+  
 }
 
 .dividend-table thead {
