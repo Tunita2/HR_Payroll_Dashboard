@@ -3,8 +3,9 @@ import React from "react";
 import PayrollRoutes from "./Routes/PayrollRoutes";
 import AdminRoutes from "./Routes/AdminRoutes";
 import HumanResourceRoutes from "./Routes/HumanResourceRoutes";
+import EmployeeRoutes from "./Routes/EmployeeRoutes";
 import Login from "./Login/Login";
-
+import EmployeeLayout from"./layouts/LayoutEmployee"
 function App() {
   return (
     <Router>
@@ -12,6 +13,7 @@ function App() {
         <>
           <Route path="/" element={<Login />} />
           {AdminRoutes()}
+          {EmployeeRoutes()}
           {PayrollRoutes()}
           {HumanResourceRoutes()}
         </>
