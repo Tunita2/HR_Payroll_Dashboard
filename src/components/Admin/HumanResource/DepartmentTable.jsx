@@ -1,11 +1,9 @@
 import React from 'react';
-
-const AdminDashboard = () => {
+import HRDepartmentTable from "../../HumanResource/HR_DepartmentTable";
+const DepartmentTable = () => {
   return (
-    <div>
-      <h1>Department list</h1>
-    </div>
+    <HRDepartmentTable />
   );
 };
 
-export default AdminDashboard;
+export default DepartmentTable;

@@ -1,11 +1,9 @@
 import React from 'react';
-
-const AdminDashboard = () => {
+import HRPositionTable from "../../HumanResource/HR_PositionTable";  
+const PositionTable = () => {
   return (
-    <div>
-      <h1>Jobtitle list</h1>
-    </div>
+    <HRPositionTable />
   );
 };
 
-export default AdminDashboard;
+export default PositionTable;

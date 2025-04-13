@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MdOutlineRefresh } from "react-icons/md";
+
 import {
   FiSearch,
   FiCalendar,
@@ -22,8 +23,6 @@ import "../../styles/HumanResourceStyles/HR_Report.css";
 
 const HR_Report = ({ style = {} }) => {
   const [activeTab, setActiveTab] = useState("Overview");
-  const [filterType, setFilterType] = useState("day"); // 'day' | 'month'
-  const [filterValue, setFilterValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [timeRange, setTimeRange] = useState("year");
   const [notesActiveTab, setNotesActiveTab] = useState("evaluations");

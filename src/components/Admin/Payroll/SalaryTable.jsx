@@ -1,11 +1,9 @@
 import React from 'react';
-
-const AdminDashboard = () => {
+import PayrollSalaryTable from "../../Payroll/SalaryTable";
+const SalaryTable = () => {
   return (
-    <div>
-      <h1>Salary list</h1>
-    </div>
+    <PayrollSalaryTable />
   );
 };
 
-export default AdminDashboard;
+export default SalaryTable;
