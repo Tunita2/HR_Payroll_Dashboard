@@ -2,13 +2,168 @@
 
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
-import { CalendarIcon, PlusCircle, X } from "lucide-react"
-import NotificationCard from "./NotificationCard"
-import { mockNotifications } from "../../lib/mock-data"
-import { NotificationType } from "../../lib/types"
-import "../../styles/AdminStyles/NotificationDashboard.css"
-import "../../styles/AdminStyles/CreateAlertForm.css"
+import { CalendarIcon, PlusCircle, X, Check, Eye, Calendar, AlertTriangle, TrendingDown, Mail } from "lucide-react"
+import "../../styles/AdminStyles/AlertsAndNotifications.css"
+// Define NotificationType enum
+const NotificationType = {
+  ANNIVERSARY: "ANNIVERSARY",
+  LEAVE_EXCEED: "LEAVE_EXCEED",
+  PAYROLL_DISCREPANCY: "PAYROLL_DISCREPANCY",
+  PAYROLL_SENT: "PAYROLL_SENT"
+}
 
+// Mock notifications data
+const mockNotifications = [
+  {
+    id: "notif-1",
+    type: NotificationType.ANNIVERSARY,
+    message: "🎉 John Doe is reaching their 5 year work anniversary today.",
+    date: "2023-06-15T09:00:00Z",
+    status: false,
+    employeeName: "John Doe",
+    details: { years: 5 }
+  },
+  {
+    id: "notif-2",
+    type: NotificationType.LEAVE_EXCEED,
+    message: "⚠️ Sarah Johnson has exceeded the allowed leave days by 3 days.",
+    date: "2023-06-14T14:30:00Z",
+    status: true,
+    employeeName: "Sarah Johnson",
+    details: { daysExceeded: 3 }
+  },
+  {
+    id: "notif-3",
+    type: NotificationType.PAYROLL_DISCREPANCY,
+    message: "📉 Major payroll change detected for Michael Brown: 4500 vs 3900.",
+    date: "2023-06-14T11:15:00Z",
+    status: false,
+    employeeName: "Michael Brown",
+    details: { previousAmount: 3900, currentAmount: 4500 }
+  },
+  {
+    id: "notif-4",
+    type: NotificationType.PAYROLL_SENT,
+    message: "📩 Payroll for June 2023 has been sent to Emily Wilson.",
+    date: "2023-06-13T16:45:00Z",
+    status: true,
+    employeeName: "Emily Wilson",
+    details: { month: "June" }
+  }
+];
+
+// NotificationCard component
+function NotificationCard({ notification, onMarkAsRead }) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  const getIcon = () => {
+    switch (notification.type) {
+      case NotificationType.ANNIVERSARY:
+        return <Calendar className="notif_icon notif_anniversary" />
+      case NotificationType.LEAVE_EXCEED:
+        return <AlertTriangle className="notif_icon notif_leave" />
+      case NotificationType.PAYROLL_DISCREPANCY:
+        return <TrendingDown className="notif_icon notif_discrepancy" />
+      case NotificationType.PAYROLL_SENT:
+        return <Mail className="notif_icon notif_payroll" />
+      default:
+        return <Mail className="notif_icon" />
+    }
+  }
+
+  const getTypeLabel = () => {
+    switch (notification.type) {
+      case NotificationType.ANNIVERSARY:
+        return "Anniversary"
+      case NotificationType.LEAVE_EXCEED:
+        return "Leave Alert"
+      case NotificationType.PAYROLL_DISCREPANCY:
+        return "Payroll Alert"
+      case NotificationType.PAYROLL_SENT:
+        return "Payroll"
+      default:
+        return "Notification"
+    }
+  }
+
+  const getBadgeClass = () => {
+    switch (notification.type) {
+      case NotificationType.ANNIVERSARY:
+        return "notif_badge notif_badge-anniversary"
+      case NotificationType.LEAVE_EXCEED:
+        return "notif_badge notif_badge-leave"
+      case NotificationType.PAYROLL_DISCREPANCY:
+        return "notif_badge notif_badge-discrepancy"
+      case NotificationType.PAYROLL_SENT:
+        return "notif_badge notif_badge-payroll"
+      default:
+        return "notif_badge"
+    }
+  }
+
+  const getCardClass = () => {
+    let className = "notif_notification-item"
+
+    if (!notification.status) {
+      className += " notif_unread"
+
+      switch (notification.type) {
+        case NotificationType.ANNIVERSARY:
+          className += " notif_unread-anniversary"
+          break
+        case NotificationType.LEAVE_EXCEED:
+          className += " notif_unread-leave"
+          break
+        case NotificationType.PAYROLL_DISCREPANCY:
+          className += " notif_unread-discrepancy"
+          break
+        case NotificationType.PAYROLL_SENT:
+          className += " notif_unread-payroll"
+          break
+        default:
+          break
+      }
+    }
+
+    return className
+  }
+
+  return (
+    <div className={getCardClass()} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+      <div className="notif_notification-content">
+        <div className="notif_notification-icon">{getIcon()}</div>
+        <div className="notif_notification-details">
+          <div className="notif_notification-header">
+            <div className="notif_notification-badges">
+              <span className={getBadgeClass()}>{getTypeLabel()}</span>
+              {!notification.status && <span className="notif_badge notif_badge-new">New</span>}
+            </div>
+            <span className="notif_notification-time">{format(new Date(notification.date), "h:mm a")}</span>
+          </div>
+          <p className="notif_notification-message">{notification.message}</p>
+          <div className="notif_notification-footer">
+            <span className="notif_notification-date">{format(new Date(notification.date), "MMM d, yyyy")}</span>
+            {(isHovered || !notification.status) && (
+              <button className="notif_btn notif_btn-small" onClick={() => onMarkAsRead(notification.id, !notification.status)}>
+                {notification.status ? (
+                  <span className="notif_btn-text">
+                    <Eye className="notif_btn-icon" /> Mark as unread
+                  </span>
+                ) : (
+                  <span className="notif_btn-text">
+                    <Check className="notif_btn-icon" /> Mark as read
+                  </span>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Main NotificationDashboard component
 function NotificationDashboard() {
   const [notifications, setNotifications] = useState([])
   const [filteredNotifications, setFilteredNotifications] = useState([])
@@ -140,7 +295,7 @@ function NotificationDashboard() {
     switch (alertType) {
       case NotificationType.ANNIVERSARY:
         return (
-          <div className="form-group">
+          <div className="notif_form-group">
             <label htmlFor="years">Years of Service</label>
             <input
               type="number"
@@ -155,7 +310,7 @@ function NotificationDashboard() {
         )
       case NotificationType.LEAVE_EXCEED:
         return (
-          <div className="form-group">
+          <div className="notif_form-group">
             <label htmlFor="daysExceeded">Days Exceeded</label>
             <input
               type="number"
@@ -171,7 +326,7 @@ function NotificationDashboard() {
       case NotificationType.PAYROLL_DISCREPANCY:
         return (
           <>
-            <div className="form-group">
+            <div className="notif_form-group">
               <label htmlFor="previousAmount">Previous Amount</label>
               <input
                 type="number"
@@ -183,7 +338,7 @@ function NotificationDashboard() {
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="notif_form-group">
               <label htmlFor="currentAmount">Current Amount</label>
               <input
                 type="number"
@@ -199,7 +354,7 @@ function NotificationDashboard() {
         )
       case NotificationType.PAYROLL_SENT:
         return (
-          <div className="form-group">
+          <div className="notif_form-group">
             <label htmlFor="month">Month</label>
             <select
               id="month"
@@ -343,7 +498,7 @@ function NotificationDashboard() {
 
     const days = []
     for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>)
+      days.push(<div key={`empty-${i}`} className="notif_calendar-day notif_empty"></div>)
     }
 
     for (let i = 1; i <= daysInMonth; i++) {
@@ -351,7 +506,7 @@ function NotificationDashboard() {
       days.push(
         <div
           key={`day-${i}`}
-          className={`calendar-day ${dateFilter && format(dateFilter, "yyyy-MM-dd") === format(date, "yyyy-MM-dd") ? "selected" : ""}`}
+          className={`notif_calendar-day ${dateFilter && format(dateFilter, "yyyy-MM-dd") === format(date, "yyyy-MM-dd") ? "notif_selected" : ""}`}
           onClick={() => handleDateSelect(date)}
         >
           {i}
@@ -360,11 +515,11 @@ function NotificationDashboard() {
     }
 
     return (
-      <div className="calendar-popup">
-        <div className="calendar-header">
+      <div className="notif_calendar-popup">
+        <div className="notif_calendar-header">
           <h3>{format(currentDate, "MMMM yyyy")}</h3>
         </div>
-        <div className="calendar-weekdays">
+        <div className="notif_calendar-weekdays">
           <div>Su</div>
           <div>Mo</div>
           <div>Tu</div>
@@ -373,24 +528,24 @@ function NotificationDashboard() {
           <div>Fr</div>
           <div>Sa</div>
         </div>
-        <div className="calendar-days">{days}</div>
+        <div className="notif_calendar-days">{days}</div>
       </div>
     )
   }
 
   return (
-    <div className="notification-dashboard">
-      <div className="notification-card">
-        <div className="card-header">
-          <div className="header-content">
-            <h2 className="card-title">
-              Notifications {unreadCount > 0 && <span className="unread-badge">{unreadCount} unread</span>}
+    <div className="notif_notification-dashboard">
+      <div className="notif_notification-card">
+        <div className="notif_card-header">
+          <div className="notif_header-content">
+            <h2 className="notif_card-title">
+              Notifications {unreadCount > 0 && <span className="notif_unread-badge">{unreadCount} unread</span>}
             </h2>
-            <div className="header-actions">
-              <button className="btn btn-outline" onClick={handleMarkAllAsRead} disabled={unreadCount === 0}>
+            <div className="notif_header-actions">
+              <button className="notif_btn notif_btn-outline" onClick={handleMarkAllAsRead} disabled={unreadCount === 0}>
                 Mark all as read
               </button>
-              <button className="create-alert-toggle" onClick={toggleCreateForm}>
+              <button className="notif_create-alert-toggle" onClick={toggleCreateForm}>
                 {showCreateForm ? (
                   <>
                     <X size={16} /> Hide Form
@@ -406,14 +561,14 @@ function NotificationDashboard() {
         </div>
 
         {showCreateForm && (
-          <div className="create-alert-section">
-            <h3 className="form-title">Create New Alert</h3>
+          <div className="notif_create-alert-section">
+            <h3 className="notif_form-title">Create New Alert</h3>
 
-            {formError && <div className="alert-error">{formError}</div>}
-            {formSuccess && <div className="alert-success">{formSuccess}</div>}
+            {formError && <div className="notif_alert-error">{formError}</div>}
+            {formSuccess && <div className="notif_alert-success">{formSuccess}</div>}
 
-            <form onSubmit={handleCreateAlert} className="create-alert-form">
-              <div className="form-group">
+            <form onSubmit={handleCreateAlert} className="notif_create-alert-form">
+              <div className="notif_form-group">
                 <label htmlFor="alertType">Alert Type</label>
                 <select
                   id="alertType"
@@ -432,7 +587,7 @@ function NotificationDashboard() {
                 </select>
               </div>
 
-              <div className="form-group">
+              <div className="notif_form-group">
                 <label htmlFor="employeeName">Employee Name</label>
                 <input
                   type="text"
@@ -445,12 +600,12 @@ function NotificationDashboard() {
 
               {renderDynamicFields()}
 
-              <div className="form-group">
+              <div className="notif_form-group">
                 <label htmlFor="message">
                   Message
                   <button
                     type="button"
-                    className="generate-btn"
+                    className="notif_generate-btn"
                     onClick={() => setMessage(generateDefaultMessage())}
                     disabled={!employeeName || Object.keys(details).length === 0}
                   >
@@ -466,8 +621,8 @@ function NotificationDashboard() {
                 ></textarea>
               </div>
 
-              <div className="form-actions">
-                <button type="submit" className="submit-btn" disabled={isSubmitting}>
+              <div className="notif_form-actions">
+                <button type="submit" className="notif_submit-btn" disabled={isSubmitting}>
                   {isSubmitting ? "Sending..." : "Send Alert"}
                 </button>
               </div>
@@ -475,19 +630,19 @@ function NotificationDashboard() {
           </div>
         )}
 
-        <div className="card-content">
-          <div className="filters">
-            <div className="search-container">
+        <div className="notif_card-content">
+          <div className="notif_filters">
+            <div className="notif_search-container">
               <input
                 type="text"
                 placeholder="Search notifications..."
-                className="search-input"
+                className="notif_search-input"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
-            <div className="filter-select">
+            <div className="notif_filter-select">
               <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
                 <option value="all">All types</option>
                 <option value={NotificationType.ANNIVERSARY}>Work Anniversary</option>
@@ -497,7 +652,7 @@ function NotificationDashboard() {
               </select>
             </div>
 
-            <div className="filter-select">
+            <div className="notif_filter-select">
               <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                 <option value="all">All status</option>
                 <option value="read">Read</option>
@@ -505,45 +660,45 @@ function NotificationDashboard() {
               </select>
             </div>
 
-            <div className="date-picker">
-              <button className="btn btn-outline date-btn" onClick={() => setShowCalendar(!showCalendar)}>
-                <CalendarIcon className="calendar-icon" />
+            <div className="notif_date-picker">
+              <button className="notif_btn notif_btn-outline notif_date-btn" onClick={() => setShowCalendar(!showCalendar)}>
+                <CalendarIcon className="notif_calendar-icon" />
                 {dateFilter ? format(dateFilter, "PPP") : <span>Filter by date</span>}
               </button>
               {renderCalendar()}
             </div>
 
-            <button className="btn btn-ghost" onClick={handleClearFilters}>
+            <button className="notif_btn notif_btn-ghost" onClick={handleClearFilters}>
               Clear filters
             </button>
           </div>
 
-          <div className="tabs">
-            <div className="tabs-list">
+          <div className="notif_tabs">
+            <div className="notif_tabs-list">
               <button
-                className={`tab ${activeTab === "byDate" ? "active" : ""}`}
+                className={`notif_tab ${activeTab === "byDate" ? "notif_active" : ""}`}
                 onClick={() => setActiveTab("byDate")}
               >
                 Group by Date
               </button>
               <button
-                className={`tab ${activeTab === "byType" ? "active" : ""}`}
+                className={`notif_tab ${activeTab === "byType" ? "notif_active" : ""}`}
                 onClick={() => setActiveTab("byType")}
               >
                 Group by Type
               </button>
             </div>
 
-            <div className="tab-content">
+            <div className="notif_tab-content">
               {activeTab === "byDate" && (
-                <div className="tab-panel">
+                <div className="notif_tab-panel">
                   {Object.keys(dateGrouped).length > 0 ? (
                     Object.entries(dateGrouped)
                       .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
                       .map(([date, notifications]) => (
-                        <div key={date} className="notification-group">
-                          <h3 className="group-title">{date}</h3>
-                          <div className="notification-list">
+                        <div key={date} className="notif_notification-group">
+                          <h3 className="notif_group-title">{date}</h3>
+                          <div className="notif_notification-list">
                             {notifications.map((notification) => (
                               <NotificationCard
                                 key={notification.id}
@@ -555,23 +710,23 @@ function NotificationDashboard() {
                         </div>
                       ))
                   ) : (
-                    <div className="empty-message">No notifications match your filters</div>
+                    <div className="notif_empty-message">No notifications match your filters</div>
                   )}
                 </div>
               )}
 
               {activeTab === "byType" && (
-                <div className="tab-panel">
+                <div className="notif_tab-panel">
                   {Object.keys(typeGrouped).length > 0 ? (
                     Object.entries(typeGrouped).map(([type, notifications]) => (
-                      <div key={type} className="notification-group">
-                        <h3 className="group-title">
+                      <div key={type} className="notif_notification-group">
+                        <h3 className="notif_group-title">
                           {type === NotificationType.ANNIVERSARY && "Work Anniversary"}
                           {type === NotificationType.LEAVE_EXCEED && "Leave Exceed"}
                           {type === NotificationType.PAYROLL_DISCREPANCY && "Payroll Discrepancy"}
                           {type === NotificationType.PAYROLL_SENT && "Payroll Sent"}
                         </h3>
-                        <div className="notification-list">
+                        <div className="notif_notification-list">
                           {notifications.map((notification) => (
                             <NotificationCard
                               key={notification.id}
@@ -583,7 +738,7 @@ function NotificationDashboard() {
                       </div>
                     ))
                   ) : (
-                    <div className="empty-message">No notifications match your filters</div>
+                    <div className="notif_empty-message">No notifications match your filters</div>
                   )}
                 </div>
               )}

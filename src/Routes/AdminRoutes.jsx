@@ -11,7 +11,7 @@ import SalaryTable from "../components/Admin/Payroll/SalaryTable";
 import AttendanceTable from "../components/Admin/Payroll/AttendanceTable";
 // General
 import Reports from "../components/Admin/Reports";
-import AlertNotifications from "../components/Admin/NotificationDashboard";
+import AlertsAndNotifications from "../components/Admin/AlertsAndNotifications";
 
 const AdminRoutes = () => {
   return (
@@ -25,7 +25,7 @@ const AdminRoutes = () => {
           <Route path="reports" element={<Reports />} />
           <Route
             path="alerts-and-notifications"
-            element={<AlertNotifications />}
+            element={<AlertsAndNotifications />}
           />
     </Route>
   );

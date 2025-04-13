@@ -1,0 +1,306 @@
+/* HR & Payroll Dashboard Specific Styles with unique class names */
+.hrp-admin-dashboard {
+  display: flex;
+  min-height: 100vh;
+  background-color: #1a1d30;
+  color: #ffffff;
+}
+
+/* Sidebar */
+.hrp-sidebar {
+  width: 240px;
+  background-color: #161827;
+  border-right: 1px solid #2d3046;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.hrp-sidebar-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.hrp-sidebar-nav {
+  padding: 1rem 0;
+}
+
+.hrp-sidebar-nav ul {
+  list-style: none;
+}
+
+.hrp-nav-item {
+  margin-bottom: 0.25rem;
+}
+
+.hrp-nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  color: #a1a1aa;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.hrp-nav-link:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.hrp-nav-link.active, .hrp-nav-link.current {
+  color: #ffffff;
+  background-color: rgba(59, 130, 246, 0.2);
+  border-left: 3px solid #3b82f6;
+}
+
+.hrp-nav-link svg {
+  margin-right: 0.75rem;
+}
+
+/* Main content */
+.hrp-main-content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Report tabs */
+.hrp-report-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #2d3046;
+  padding-bottom: 0.5rem;
+}
+
+.hrp-tab-button {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.hrp-tab-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.hrp-tab-button.active {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.hrp-tab-button svg {
+  margin-right: 0.5rem;
+}
+
+/* Period filter */
+.hrp-period-filter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.hrp-filter-button {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.hrp-filter-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.hrp-filter-button.active {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+/* Dashboard content */
+.hrp-dashboard-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .hrp-dashboard-content {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Chart sections */
+.hrp-chart-section {
+  background-color: #232538;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hrp-section-title {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #2d3046;
+}
+
+.hrp-chart-container {
+  display: flex;
+  justify-content: center;
+}
+
+/* Stats grid */
+.hrp-stats-section {
+  background-color: #232538;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hrp-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.hrp-stats-item {
+  padding: 1rem;
+  border-radius: 0.375rem;
+}
+
+.hrp-stats-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.hrp-stats-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Colors */
+.hrp-blue {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.hrp-blue .hrp-stats-title {
+  color: #93c5fd;
+}
+
+.hrp-green {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.hrp-green .hrp-stats-title {
+  color: #6ee7b7;
+}
+
+.hrp-purple {
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+.hrp-purple .hrp-stats-title {
+  color: #c4b5fd;
+}
+
+.hrp-yellow {
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+.hrp-yellow .hrp-stats-title {
+  color: #fcd34d;
+}
+
+/* Tabs and filters positioning fixes */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2d3046;
+  width: 100%;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  background: rgba(59, 130, 246, 0.1);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.tab-button.active {
+  background: #3b82f6;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.tab-icon {
+  margin-right: 8px;
+}
+
+/* Period filter container styling */
+.period-filter-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  margin-top: 12px;
+}
+
+.period-filter {
+  display: flex;
+  gap: 8px;
+  background: rgba(38, 41, 56, 0.5);
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.filter-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.filter-button:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.filter-button.active {
+  background: #3b82f6;
+  color: #ffffff;
+}
