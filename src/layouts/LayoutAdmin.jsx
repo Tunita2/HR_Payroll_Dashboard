@@ -20,10 +20,10 @@ const LayoutAdmin = () => {
             {/* Kiểm tra nếu đường dẫn là "/staff" thì hiển thị StaffTable, ngược lại hiển thị DashboardTitle */}
             {/* {location.pathname === "/staff" ? <Outlet /> : <DashboardTitle/>} */}
             {
-                location.pathname === "/admin/staffs" ||
-                location.pathname === "/admin/applicants" ||
+                location.pathname === "/admin/employees" ||
+                location.pathname === "/admin/dividends" ||
                 location.pathname === "/admin/departments" ||
-                location.pathname === "/admin/jobtitles"   ||
+                location.pathname === "/admin/positions"   ||
                 location.pathname === "/admin/salaries" ||
                 location.pathname === "/admin/attendances" ||
                 location.pathname === "/admin/reports" ||
