@@ -11,7 +11,7 @@ import SalaryTable from "../components/Admin/Payroll/SalaryTable";
 import AttendanceTable from "../components/Admin/Payroll/AttendanceTable";
 // General
 import Reports from "../components/Admin/Reports";
-import AlertNotifications from "../components/Admin/AlertNotifications";
+import AlertNotifications from "../components/Admin/NotificationDashboard";
 
 const AdminRoutes = () => {
   return (
