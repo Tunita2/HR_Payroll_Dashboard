@@ -3,9 +3,9 @@ import { RiLogoutBoxLine } from "react-icons/ri";
 import { GoHomeFill } from "react-icons/go";
 import { GiPayMoney } from "react-icons/gi";
 import { IoIosPeople } from "react-icons/io";
-import { GrSchedule } from "react-icons/gr";
 import { TbReportSearch } from "react-icons/tb";
 import { FaAddressCard } from "react-icons/fa";
+import { FaBriefcase } from "react-icons/fa";
 
 export const menuConfig = [
   {
@@ -29,7 +29,7 @@ export const menuConfig = [
   },
   {
     id: "position",
-    icon: GrSchedule,
+    icon: FaBriefcase,
     text: "Position",
     path: "/human/position",
   },
