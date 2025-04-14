@@ -1,13 +1,12 @@
-/* Container chính */
+
 .appli-table-container {
   width: 100%;
   padding: 20px;
-  background-color: #0c014d;
+  /* background-color: #0c014d; */
   margin-top: 50px;
   position: relative;
 }
 
-/* Header chứa thanh tìm kiếm và nút */
 .appli-table-header {
   color: white;
   display: flex;
@@ -24,7 +23,7 @@
 .appli-table {
   width: 100%;
   border-collapse: collapse;
-  background: #2a0b55;
+  background: rgb(12, 6, 56);
   border-radius: 8px;
   overflow: hidden;
   border-style: solid;
@@ -33,7 +32,7 @@
 }
 
 .appli-table thead {
-  background-color: #2a0b55;
+  /* background-color: #2a0b55; */
   color: white;
 }
 

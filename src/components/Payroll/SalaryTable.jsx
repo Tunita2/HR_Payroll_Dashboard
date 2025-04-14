@@ -1,76 +1,71 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 import "../../styles/PayrollStyles/tableSalaries.css"
 
+
 const SalaryTable = () => {
-  const list_salary = [
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      SalaryMonth: "200",
-      BaseSalary: "19",
-      Bonus: "19",
-      Deductions: "900",
-      NetSalary: "900",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      SalaryMonth: "200",
-      BaseSalary: "19",
-      Bonus: "19",
-      Deductions: "800",
-      NetSalary: "800",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      SalaryMonth: "200",
-      BaseSalary: "19",
-      Bonus: "19",
-      Deductions: "700",
-      NetSalary: "700",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      SalaryMonth: "200",
-      BaseSalary: "19",
-      Bonus: "19",
-      Deductions: "700",
-      NetSalary: "700",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      SalaryMonth: "200",
-      BaseSalary: "19",
-      Bonus: "19",
-      Deductions: "900",
-      NetSalary: "900",
-    },
-  ];
+  const [dataSalary, setSalary] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState("all");
+
+  useEffect(() => {
+    const fetchSalary = async () => {
+      try {
+        const res = await axios.get('http://localhost:3001/api/payroll/salaries');
+        const sortedData = res.data.sort((a, b) => a.SalaryID - b.SalaryID);
+        setSalary(sortedData);
+      } catch (err) {
+        console.error("Failed to fetch salary data", err);
+      }
+    };
+    fetchSalary();
+  }, []);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  const getMonthYear = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return `${date.getMonth() + 1}-${date.getFullYear()}`;
+  };
+
+  const allMonths = Array.from(
+    new Set(dataSalary.map((item) => getMonthYear(item.SalaryMonth)))
+  );
+
+  const filteredData = selectedMonth === "all"
+    ? dataSalary
+    : dataSalary.filter(item => getMonthYear(item.SalaryMonth) === selectedMonth);
+
   return (
     <div>
       <div class="appli-table-header">
         <div>Salary list</div>
         <div className="button-group">
-            <div className="history">Salaries history</div>
-            <img src="https://dashboard.codeparrot.ai/api/image/Z-oMCgz4-w8v6Rpi/refresh.png" alt="Refresh" style={{ width: '30px', height: '30px', marginRight: '10px' }} />
+          <Link to={'/payroll/salary/history'} style={{ color: 'white' }}>
+            <div className="history">Salary history</div>
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <label htmlFor="month-filter">Sort by month:</label>
+            <select
+              id="month-filter"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+            >
+              <option value="all">Tất cả</option>
+              {allMonths.map((month, index) => (
+                <option key={index} value={month}>{month}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -92,14 +87,14 @@ const SalaryTable = () => {
             </tr>
           </thead>
           <tbody>
-            {list_salary.map((employee, index) => (
+            {filteredData.map((employee, index) => (
               <tr key={index} className="appli-table-row">
-                <td>{employee.id}</td>
-                <td>{employee.employee_id}</td>
-                <td>{employee.fullname}</td>
-                <td>{employee.department}</td>
-                <td>{employee.position}</td>
-                <td>{employee.SalaryMonth}</td>
+                <td>{employee.SalaryID}</td>
+                <td>{employee.EmployeeID}</td>
+                <td>{employee.FullName}</td>
+                <td>{employee.DepartmentName}</td>
+                <td>{employee.PositionName}</td>
+                <td>{formatDate(employee.SalaryMonth)}</td>
                 <td>{employee.BaseSalary}</td>
                 <td>{employee.Bonus}</td>
                 <td>{employee.Deductions}</td>
@@ -109,7 +104,7 @@ const SalaryTable = () => {
           </tbody>
         </table>
       </div>
-    </div>
+    </div >
   );
 };
 

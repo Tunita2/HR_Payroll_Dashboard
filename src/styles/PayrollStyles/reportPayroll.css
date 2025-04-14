@@ -82,7 +82,7 @@ header .title-header {
 
 /* Cards */
 .card {
-  background-color: rgb(33, 32, 45);
+  background-color: rgb(12, 6, 56);
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   padding: 1.5rem;
@@ -128,7 +128,7 @@ header .title-header {
 
 .metric-detail {
   font-size: 0.875rem;
-  color:rgb(132, 174, 228);
+  color: rgb(132, 174, 228);
   margin-top: 0.5rem;
 }
 
@@ -170,12 +170,12 @@ td {
 }
 
 tr:hover {
-  background-color:rgba(200, 208, 218, 0.14);
+  background-color: rgba(200, 208, 218, 0.14);
 }
 
 .inactive-row {
-  background-color:rgba(241, 245, 249, 0.12);
-  color:rgb(255, 255, 255);
+  background-color: rgba(241, 245, 249, 0.12);
+  color: rgb(255, 255, 255);
 }
 
 .text-right {
@@ -319,7 +319,7 @@ footer {
 }
 
 .btn-secondary:hover {
-  background-color:rgba(143, 149, 159, 0.51);
+  background-color: rgba(143, 149, 159, 0.51);
 }
 
 /* Print styles */
