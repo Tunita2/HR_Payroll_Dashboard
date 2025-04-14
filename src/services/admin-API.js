@@ -30,4 +30,13 @@ router.get("/salaries", async (req, res) => {
   }
 });
 
+router.post("/alerts", (req, res) => {
+  const { employeeID, type, title, message} = req.body;
+
+  if(!employeeID || !type || !title || !message){
+    return res.status(400).json({error:"Missing fields in request body."});
+  }
+  res.status(200).json({message: "Alert sent successfully"});
+});
+
 module.exports = router;
