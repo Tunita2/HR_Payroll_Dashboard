@@ -1,13 +1,13 @@
 const express = require("express");
-const router = express.Router();
+const 2router = express.Router();
 const { mysqlPool } = require("./mysqlConfig");
 const promisePool = mysqlPool.promise();
 const { conn, sql } = require("./sqlServerConfig");
 
 router.get("/test", async (req, res) => {
   const pool = await conn;
-  const results = await pool.request().query("SELECT * FROM Employees");
-  res.json(results);
+  const results = await pool.request().query("SELECT * FROM Departments");
+  res.json(results.recordset);
 });
 
 router.get("/salaries", async (req, res) => {

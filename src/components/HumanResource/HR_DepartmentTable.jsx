@@ -1,16 +1,47 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../../styles/HumanResourceStyles/HR_DepartmentTable.css"
 
 const HR_DepartmentTable = ({ style }) => {
-  const departments = [
-    {
-      id: "01",
-      departmentName: "Kinh doanh",
-      createdAt: "Alex",
-      updatedAt : "Minh"
-    },
+  // const departments = [
+  //   {
+  //     id: "01",
+  //     departmentName: "Kinh doanh",
+  //     createdAt: "Alex",
+  //     updatedAt : "Minh"
+  //   },
     
-  ];
+  // ];
+
+  const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/departments")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("✅ Dữ liệu nhận được:", data);  // THÊM DÒNG NÀY
+        setDepartments(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div>
@@ -40,12 +71,12 @@ const HR_DepartmentTable = ({ style }) => {
             </tr>
           </thead>
           <tbody>
-            {departments.map((departments, index) => (
+            {departments.map((dept, index) => (
               <tr key={index} className="depart-table-row">
-                <td>{departments.id}</td>
-                <td>{departments.departmentName}</td>
-                <td>{departments.createdAt}</td>
-                <td>{departments.updatedAt}</td>
+                <td>{dept.id}</td>
+                <td>{dept.departmentName}</td>
+                <td>{dept.createdAt}</td>
+                <td>{dept.updatedAt}</td>
               </tr>
             ))}
           </tbody>

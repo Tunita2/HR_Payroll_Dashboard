@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../../styles/HumanResourceStyles/HR_EmployeeTable.css";
 
 const HR_EmployeeTable = ({ style }) => {
@@ -21,6 +21,8 @@ const HR_EmployeeTable = ({ style }) => {
     // ... other employees
   ];
 
+  
+  
   return (
     <div>
       <div className ="employ-table-header">
