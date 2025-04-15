@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Calendar, Users, DollarSign, BarChart2 } from 'lucide-react';
 import '../../styles/AdminStyles/Reports.css';
@@ -7,6 +7,75 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [periodFilter, setPeriodFilter] = useState('month');
   
+    const useFetchData = (endpoint) => {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch(`http://localhost:3001/api/admin/${endpoint}`);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch ${endpoint} data`);
+          }
+          
+          const result = await response.json();
+          setData(result);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchData();
+    }, [endpoint]);
+    
+    return { data, loading, error };
+  };
+  
+  // Sử dụng hook tùy chỉnh cho từng loại dữ liệu
+  const { data: departments, loading: departmentsLoading, error: departmentsError } = useFetchData('departments');
+  const { data: positions, loading: positionsLoading, error: positionsError } = useFetchData('positions');
+  const { data: attendances, loading: attendancesLoading, error: attendancesError } = useFetchData('attendances');
+  const { data: salaries, loading: salariesLoading, error: salariesError } = useFetchData('salaries');
+  const { data: dividends, loading: dividendsLoading, error: dividendsError } = useFetchData('dividends');
+  const { data: status, loading: statusLoading, error: statusError } = useFetchData('status');
+  
+  // Kiểm tra lỗi từ bất kỳ API nào
+  const hasError = departmentsError || positionsError || attendancesError || 
+                  salariesError || dividendsError || statusError;
+                  
+  // Kiểm tra xem có đang tải dữ liệu từ bất kỳ API nào
+  const isLoading = departmentsLoading || positionsLoading || attendancesLoading ||
+                   salariesLoading || dividendsLoading || statusLoading;
+  
+  // Hiển thị thông báo lỗi nếu có
+  if (hasError) {
+    return (
+      <div className="error-container">
+        <p>Đã xảy ra lỗi khi tải dữ liệu:</p>
+        <ul>
+          {departmentsError && <li>Lỗi dữ liệu phòng ban: {departmentsError}</li>}
+          {positionsError && <li>Lỗi dữ liệu vị trí: {positionsError}</li>}
+          {attendancesError && <li>Lỗi dữ liệu điểm danh: {attendancesError}</li>}
+          {salariesError && <li>Lỗi dữ liệu lương: {salariesError}</li>}
+          {dividendsError && <li>Lỗi dữ liệu cổ tức: {dividendsError}</li>}
+          {statusError && <li>Lỗi dữ liệu trạng thái: {statusError}</li>}
+        </ul>
+      </div>
+    );
+  }
+  
+  // Hiển thị trạng thái đang tải
+  if (isLoading) {
+    return <div className="loading">Đang tải dữ liệu...</div>;
+  }
+
+
   // Mock data for reports
   const departmentData = [
     { name: 'Engineering', employees: 45, budget: 450000, avgSalary: 100000 },
@@ -134,9 +203,8 @@ export default function Dashboard() {
               <h2 className="card-title">Employee Distribution by Department</h2>
               <PieChart width={400} height={300}>
                 <Pie
-                  data={departmentData}
+                  data={departments}
                   cx={200}
-                  cy={150}
                   labelLine={false}
                   outerRadius={100}
                   fill="#8884d8"
@@ -144,7 +212,7 @@ export default function Dashboard() {
                   nameKey="name"
                   label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
                 >
-                  {departmentData.map((entry, index) => (
+                  {departments.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -156,7 +224,7 @@ export default function Dashboard() {
               <h2 className="card-title">Employee Status Distribution</h2>
               <PieChart width={400} height={300}>
                 <Pie
-                  data={statusData}
+                  data={status}
                   cx={200}
                   cy={150}
                   labelLine={false}
@@ -166,7 +234,7 @@ export default function Dashboard() {
                   nameKey="status"
                   label={({status, percent}) => `${status}: ${(percent * 100).toFixed(0)}%`}
                 >
-                  {statusData.map((entry, index) => (
+                  {status.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -176,7 +244,7 @@ export default function Dashboard() {
             
             <div className="card">
               <h2 className="card-title">Payroll Summary (Last 6 Months)</h2>
-              <LineChart width={500} height={300} data={salaryData}>
+              <LineChart width={500} height={300} data={salaries}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -190,7 +258,7 @@ export default function Dashboard() {
             
             <div className="card">
               <h2 className="card-title">Attendance Overview (Last 6 Months)</h2>
-              <BarChart width={500} height={300} data={attendanceData}>
+              <BarChart width={500} height={300} data={attendances}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -220,7 +288,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {departmentData.map((dept, index) => (
+                    {departments.map((dept, index) => (
                       <tr key={index} className={index % 2 === 0 ? 'even-row' : ''}>
                         <td>{dept.name}</td>
                         <td>{dept.employees}</td>
@@ -235,7 +303,7 @@ export default function Dashboard() {
             
             <div className="card">
               <h2 className="card-title">Position Distribution</h2>
-              <BarChart width={500} height={300} data={positionData}>
+              <BarChart width={500} height={300} data={positions}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -247,7 +315,7 @@ export default function Dashboard() {
             
             <div className="card">
               <h2 className="card-title">Average Salary by Position</h2>
-              <BarChart width={500} height={300} data={positionData}>
+              <BarChart width={500} height={300} data={positions}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -269,8 +337,8 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {statusData.map((item, index) => {
-                      const total = statusData.reduce((sum, current) => sum + current.count, 0);
+                    {status.map((item, index) => {
+                      const total = status.reduce((sum, current) => sum + current.count, 0);
                       const percentage = ((item.count / total) * 100).toFixed(1);
                       return (
                         <tr key={index} className={index % 2 === 0 ? 'even-row' : ''}>
@@ -292,7 +360,7 @@ export default function Dashboard() {
           <div className="grid-container">
             <div className="card">
               <h2 className="card-title">Salary Breakdown</h2>
-              <LineChart width={500} height={300} data={salaryData}>
+              <LineChart width={500} height={300} data={salaries}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -306,7 +374,7 @@ export default function Dashboard() {
             
             <div className="card">
               <h2 className="card-title">Net Salary Trend</h2>
-              <LineChart width={500} height={300} data={salaryData}>
+              <LineChart width={500} height={300} data={salaries}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -331,8 +399,8 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {salaryData.map((item, index) => {
-                      const prevSalary = index > 0 ? salaryData[index - 1].netSalary : item.netSalary;
+                    {salaries.map((item, index) => {
+                      const prevSalary = index > 0 ? salaries[index - 1].netSalary : item.netSalary;
                       const percentChange = ((item.netSalary - prevSalary) / prevSalary * 100).toFixed(1);
                       return (
                         <tr key={index} className={index % 2 === 0 ? 'even-row' : ''}>
@@ -361,7 +429,7 @@ export default function Dashboard() {
           <div className="grid-container">
             <div className="card">
               <h2 className="card-title">Attendance Overview</h2>
-              <BarChart width={500} height={300} data={attendanceData}>
+              <BarChart width={500} height={300} data={attendances}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -375,7 +443,7 @@ export default function Dashboard() {
             
             <div className="card">
               <h2 className="card-title">Absence Rate</h2>
-              <LineChart width={500} height={300} data={attendanceData.map(item => ({
+              <LineChart width={500} height={300} data={attendances.map(item => ({
                 month: item.month,
                 absenceRate: ((item.absentDays + item.leaveDays) / (item.workDays + item.absentDays + item.leaveDays) * 100).toFixed(1)
               }))}>
@@ -403,7 +471,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {attendanceData.map((item, index) => {
+                    {attendances.map((item, index) => {
                       const totalDays = item.workDays + item.absentDays + item.leaveDays;
                       const attendanceRate = (item.workDays / totalDays * 100).toFixed(1);
                       const absenceRate = ((item.absentDays + item.leaveDays) / totalDays * 100).toFixed(1);
@@ -430,7 +498,7 @@ export default function Dashboard() {
           <div className="grid-container">
             <div className="card">
               <h2 className="card-title">Dividend Payments</h2>
-              <BarChart width={500} height={300} data={dividendData}>
+              <BarChart width={500} height={300} data={dividends}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -445,18 +513,18 @@ export default function Dashboard() {
               <div className="stats-grid">
                 <div className="stats-item blue">
                   <h3 className="stats-title">Total Dividends</h3>
-                  <p className="stats-value">${dividendData.reduce((sum, item) => sum + item.amount, 0).toLocaleString()}</p>
+                  <p className="stats-value">${dividends.reduce((sum, item) => sum + item.amount, 0).toLocaleString()}</p>
                 </div>
                 <div className="stats-item green">
                   <h3 className="stats-title">Average Dividend</h3>
                   <p className="stats-value">
-                    ${(dividendData.reduce((sum, item) => sum + item.amount, 0) / dividendData.filter(item => item.amount > 0).length).toLocaleString()}
+                    ${(dividends.reduce((sum, item) => sum + item.amount, 0) / dividends.filter(item => item.amount > 0).length).toLocaleString()}
                   </p>
                 </div>
                 <div className="stats-item purple">
                   <h3 className="stats-title">Last Dividend</h3>
                   <p className="stats-value">
-                    ${dividendData.filter(item => item.amount > 0).slice(-1)[0]?.amount.toLocaleString() || 0}
+                    ${dividends.filter(item => item.amount > 0).slice(-1)[0]?.amount.toLocaleString() || 0}
                   </p>
                 </div>
                 <div className="stats-item yellow">
@@ -479,8 +547,8 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {dividendData.map((item, index) => {
-                      const prevDividends = dividendData.slice(0, index).filter(d => d.amount > 0);
+                    {dividends.map((item, index) => {
+                      const prevDividends = dividends.slice(0, index).filter(d => d.amount > 0);
                       const prevDividend = prevDividends.length > 0 ? prevDividends[prevDividends.length - 1].amount : item.amount;
                       const percentChange = item.amount > 0 && prevDividend > 0 ? ((item.amount - prevDividend) / prevDividend * 100).toFixed(1) : null;
                       return (
