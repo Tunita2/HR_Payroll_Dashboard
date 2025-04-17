@@ -1,0 +1,102 @@
+.alert-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.alert-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.alert-type {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.alert-source {
+  font-size: 0.85em;
+  color: #666;
+  background-color: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.alert-content {
+  padding: 15px;
+}
+
+.employee-name {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.alert-message {
+  margin: 0 0 15px 0;
+  color: #555;
+  line-height: 1.4;
+}
+
+.alert-date {
+  font-size: 0.85em;
+  color: #777;
+}
+
+.alert-actions {
+  display: flex;
+  padding: 10px 15px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #eee;
+}
+
+.edit-button,
+.delete-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.edit-button {
+  background-color: #e7f3ff;
+  color: #0066cc;
+  margin-right: 10px;
+}
+
+.edit-button:hover {
+  background-color: #d0e5ff;
+}
+
+.delete-button {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.delete-button:hover {
+  background-color: #ffdde0;
+}
+
+/* Alert type specific styling */
+.alert-type-anniversary {
+  border-top: 4px solid #4caf50;
+}
+
+.alert-type-warning {
+  border-top: 4px solid #ff9800;
+}
+
+.alert-type-default {
+  border-top: 4px solid #2196f3;
+}

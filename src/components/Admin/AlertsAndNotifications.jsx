@@ -1,753 +1,160 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { format } from "date-fns"
-import { CalendarIcon, PlusCircle, X, Check, Eye, Calendar, AlertTriangle, TrendingDown, Mail } from "lucide-react"
+import AlertsPage from "./AlertsPage"
+import AlertForm from "./AlertForm"
 import "../../styles/AdminStyles/AlertsAndNotifications.css"
-// Define NotificationType enum
-const NotificationType = {
-  ANNIVERSARY: "ANNIVERSARY",
-  LEAVE_EXCEED: "LEAVE_EXCEED",
-  PAYROLL_DISCREPANCY: "PAYROLL_DISCREPANCY",
-  PAYROLL_SENT: "PAYROLL_SENT"
-}
 
-// Mock notifications data
-const mockNotifications = [
-  {
-    id: "notif-1",
-    type: NotificationType.ANNIVERSARY,
-    message: "🎉 John Doe is reaching their 5 year work anniversary today.",
-    date: "2023-06-15T09:00:00Z",
-    status: false,
-    employeeName: "John Doe",
-    details: { years: 5 }
-  },
-  {
-    id: "notif-2",
-    type: NotificationType.LEAVE_EXCEED,
-    message: "⚠️ Sarah Johnson has exceeded the allowed leave days by 3 days.",
-    date: "2023-06-14T14:30:00Z",
-    status: true,
-    employeeName: "Sarah Johnson",
-    details: { daysExceeded: 3 }
-  },
-  {
-    id: "notif-3",
-    type: NotificationType.PAYROLL_DISCREPANCY,
-    message: "📉 Major payroll change detected for Michael Brown: 4500 vs 3900.",
-    date: "2023-06-14T11:15:00Z",
-    status: false,
-    employeeName: "Michael Brown",
-    details: { previousAmount: 3900, currentAmount: 4500 }
-  },
-  {
-    id: "notif-4",
-    type: NotificationType.PAYROLL_SENT,
-    message: "📩 Payroll for June 2023 has been sent to Emily Wilson.",
-    date: "2023-06-13T16:45:00Z",
-    status: true,
-    employeeName: "Emily Wilson",
-    details: { month: "June" }
-  }
-];
+function AlertsAndNotifications() {
+  const [alerts, setAlerts] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [currentAlert, setCurrentAlert] = useState(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
 
-// NotificationCard component
-function NotificationCard({ notification, onMarkAsRead }) {
-  const [isHovered, setIsHovered] = useState(false)
-
-  const getIcon = () => {
-    switch (notification.type) {
-      case NotificationType.ANNIVERSARY:
-        return <Calendar className="notif_icon notif_anniversary" />
-      case NotificationType.LEAVE_EXCEED:
-        return <AlertTriangle className="notif_icon notif_leave" />
-      case NotificationType.PAYROLL_DISCREPANCY:
-        return <TrendingDown className="notif_icon notif_discrepancy" />
-      case NotificationType.PAYROLL_SENT:
-        return <Mail className="notif_icon notif_payroll" />
-      default:
-        return <Mail className="notif_icon" />
-    }
-  }
-
-  const getTypeLabel = () => {
-    switch (notification.type) {
-      case NotificationType.ANNIVERSARY:
-        return "Anniversary"
-      case NotificationType.LEAVE_EXCEED:
-        return "Leave Alert"
-      case NotificationType.PAYROLL_DISCREPANCY:
-        return "Payroll Alert"
-      case NotificationType.PAYROLL_SENT:
-        return "Payroll"
-      default:
-        return "Notification"
-    }
-  }
-
-  const getBadgeClass = () => {
-    switch (notification.type) {
-      case NotificationType.ANNIVERSARY:
-        return "notif_badge notif_badge-anniversary"
-      case NotificationType.LEAVE_EXCEED:
-        return "notif_badge notif_badge-leave"
-      case NotificationType.PAYROLL_DISCREPANCY:
-        return "notif_badge notif_badge-discrepancy"
-      case NotificationType.PAYROLL_SENT:
-        return "notif_badge notif_badge-payroll"
-      default:
-        return "notif_badge"
-    }
-  }
-
-  const getCardClass = () => {
-    let className = "notif_notification-item"
-
-    if (!notification.status) {
-      className += " notif_unread"
-
-      switch (notification.type) {
-        case NotificationType.ANNIVERSARY:
-          className += " notif_unread-anniversary"
-          break
-        case NotificationType.LEAVE_EXCEED:
-          className += " notif_unread-leave"
-          break
-        case NotificationType.PAYROLL_DISCREPANCY:
-          className += " notif_unread-discrepancy"
-          break
-        case NotificationType.PAYROLL_SENT:
-          className += " notif_unread-payroll"
-          break
-        default:
-          break
-      }
-    }
-
-    return className
-  }
-
-  return (
-    <div className={getCardClass()} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-      <div className="notif_notification-content">
-        <div className="notif_notification-icon">{getIcon()}</div>
-        <div className="notif_notification-details">
-          <div className="notif_notification-header">
-            <div className="notif_notification-badges">
-              <span className={getBadgeClass()}>{getTypeLabel()}</span>
-              {!notification.status && <span className="notif_badge notif_badge-new">New</span>}
-            </div>
-            <span className="notif_notification-time">{format(new Date(notification.date), "h:mm a")}</span>
-          </div>
-          <p className="notif_notification-message">{notification.message}</p>
-          <div className="notif_notification-footer">
-            <span className="notif_notification-date">{format(new Date(notification.date), "MMM d, yyyy")}</span>
-            {(isHovered || !notification.status) && (
-              <button className="notif_btn notif_btn-small" onClick={() => onMarkAsRead(notification.id, !notification.status)}>
-                {notification.status ? (
-                  <span className="notif_btn-text">
-                    <Eye className="notif_btn-icon" /> Mark as unread
-                  </span>
-                ) : (
-                  <span className="notif_btn-text">
-                    <Check className="notif_btn-icon" /> Mark as read
-                  </span>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Main NotificationDashboard component
-function NotificationDashboard() {
-  const [notifications, setNotifications] = useState([])
-  const [filteredNotifications, setFilteredNotifications] = useState([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [typeFilter, setTypeFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [dateFilter, setDateFilter] = useState(undefined)
-  const [showCalendar, setShowCalendar] = useState(false)
-  const [activeTab, setActiveTab] = useState("byDate")
-
-  // Create Alert Form state
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [alertType, setAlertType] = useState(NotificationType.ANNIVERSARY)
-  const [employeeName, setEmployeeName] = useState("")
-  const [message, setMessage] = useState("")
-  const [details, setDetails] = useState({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formError, setFormError] = useState("")
-  const [formSuccess, setFormSuccess] = useState("")
-
-  // Initialize notifications from mock data
   useEffect(() => {
-    // Check if we have saved read status in localStorage
-    const savedNotifications = localStorage.getItem("notifications")
-    if (savedNotifications) {
-      setNotifications(JSON.parse(savedNotifications))
-    } else {
-      setNotifications(mockNotifications)
-    }
+    fetchAlerts()
   }, [])
 
-  // Apply filters whenever filter state or notifications change
-  useEffect(() => {
-    let filtered = [...notifications]
-
-    // Apply search filter
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (notification) =>
-          notification.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          notification.employeeName.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    }
-
-    // Apply type filter
-    if (typeFilter !== "all") {
-      filtered = filtered.filter((notification) => notification.type === typeFilter)
-    }
-
-    // Apply status filter
-    if (statusFilter !== "all") {
-      filtered = filtered.filter((notification) => notification.status === (statusFilter === "read" ? true : false))
-    }
-
-    // Apply date filter
-    if (dateFilter) {
-      const filterDate = format(dateFilter, "yyyy-MM-dd")
-      filtered = filtered.filter((notification) => {
-        const notificationDate = format(new Date(notification.date), "yyyy-MM-dd")
-        return notificationDate === filterDate
-      })
-    }
-
-    setFilteredNotifications(filtered)
-  }, [notifications, searchQuery, typeFilter, statusFilter, dateFilter])
-
-  // Group notifications by date
-  const groupByDate = (notifications) => {
-    const groups = {}
-
-    notifications.forEach((notification) => {
-      const date = format(new Date(notification.date), "MMMM d, yyyy")
-      if (!groups[date]) {
-        groups[date] = []
-      }
-      groups[date].push(notification)
-    })
-
-    return groups
-  }
-
-  // Group notifications by type
-  const groupByType = (notifications) => {
-    const groups = {}
-
-    notifications.forEach((notification) => {
-      if (!groups[notification.type]) {
-        groups[notification.type] = []
-      }
-      groups[notification.type].push(notification)
-    })
-
-    return groups
-  }
-
-  const handleMarkAsRead = (id, isRead) => {
-    const updatedNotifications = notifications.map((notification) =>
-      notification.id === id ? { ...notification, status: isRead } : notification,
-    )
-
-    setNotifications(updatedNotifications)
-    localStorage.setItem("notifications", JSON.stringify(updatedNotifications))
-  }
-
-  const handleMarkAllAsRead = () => {
-    const updatedNotifications = notifications.map((notification) => ({
-      ...notification,
-      status: true,
-    }))
-
-    setNotifications(updatedNotifications)
-    localStorage.setItem("notifications", JSON.stringify(updatedNotifications))
-  }
-
-  const handleClearFilters = () => {
-    setSearchQuery("")
-    setTypeFilter("all")
-    setStatusFilter("all")
-    setDateFilter(undefined)
-  }
-
-  const handleDateSelect = (date) => {
-    setDateFilter(date)
-    setShowCalendar(false)
-  }
-
-  // Generate dynamic fields based on alert type
-  const renderDynamicFields = () => {
-    switch (alertType) {
-      case NotificationType.ANNIVERSARY:
-        return (
-          <div className="notif_form-group">
-            <label htmlFor="years">Years of Service</label>
-            <input
-              type="number"
-              id="years"
-              min="1"
-              max="50"
-              value={details.years || ""}
-              onChange={(e) => setDetails({ ...details, years: Number.parseInt(e.target.value) })}
-              required
-            />
-          </div>
-        )
-      case NotificationType.LEAVE_EXCEED:
-        return (
-          <div className="notif_form-group">
-            <label htmlFor="daysExceeded">Days Exceeded</label>
-            <input
-              type="number"
-              id="daysExceeded"
-              min="1"
-              max="30"
-              value={details.daysExceeded || ""}
-              onChange={(e) => setDetails({ ...details, daysExceeded: Number.parseInt(e.target.value) })}
-              required
-            />
-          </div>
-        )
-      case NotificationType.PAYROLL_DISCREPANCY:
-        return (
-          <>
-            <div className="notif_form-group">
-              <label htmlFor="previousAmount">Previous Amount</label>
-              <input
-                type="number"
-                id="previousAmount"
-                min="0"
-                step="0.01"
-                value={details.previousAmount || ""}
-                onChange={(e) => setDetails({ ...details, previousAmount: Number.parseFloat(e.target.value) })}
-                required
-              />
-            </div>
-            <div className="notif_form-group">
-              <label htmlFor="currentAmount">Current Amount</label>
-              <input
-                type="number"
-                id="currentAmount"
-                min="0"
-                step="0.01"
-                value={details.currentAmount || ""}
-                onChange={(e) => setDetails({ ...details, currentAmount: Number.parseFloat(e.target.value) })}
-                required
-              />
-            </div>
-          </>
-        )
-      case NotificationType.PAYROLL_SENT:
-        return (
-          <div className="notif_form-group">
-            <label htmlFor="month">Month</label>
-            <select
-              id="month"
-              value={details.month || ""}
-              onChange={(e) => setDetails({ ...details, month: e.target.value })}
-              required
-            >
-              <option value="">Select Month</option>
-              <option value="January">January</option>
-              <option value="February">February</option>
-              <option value="March">March</option>
-              <option value="April">April</option>
-              <option value="May">May</option>
-              <option value="June">June</option>
-              <option value="July">July</option>
-              <option value="August">August</option>
-              <option value="September">September</option>
-              <option value="October">October</option>
-              <option value="November">November</option>
-              <option value="December">December</option>
-            </select>
-          </div>
-        )
-      default:
-        return null
-    }
-  }
-
-  // Generate default message based on alert type and details
-  const generateDefaultMessage = () => {
-    switch (alertType) {
-      case NotificationType.ANNIVERSARY:
-        if (employeeName && details.years) {
-          return `🎉 ${employeeName} is reaching their ${details.years} year work anniversary on ${new Date().toLocaleDateString()}.`
-        }
-        break
-      case NotificationType.LEAVE_EXCEED:
-        if (employeeName && details.daysExceeded) {
-          return `⚠️ ${employeeName} has exceeded the allowed leave days by ${details.daysExceeded} days.`
-        }
-        break
-      case NotificationType.PAYROLL_DISCREPANCY:
-        if (employeeName && details.currentAmount && details.previousAmount) {
-          return `📉 Major payroll change detected for ${employeeName}: ${details.currentAmount} vs ${details.previousAmount}.`
-        }
-        break
-      case NotificationType.PAYROLL_SENT:
-        if (employeeName && details.month) {
-          return `📩 Payroll for ${details.month} ${new Date().getFullYear()} has been sent to ${employeeName}.`
-        }
-        break
-      default:
-        return ""
-    }
-    return ""
-  }
-
-  const handleCreateAlert = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setFormError("")
-    setFormSuccess("")
-
-    // Create the alert object
-    const newAlert = {
-      id: `alert-${Date.now()}`,
-      type: alertType,
-      message: message || generateDefaultMessage(),
-      date: new Date().toISOString(),
-      status: false, // unread
-      employeeName,
-      details,
-    }
-
+  const fetchAlerts = async () => {
+    setIsLoading(true)
     try {
-      // In a real application, you would send this to your API
-      // const response = await fetch('/api/alerts', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(newAlert),
-      // });
-
-      // if (!response.ok) {
-      //   throw new Error('Failed to create alert');
-      // }
-
-      // For demo purposes, we'll just add it to our local state
-      const updatedNotifications = [newAlert, ...notifications]
-      setNotifications(updatedNotifications)
-      localStorage.setItem("notifications", JSON.stringify(updatedNotifications))
-
-      // Reset the form
-      setAlertType(NotificationType.ANNIVERSARY)
-      setEmployeeName("")
-      setMessage("")
-      setDetails({})
-      setFormSuccess("Alert created successfully!")
-
-      // Optionally close the form after successful submission
-      // setTimeout(() => setShowCreateForm(false), 2000)
+      const response = await fetch("http://localhost:3001/api/admin/alerts")
+      if (!response.ok) {
+        throw new Error("Failed to fetch alerts")
+      }
+      const data = await response.json()
+      setAlerts(data)
+      setError(null)
     } catch (err) {
-      setFormError(err.message || "Failed to create alert")
+      setError("Error fetching alerts. Using mock data instead.")
+      setAlerts([
+        {
+          alertId: 1,
+          type: "work-anniversary",
+          employeeId: 101,
+          employeeName: "Nguyen Van A",
+          message: "Congrats on your 5-year anniversary!",
+          source: "HUMAN_2025",
+          createdAt: "2025-04-17T10:00:00",
+        },
+        {
+          alertId: 2,
+          type: "leave-warning",
+          employeeId: 102,
+          employeeName: "Tran Thi B",
+          message: "Exceeded allowed leave days this month.",
+          source: "PAYROLL",
+          createdAt: "2025-04-15T09:30:00",
+        },
+      ])
     } finally {
-      setIsSubmitting(false)
+      setIsLoading(false)
     }
   }
 
-  const resetCreateForm = () => {
-    setAlertType(NotificationType.ANNIVERSARY)
-    setEmployeeName("")
-    setMessage("")
-    setDetails({})
-    setFormError("")
-    setFormSuccess("")
+  const handleAddAlert = () => {
+    setCurrentAlert(null)
+    setIsFormOpen(true)
   }
 
-  const toggleCreateForm = () => {
-    if (showCreateForm) {
-      resetCreateForm()
-    }
-    setShowCreateForm(!showCreateForm)
+  const handleEditAlert = (alert) => {
+    setCurrentAlert(alert)
+    setIsFormOpen(true)
   }
 
-  const dateGrouped = groupByDate(filteredNotifications)
-  const typeGrouped = groupByType(filteredNotifications)
+  const handleDeleteAlert = async (alertId) => {
+    if (window.confirm("Are you sure you want to delete this alert?")) {
+      try {
+        const response = await fetch(`http://localhost:3001/api/admin/delete-alerts/${alertId}`, {
+          method: "DELETE",
+        })
 
-  const unreadCount = notifications.filter((notification) => !notification.status).length
+        if (!response.ok) {
+          throw new Error("Failed to delete alert")
+        }
 
-  const renderCalendar = () => {
-    if (!showCalendar) return null
-
-    // Simple calendar implementation
-    const currentDate = new Date()
-    const currentMonth = currentDate.getMonth()
-    const currentYear = currentDate.getFullYear()
-
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay()
-
-    const days = []
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(<div key={`empty-${i}`} className="notif_calendar-day notif_empty"></div>)
+        setAlerts(alerts.filter((alert) => alert.alertId !== alertId))
+      } catch (err) {
+        setError("Error deleting alert. Please try again.")
+        console.error(err)
+      }
     }
+  }
 
-    for (let i = 1; i <= daysInMonth; i++) {
-      const date = new Date(currentYear, currentMonth, i)
-      days.push(
-        <div
-          key={`day-${i}`}
-          className={`notif_calendar-day ${dateFilter && format(dateFilter, "yyyy-MM-dd") === format(date, "yyyy-MM-dd") ? "notif_selected" : ""}`}
-          onClick={() => handleDateSelect(date)}
-        >
-          {i}
-        </div>,
-      )
+  const handleFormSubmit = async (formData) => {
+    try {
+      let response
+
+      if (currentAlert) {
+        // Update existing alert
+        response = await fetch(`http://localhost:3001/api/admin/update-alerts/${currentAlert.alertId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        })
+      } else {
+        // Create new alert
+        response = await fetch("http://localhost:3001/api/admin/add-alerts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        })
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to save alert")
+      }
+
+      const savedAlert = await response.json()
+
+      if (currentAlert) {
+        setAlerts(alerts.map((alert) => (alert.alertId === currentAlert.alertId ? savedAlert : alert)))
+      } else {
+        setAlerts([...alerts, savedAlert])
+      }
+
+      setIsFormOpen(false)
+      setCurrentAlert(null)
+    } catch (err) {
+      setError("Error saving alert. Please try again.")
+      console.error(err)
     }
+  }
 
-    return (
-      <div className="notif_calendar-popup">
-        <div className="notif_calendar-header">
-          <h3>{format(currentDate, "MMMM yyyy")}</h3>
-        </div>
-        <div className="notif_calendar-weekdays">
-          <div>Su</div>
-          <div>Mo</div>
-          <div>Tu</div>
-          <div>We</div>
-          <div>Th</div>
-          <div>Fr</div>
-          <div>Sa</div>
-        </div>
-        <div className="notif_calendar-days">{days}</div>
-      </div>
-    )
+  const handleFormCancel = () => {
+    setIsFormOpen(false)
+    setCurrentAlert(null)
   }
 
   return (
-    <div className="notif_notification-dashboard">
-      <div className="notif_notification-card">
-        <div className="notif_card-header">
-          <div className="notif_header-content">
-            <h2 className="notif_card-title">
-              Notifications {unreadCount > 0 && <span className="notif_unread-badge">{unreadCount} unread</span>}
-            </h2>
-            <div className="notif_header-actions">
-              <button className="notif_btn notif_btn-outline" onClick={handleMarkAllAsRead} disabled={unreadCount === 0}>
-                Mark all as read
-              </button>
-              <button className="notif_create-alert-toggle" onClick={toggleCreateForm}>
-                {showCreateForm ? (
-                  <>
-                    <X size={16} /> Hide Form
-                  </>
-                ) : (
-                  <>
-                    <PlusCircle size={16} /> Create Alert
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+    <div className="app">
+      <header className="app-header">
+        <h1>Alerts Management</h1>
+        <button className="add-button" onClick={handleAddAlert}>
+          Add New Alert
+        </button>
+      </header>
+
+      {error && <div className="error-message">{error}</div>}
+
+      {isLoading ? (
+        <div className="loading">Loading alerts...</div>
+      ) : (
+        <AlertsPage alerts={alerts} onEdit={handleEditAlert} onDelete={handleDeleteAlert} />
+      )}
+
+      {isFormOpen && (
+        <div className="modal-overlay">
+          <AlertForm alert={currentAlert} onSubmit={handleFormSubmit} onCancel={handleFormCancel} />
         </div>
-
-        {showCreateForm && (
-          <div className="notif_create-alert-section">
-            <h3 className="notif_form-title">Create New Alert</h3>
-
-            {formError && <div className="notif_alert-error">{formError}</div>}
-            {formSuccess && <div className="notif_alert-success">{formSuccess}</div>}
-
-            <form onSubmit={handleCreateAlert} className="notif_create-alert-form">
-              <div className="notif_form-group">
-                <label htmlFor="alertType">Alert Type</label>
-                <select
-                  id="alertType"
-                  value={alertType}
-                  onChange={(e) => {
-                    setAlertType(e.target.value)
-                    setDetails({}) // Reset details when type changes
-                    setMessage("") // Reset message when type changes
-                  }}
-                  required
-                >
-                  <option value={NotificationType.ANNIVERSARY}>Work Anniversary</option>
-                  <option value={NotificationType.LEAVE_EXCEED}>Leave Exceed</option>
-                  <option value={NotificationType.PAYROLL_DISCREPANCY}>Payroll Discrepancy</option>
-                  <option value={NotificationType.PAYROLL_SENT}>Payroll Sent</option>
-                </select>
-              </div>
-
-              <div className="notif_form-group">
-                <label htmlFor="employeeName">Employee Name</label>
-                <input
-                  type="text"
-                  id="employeeName"
-                  value={employeeName}
-                  onChange={(e) => setEmployeeName(e.target.value)}
-                  required
-                />
-              </div>
-
-              {renderDynamicFields()}
-
-              <div className="notif_form-group">
-                <label htmlFor="message">
-                  Message
-                  <button
-                    type="button"
-                    className="notif_generate-btn"
-                    onClick={() => setMessage(generateDefaultMessage())}
-                    disabled={!employeeName || Object.keys(details).length === 0}
-                  >
-                    Generate
-                  </button>
-                </label>
-                <textarea
-                  id="message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows="3"
-                  required
-                ></textarea>
-              </div>
-
-              <div className="notif_form-actions">
-                <button type="submit" className="notif_submit-btn" disabled={isSubmitting}>
-                  {isSubmitting ? "Sending..." : "Send Alert"}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        <div className="notif_card-content">
-          <div className="notif_filters">
-            <div className="notif_search-container">
-              <input
-                type="text"
-                placeholder="Search notifications..."
-                className="notif_search-input"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            <div className="notif_filter-select">
-              <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                <option value="all">All types</option>
-                <option value={NotificationType.ANNIVERSARY}>Work Anniversary</option>
-                <option value={NotificationType.LEAVE_EXCEED}>Leave Exceed</option>
-                <option value={NotificationType.PAYROLL_DISCREPANCY}>Payroll Discrepancy</option>
-                <option value={NotificationType.PAYROLL_SENT}>Payroll Sent</option>
-              </select>
-            </div>
-
-            <div className="notif_filter-select">
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                <option value="all">All status</option>
-                <option value="read">Read</option>
-                <option value="unread">Unread</option>
-              </select>
-            </div>
-
-            <div className="notif_date-picker">
-              <button className="notif_btn notif_btn-outline notif_date-btn" onClick={() => setShowCalendar(!showCalendar)}>
-                <CalendarIcon className="notif_calendar-icon" />
-                {dateFilter ? format(dateFilter, "PPP") : <span>Filter by date</span>}
-              </button>
-              {renderCalendar()}
-            </div>
-
-            <button className="notif_btn notif_btn-ghost" onClick={handleClearFilters}>
-              Clear filters
-            </button>
-          </div>
-
-          <div className="notif_tabs">
-            <div className="notif_tabs-list">
-              <button
-                className={`notif_tab ${activeTab === "byDate" ? "notif_active" : ""}`}
-                onClick={() => setActiveTab("byDate")}
-              >
-                Group by Date
-              </button>
-              <button
-                className={`notif_tab ${activeTab === "byType" ? "notif_active" : ""}`}
-                onClick={() => setActiveTab("byType")}
-              >
-                Group by Type
-              </button>
-            </div>
-
-            <div className="notif_tab-content">
-              {activeTab === "byDate" && (
-                <div className="notif_tab-panel">
-                  {Object.keys(dateGrouped).length > 0 ? (
-                    Object.entries(dateGrouped)
-                      .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
-                      .map(([date, notifications]) => (
-                        <div key={date} className="notif_notification-group">
-                          <h3 className="notif_group-title">{date}</h3>
-                          <div className="notif_notification-list">
-                            {notifications.map((notification) => (
-                              <NotificationCard
-                                key={notification.id}
-                                notification={notification}
-                                onMarkAsRead={handleMarkAsRead}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      ))
-                  ) : (
-                    <div className="notif_empty-message">No notifications match your filters</div>
-                  )}
-                </div>
-              )}
-
-              {activeTab === "byType" && (
-                <div className="notif_tab-panel">
-                  {Object.keys(typeGrouped).length > 0 ? (
-                    Object.entries(typeGrouped).map(([type, notifications]) => (
-                      <div key={type} className="notif_notification-group">
-                        <h3 className="notif_group-title">
-                          {type === NotificationType.ANNIVERSARY && "Work Anniversary"}
-                          {type === NotificationType.LEAVE_EXCEED && "Leave Exceed"}
-                          {type === NotificationType.PAYROLL_DISCREPANCY && "Payroll Discrepancy"}
-                          {type === NotificationType.PAYROLL_SENT && "Payroll Sent"}
-                        </h3>
-                        <div className="notif_notification-list">
-                          {notifications.map((notification) => (
-                            <NotificationCard
-                              key={notification.id}
-                              notification={notification}
-                              onMarkAsRead={handleMarkAsRead}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="notif_empty-message">No notifications match your filters</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   )
 }
 
-export default NotificationDashboard
+export default AlertsAndNotifications

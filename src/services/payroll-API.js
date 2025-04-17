@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const pool = require("./mysqlConfig");
-
-const promisePool = pool.promise();
+const { mysqlPool } = require("./mysqlConfig");
+const promisePool = mysqlPool.promise();
 
 // Lấy danh sách attendance
 router.get("/attendance", async (req, res) => {

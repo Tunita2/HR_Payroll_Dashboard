@@ -218,6 +218,114 @@ router.get("/status", async (req, res) => {
   }
 });
 
+router.get("/alerts", async (req, res) => {
+  try {
+    const [rows] = await promisePool.query(`
+      SELECT AlertID as alertId, 
+        Type as type, 
+        EmployeeID as employeeId, 
+        EmployeeName as employeeName, 
+        Message as message, 
+        Source as source, 
+        CreatedAt as createdAt 
+      FROM alerts ORDER BY CreatedAt DESC
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error fetching salary records:", error);
+    res.status(500).json({ error: "Failed to fetch salary records" });
+  }
+});
+
+// Create a new alert
+router.post("/add-alerts", async (req, res) => {
+  try {
+    const { type, employeeId, employeeName, message, source } = req.body;
+
+    if (!type || !employeeId || !employeeName || !message || !source) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const query =
+      "INSERT INTO alerts (Type, EmployeeID, EmployeeName, Message, Source) VALUES (?, ?, ?, ?, ?)";
+
+    const [result] = await promisePool.query(query, [
+      type,
+      employeeId,
+      employeeName,
+      message,
+      source,
+    ]);
+
+    const [rows] = await promisePool.query(
+      "SELECT AlertID as alertId, Type as type, EmployeeID as employeeId, EmployeeName as employeeName, Message as message, Source as source, CreatedAt as createdAt FROM alerts WHERE AlertID = ?",
+      [result.insertId]
+    );
+
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    console.error("Error creating alert:", err);
+    res.status(500).json({ error: "Failed to create alert" });
+  }
+});
+
+// Update an existing alert
+router.put("/update-alerts/:id", async (req, res) => {
+  try {
+    const alertId = req.params.id;
+    const { type, employeeId, employeeName, message, source } = req.body;
+
+    if (!type || !employeeId || !employeeName || !message || !source) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const query =
+      "UPDATE alerts SET Type = ?, EmployeeID = ?, EmployeeName = ?, Message = ?, Source = ? WHERE AlertID = ?";
+
+    const [result] = await promisePool.query(query, [
+      type,
+      employeeId,
+      employeeName,
+      message,
+      source,
+      alertId,
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Alert not found" });
+    }
+
+    const [rows] = await promisePool.query(
+      "SELECT AlertID as alertId, Type as type, EmployeeID as employeeId, EmployeeName as employeeName, Message as message, Source as source, CreatedAt as createdAt FROM alerts WHERE AlertID = ?",
+      [alertId]
+    );
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("Error updating alert:", err);
+    res.status(500).json({ error: "Failed to update alert" });
+  }
+});
+
+// Delete an alert
+router.delete("/delete-alerts/:id", async (req, res) => {
+  try {
+    const alertId = req.params.id;
+    const query = "DELETE FROM alerts WHERE AlertID = ?";
+
+    const [result] = await promisePool.query(query, [alertId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Alert not found" });
+    }
+
+    res.json({ message: "Alert deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting alert:", err);
+    res.status(500).json({ error: "Failed to delete alert" });
+  }
+});
+
 // router.get("/test", async (req, res) => {
 //   const pool = await conn;
 //   const results = await pool.request().query("SELECT * FROM Employees");
