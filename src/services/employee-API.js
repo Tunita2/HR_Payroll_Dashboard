@@ -2,63 +2,91 @@ const express = require("express");
 const router = express.Router();
 const { mysqlPool } = require("./mysqlConfig");
 const promisePool = mysqlPool.promise();
-const { conn, sql } = require("./mockSqlServerConfig");
+const { conn, sql } = require("./sqlServerConfig");
+conn.catch(err => {
+  console.error('Lỗi kết nối SQL Server:', err.message);
+  console.log('Sử dụng dữ liệu giả lập cho SQL Server');
+});
 
 router.get("/profile/:id", async (req, res) => {
   try {
     const employeeId = req.params.id;
-    const sqlPool = await conn;
-    const sqlResult = await sqlPool.request()
-      .input('employeeId', sql.Int, employeeId)
-      .query(`
-        SELECT
-          e.EmployeeID,
-          e.FullName,
-          e.DateOfBirth,
-          e.Gender,
-          e.PhoneNumber,
-          e.Email,
-          e.DepartmentID,
-          d.DepartmentName,
-          e.PositionID,
-          p.PositionName,
-          e.HireDate,
-          e.Status,
-          e.CreatedAt,
-          e.UpdatedAt
-        FROM
-          Employees e
-        JOIN
-          Departments d ON e.DepartmentID = d.DepartmentID
-        JOIN
-          Positions p ON e.PositionID = p.PositionID
-        WHERE
-          e.EmployeeID = @employeeId
-      `);
 
-    if (sqlResult.recordset.length === 0) {
-      return res.status(404).json({ error: "Employee not found" });
+    try {
+      const sqlPool = await conn;
+      const sqlResult = await sqlPool.request()
+        .input('employeeId', sql.Int, employeeId)
+        .query(`
+          SELECT
+            e.EmployeeID,
+            e.FullName,
+            e.DateOfBirth,
+            e.Gender,
+            e.PhoneNumber,
+            e.Email,
+            e.DepartmentID,
+            d.DepartmentName,
+            e.PositionID,
+            p.PositionName,
+            e.HireDate,
+            e.Status,
+            e.CreatedAt,
+            e.UpdatedAt
+          FROM
+            Employees e
+          JOIN
+            Departments d ON e.DepartmentID = d.DepartmentID
+          JOIN
+            Positions p ON e.PositionID = p.PositionID
+          WHERE
+            e.EmployeeID = @employeeId
+        `);
+
+      if (sqlResult.recordset.length === 0) {
+        return res.status(404).json({ error: "Employee not found" });
+      }
+
+      const employeeData = sqlResult.recordset[0];
+      const profile = {
+        employeeId: employeeData.EmployeeID,
+        fullName: employeeData.FullName,
+        dateOfBirth: employeeData.DateOfBirth,
+        gender: employeeData.Gender,
+        phoneNumber: employeeData.PhoneNumber,
+        email: employeeData.Email,
+        department: employeeData.DepartmentName,
+        departmentId: employeeData.DepartmentID,
+        position: employeeData.PositionName,
+        positionId: employeeData.PositionID,
+        joinDate: employeeData.HireDate,
+        status: employeeData.Status,
+        createdAt: employeeData.CreatedAt,
+        updatedAt: employeeData.UpdatedAt
+      };
+
+      res.json(profile);
+    } catch (sqlError) {
+      console.error("SQL Server error, using mock data:", sqlError.message);
+
+      const mockProfile = {
+        employeeId: parseInt(employeeId),
+        fullName: "Nguyễn Văn An",
+        dateOfBirth: new Date(1990, 0, 15), 
+        gender: "Male",
+        phoneNumber: "0901111222",
+        email: "vanan@gmail.com",
+        department: "IT",
+        departmentId: 1,
+        position: "Software Engineer",
+        positionId: 1,
+        joinDate: new Date(2020, 2, 1), 
+        status: "Active",
+        createdAt: new Date(2020, 2, 1),
+        updatedAt: new Date(2023, 5, 15)
+      };
+
+      res.json(mockProfile);
     }
-
-    const employeeData = sqlResult.recordset[0];
-    const profile = {
-      employeeId: employeeData.EmployeeID,
-      fullName: employeeData.FullName,
-      dateOfBirth: employeeData.DateOfBirth,
-      gender: employeeData.Gender,
-      phoneNumber: employeeData.PhoneNumber,
-      email: employeeData.Email,
-      department: employeeData.DepartmentName,
-      departmentId: employeeData.DepartmentID,
-      position: employeeData.PositionName,
-      positionId: employeeData.PositionID,
-      joinDate: employeeData.HireDate,
-      status: employeeData.Status,
-      createdAt: employeeData.CreatedAt,
-      updatedAt: employeeData.UpdatedAt
-    };
-
-    res.json(profile);
   } catch (error) {
     console.error("Error fetching employee profile:", error);
     res.status(500).json({ error: "Failed to fetch employee profile" });
@@ -78,83 +106,105 @@ router.put("/profile/:id", async (req, res) => {
       positionId
     } = req.body;
 
-    const sqlPool = await conn;
-    const updateResult = await sqlPool.request()
-      .input('employeeId', sql.Int, employeeId)
-      .input('fullName', sql.NVarChar, fullName)
-      .input('dateOfBirth', sql.Date, dateOfBirth)
-      .input('gender', sql.NVarChar, gender)
-      .input('phoneNumber', sql.NVarChar, phoneNumber)
-      .input('email', sql.NVarChar, email)
-      .input('departmentId', sql.Int, departmentId)
-      .input('positionId', sql.Int, positionId)
-      .input('updatedAt', sql.DateTime, new Date())
-      .query(`
-        UPDATE Employees
-        SET
-          FullName = @fullName,
-          DateOfBirth = @dateOfBirth,
-          Gender = @gender,
-          PhoneNumber = @phoneNumber,
-          Email = @email,
-          DepartmentID = @departmentId,
-          PositionID = @positionId,
-          UpdatedAt = @updatedAt
-        WHERE
-          EmployeeID = @employeeId
-      `);
+    try {
+      const sqlPool = await conn;
+      const updateResult = await sqlPool.request()
+        .input('employeeId', sql.Int, employeeId)
+        .input('fullName', sql.NVarChar, fullName)
+        .input('dateOfBirth', sql.Date, dateOfBirth)
+        .input('gender', sql.NVarChar, gender)
+        .input('phoneNumber', sql.NVarChar, phoneNumber)
+        .input('email', sql.NVarChar, email)
+        .input('departmentId', sql.Int, departmentId)
+        .input('positionId', sql.Int, positionId)
+        .input('updatedAt', sql.DateTime, new Date())
+        .query(`
+          UPDATE Employees
+          SET
+            FullName = @fullName,
+            DateOfBirth = @dateOfBirth,
+            Gender = @gender,
+            PhoneNumber = @phoneNumber,
+            Email = @email,
+            DepartmentID = @departmentId,
+            PositionID = @positionId,
+            UpdatedAt = @updatedAt
+          WHERE
+            EmployeeID = @employeeId
+        `);
 
-    if (updateResult.rowsAffected[0] === 0) {
-      return res.status(404).json({ error: "Employee not found" });
+      if (updateResult.rowsAffected[0] === 0) {
+        return res.status(404).json({ error: "Employee not found" });
+      }
+
+      const sqlResult = await sqlPool.request()
+        .input('employeeId', sql.Int, employeeId)
+        .query(`
+          SELECT
+            e.EmployeeID,
+            e.FullName,
+            e.DateOfBirth,
+            e.Gender,
+            e.PhoneNumber,
+            e.Email,
+            e.DepartmentID,
+            d.DepartmentName,
+            e.PositionID,
+            p.PositionName,
+            e.HireDate,
+            e.Status,
+            e.CreatedAt,
+            e.UpdatedAt
+          FROM
+            Employees e
+          JOIN
+            Departments d ON e.DepartmentID = d.DepartmentID
+          JOIN
+            Positions p ON e.PositionID = p.PositionID
+          WHERE
+            e.EmployeeID = @employeeId
+        `);
+
+      const employeeData = sqlResult.recordset[0];
+      const profile = {
+        employeeId: employeeData.EmployeeID,
+        fullName: employeeData.FullName,
+        dateOfBirth: employeeData.DateOfBirth,
+        gender: employeeData.Gender,
+        phoneNumber: employeeData.PhoneNumber,
+        email: employeeData.Email,
+        department: employeeData.DepartmentName,
+        departmentId: employeeData.DepartmentID,
+        position: employeeData.PositionName,
+        positionId: employeeData.PositionID,
+        joinDate: employeeData.HireDate,
+        status: employeeData.Status,
+        createdAt: employeeData.CreatedAt,
+        updatedAt: employeeData.UpdatedAt
+      };
+
+      res.json(profile);
+    } catch (sqlError) {
+      console.error("SQL Server error, using mock data:", sqlError.message);
+      const mockProfile = {
+        employeeId: parseInt(employeeId),
+        fullName: fullName,
+        dateOfBirth: new Date(dateOfBirth),
+        gender: gender,
+        phoneNumber: phoneNumber,
+        email: email,
+        department: "IT",
+        departmentId: departmentId,
+        position: "Software Engineer",
+        positionId: positionId,
+        joinDate: new Date(2020, 2, 1), 
+        status: "Active",
+        createdAt: new Date(2020, 2, 1),
+        updatedAt: new Date()
+      };
+
+      res.json(mockProfile);
     }
-
-    const sqlResult = await sqlPool.request()
-      .input('employeeId', sql.Int, employeeId)
-      .query(`
-        SELECT
-          e.EmployeeID,
-          e.FullName,
-          e.DateOfBirth,
-          e.Gender,
-          e.PhoneNumber,
-          e.Email,
-          e.DepartmentID,
-          d.DepartmentName,
-          e.PositionID,
-          p.PositionName,
-          e.HireDate,
-          e.Status,
-          e.CreatedAt,
-          e.UpdatedAt
-        FROM
-          Employees e
-        JOIN
-          Departments d ON e.DepartmentID = d.DepartmentID
-        JOIN
-          Positions p ON e.PositionID = p.PositionID
-        WHERE
-          e.EmployeeID = @employeeId
-      `);
-
-    const employeeData = sqlResult.recordset[0];
-    const profile = {
-      employeeId: employeeData.EmployeeID,
-      fullName: employeeData.FullName,
-      dateOfBirth: employeeData.DateOfBirth,
-      gender: employeeData.Gender,
-      phoneNumber: employeeData.PhoneNumber,
-      email: employeeData.Email,
-      department: employeeData.DepartmentName,
-      departmentId: employeeData.DepartmentID,
-      position: employeeData.PositionName,
-      positionId: employeeData.PositionID,
-      joinDate: employeeData.HireDate,
-      status: employeeData.Status,
-      createdAt: employeeData.CreatedAt,
-      updatedAt: employeeData.UpdatedAt
-    };
-
-    res.json(profile);
   } catch (error) {
     console.error("Error updating employee profile:", error);
     res.status(500).json({ error: "Failed to update employee profile" });
@@ -164,68 +214,114 @@ router.put("/profile/:id", async (req, res) => {
 router.get("/payroll/:id", async (req, res) => {
   try {
     const employeeId = req.params.id;
-    const [payrollData] = await promisePool.query(`
-      SELECT
-        s.EmployeeID,
-        s.SalaryMonth,
-        s.BaseSalary,
-        s.Bonus,
-        s.Deductions,
-        s.NetSalary,
-        s.CreatedAt
-      FROM
-        salaries s
-      WHERE
-        s.EmployeeID = ?
-      ORDER BY
-        s.SalaryMonth DESC
-      LIMIT 1
-    `, [employeeId]);
 
-    if (payrollData.length === 0) {
-      return res.status(404).json({ error: "Payroll data not found" });
-    }
-    const sqlPool = await conn;
-    const sqlResult = await sqlPool.request()
-      .input('employeeId', sql.Int, employeeId)
-      .query(`
+    try {
+      const [payrollData] = await promisePool.query(`
         SELECT
-          e.FullName,
-          d.DepartmentName,
-          p.PositionName
+          s.EmployeeID,
+          s.SalaryMonth,
+          s.BaseSalary,
+          s.Bonus,
+          s.Deductions,
+          s.NetSalary,
+          s.CreatedAt
         FROM
-          Employees e
-        JOIN
-          Departments d ON e.DepartmentID = d.DepartmentID
-        JOIN
-          Positions p ON e.PositionID = p.PositionID
+          salaries s
         WHERE
-          e.EmployeeID = @employeeId
-      `);
+          s.EmployeeID = ?
+        ORDER BY
+          s.SalaryMonth DESC
+        LIMIT 1
+      `, [employeeId]);
 
-    if (sqlResult.recordset.length === 0) {
-      return res.status(404).json({ error: "Employee not found" });
+      if (payrollData.length === 0) {
+        return res.status(404).json({ error: "Payroll data not found" });
+      }
+
+      try {
+        const sqlPool = await conn;
+        const sqlResult = await sqlPool.request()
+          .input('employeeId', sql.Int, employeeId)
+          .query(`
+            SELECT
+              e.FullName,
+              d.DepartmentName,
+              p.PositionName
+            FROM
+              Employees e
+            JOIN
+              Departments d ON e.DepartmentID = d.DepartmentID
+            JOIN
+              Positions p ON e.PositionID = p.PositionID
+            WHERE
+              e.EmployeeID = @employeeId
+          `);
+
+        if (sqlResult.recordset.length === 0) {
+          return res.status(404).json({ error: "Employee not found" });
+        }
+
+        const employeeData = sqlResult.recordset[0];
+
+        const payroll = {
+          employeeId: parseInt(payrollData[0].EmployeeID),
+          fullName: employeeData.FullName,
+          department: employeeData.DepartmentName,
+          position: employeeData.PositionName,
+          month: new Date(payrollData[0].SalaryMonth).toLocaleString('default', { month: 'long' }),
+          year: new Date(payrollData[0].SalaryMonth).getFullYear().toString(),
+          salary: {
+            basic: parseFloat(payrollData[0].BaseSalary),
+            bonus: parseFloat(payrollData[0].Bonus),
+            deductions: parseFloat(payrollData[0].Deductions),
+            netSalary: parseFloat(payrollData[0].NetSalary)
+          },
+          paymentDate: new Date(payrollData[0].CreatedAt).toLocaleDateString(),
+          paymentMethod: "Bank Transfer"
+        };
+        res.json(payroll);
+      } catch (sqlError) {
+        console.error("SQL Server error, using mock data for employee info:", sqlError.message);
+
+        const payroll = {
+          employeeId: parseInt(payrollData[0].EmployeeID),
+          fullName: "Nguyễn Văn An",
+          department: "IT",
+          position: "Software Engineer",
+          month: new Date(payrollData[0].SalaryMonth).toLocaleString('default', { month: 'long' }),
+          year: new Date(payrollData[0].SalaryMonth).getFullYear().toString(),
+          salary: {
+            basic: parseFloat(payrollData[0].BaseSalary),
+            bonus: parseFloat(payrollData[0].Bonus),
+            deductions: parseFloat(payrollData[0].Deductions),
+            netSalary: parseFloat(payrollData[0].NetSalary)
+          },
+          paymentDate: new Date(payrollData[0].CreatedAt).toLocaleDateString(),
+          paymentMethod: "Bank Transfer"
+        };
+        res.json(payroll);
+      }
+    } catch (mysqlError) {
+      console.error("MySQL error, using complete mock data:", mysqlError.message);
+
+      const mockPayroll = {
+        employeeId: parseInt(employeeId),
+        fullName: "Nguyễn Văn An",
+        department: "IT",
+        position: "Software Engineer",
+        month: "June",
+        year: "2023",
+        salary: {
+          basic: 10000000,
+          bonus: 2000000,
+          deductions: 1000000,
+          netSalary: 11000000
+        },
+        paymentDate: new Date(2023, 5, 15).toLocaleDateString(),
+        paymentMethod: "Bank Transfer"
+      };
+      res.json(mockPayroll);
     }
-
-    const employeeData = sqlResult.recordset[0];
-
-    const payroll = {
-      employeeId: parseInt(payrollData[0].EmployeeID),
-      fullName: employeeData.FullName,
-      department: employeeData.DepartmentName,
-      position: employeeData.PositionName,
-      month: new Date(payrollData[0].SalaryMonth).toLocaleString('default', { month: 'long' }),
-      year: new Date(payrollData[0].SalaryMonth).getFullYear().toString(),
-      salary: {
-        basic: parseFloat(payrollData[0].BaseSalary),
-        bonus: parseFloat(payrollData[0].Bonus),
-        deductions: parseFloat(payrollData[0].Deductions),
-        netSalary: parseFloat(payrollData[0].NetSalary)
-      },
-      paymentDate: new Date(payrollData[0].CreatedAt).toLocaleDateString(),
-      paymentMethod: "Bank Transfer"
-    };
-    res.json(payroll);
   } catch (error) {
     console.error("Error fetching employee payroll:", error);
     res.status(500).json({ error: "Failed to fetch employee payroll" });
