@@ -1,9 +1,6 @@
 const express = require("express");
 const router = express.Router();
-// Sử dụng mock MySQL config thay vì kết nối thực
-// const { mysqlPool } = require("./mysqlConfig");
-// const promisePool = mysqlPool.promise();
-const { mysqlPool } = require("./mockMysqlConfig");
+const { mysqlPool } = require("./mysqlConfig");
 const promisePool = mysqlPool.promise();
 const { conn, sql } = require("./mockSqlServerConfig");
 
