@@ -3,22 +3,39 @@ const router = express.Router();
 const { mysqlPool } = require("./mysqlConfig");
 const promisePool = mysqlPool.promise();
 const { conn, sql } = require("./sqlServerConfig");
+const nodemailer = require("nodemailer");
+
+const fetchSQLServerData = async (query) => {
+  const sqlPool = await conn;
+  const result = await sqlPool.request().query(query);
+  return result.recordset;
+};
+
+const fetchMySQLData = async (query, params = []) => {
+  const [rows] = await promisePool.query(query, params);
+  return rows;
+};
+
+const mergeData = (primaryData, secondaryData, key, mapFn) => {
+  return primaryData
+    .map((primaryItem) => {
+      const match = secondaryData.find(
+        (secondaryItem) => secondaryItem[key] === primaryItem[key]
+      );
+      return match ? mapFn(primaryItem, match) : null;
+    })
+    .filter(Boolean);
+};
 
 router.get("/departments", async (req, res) => {
   try {
-    // SQL Server - lấy employeeCount theo phòng ban
-    const sqlPool = await conn;
-    const sqlResult = await sqlPool.request().query(`
-        SELECT d.DepartmentID, d.DepartmentName, COUNT(e.EmployeeID) AS employeeCount
-        FROM Departments d
-        JOIN Employees e ON d.DepartmentID = e.DepartmentID
-        GROUP BY d.DepartmentID, d.DepartmentName
-      `);
-
-    const departmentsFromSQLServer = sqlResult.recordset;
-
-    // MySQL - lấy budget và avgSalary theo phòng ban
-    const [departmentsFromMySQL] = await promisePool.query(`
+    const sqlQuery = `
+      SELECT d.DepartmentID, d.DepartmentName, COUNT(e.EmployeeID) AS employeeCount
+      FROM Departments d
+      JOIN Employees e ON d.DepartmentID = e.DepartmentID
+      GROUP BY d.DepartmentID, d.DepartmentName
+    `;
+    const mysqlQuery = `
       SELECT 
         d.DepartmentID,
         SUM(s.BaseSalary + s.Bonus - s.Deductions) AS totalBudget,
@@ -30,27 +47,22 @@ router.get("/departments", async (req, res) => {
       JOIN 
         salaries s ON e.EmployeeID = s.EmployeeID
       GROUP BY d.DepartmentID
-    `);
+    `;
 
-    // Gộp dữ liệu theo DepartmentID
-    const mergedData = departmentsFromSQLServer
-      .map((departmentFromSQLServer, index) => {
-        const match = departmentsFromMySQL.find(
-          (departmentFromMySQL) =>
-            departmentFromMySQL.DepartmentID ===
-            departmentFromSQLServer.DepartmentID
-        );
-        if (!match) {
-          return null;
-        }
-        return {
-          name: departmentFromSQLServer.DepartmentName,
-          employees: departmentFromSQLServer.employeeCount,
-          budget: match.totalBudget || 0,
-          avgSalary: match.avgSalary || 0,
-        };
+    const departmentsFromSQLServer = await fetchSQLServerData(sqlQuery);
+    const departmentsFromMySQL = await fetchMySQLData(mysqlQuery);
+
+    const mergedData = mergeData(
+      departmentsFromSQLServer,
+      departmentsFromMySQL,
+      "DepartmentID",
+      (sqlItem, mysqlItem) => ({
+        name: sqlItem.DepartmentName,
+        employees: sqlItem.employeeCount,
+        budget: mysqlItem.totalBudget || 0,
+        avgSalary: mysqlItem.avgSalary || 0,
       })
-      .filter(Boolean);
+    );
 
     res.json(mergedData);
   } catch (error) {
@@ -61,19 +73,13 @@ router.get("/departments", async (req, res) => {
 
 router.get("/positions", async (req, res) => {
   try {
-    // SQL Server - lấy số nhân viên theo vị trí
-    const sqlPool = await conn;
-    const sqlResult = await sqlPool.request().query(`
-        SELECT p.PositionID, p.PositionName, COUNT(e.EmployeeID) AS employeeCount
-        FROM Positions p
-        JOIN Employees e ON p.PositionID = e.PositionID
-        GROUP BY p.PositionID, p.PositionName
-      `);
-
-    const positionsFromSQLServer = sqlResult.recordset;
-
-    // MySQL - lấy lương trung bình theo vị trí
-    const [positionsFromMySQL] = await promisePool.query(`
+    const sqlQuery = `
+      SELECT p.PositionID, p.PositionName, COUNT(e.EmployeeID) AS employeeCount
+      FROM Positions p
+      JOIN Employees e ON p.PositionID = e.PositionID
+      GROUP BY p.PositionID, p.PositionName
+    `;
+    const mysqlQuery = `
       SELECT 
         p.PositionID,
         AVG(s.BaseSalary + s.Bonus - s.Deductions) AS avgSalary
@@ -84,27 +90,23 @@ router.get("/positions", async (req, res) => {
       JOIN 
         salaries s ON e.EmployeeID = s.EmployeeID
       GROUP BY p.PositionID
-    `);
+    `;
 
-    // Gộp dữ liệu theo PositionID
-    const mergedPositionData = positionsFromSQLServer
-      .map((positionFromSQLServer) => {
-        const match = positionsFromMySQL.find(
-          (positionFromMySQL) =>
-            positionFromMySQL.PositionID === positionFromSQLServer.PositionID
-        );
-        if (!match) {
-          return null;
-        }
-        return {
-          name: positionFromSQLServer.PositionName,
-          count: positionFromSQLServer.employeeCount,
-          avgSalary: match.avgSalary || 0,
-        };
+    const positionsFromSQLServer = await fetchSQLServerData(sqlQuery);
+    const positionsFromMySQL = await fetchMySQLData(mysqlQuery);
+
+    const mergedData = mergeData(
+      positionsFromSQLServer,
+      positionsFromMySQL,
+      "PositionID",
+      (sqlItem, mysqlItem) => ({
+        name: sqlItem.PositionName,
+        count: sqlItem.employeeCount,
+        avgSalary: mysqlItem.avgSalary || 0,
       })
-      .filter(Boolean);
+    );
 
-    res.json(mergedPositionData);
+    res.json(mergedData);
   } catch (error) {
     console.error("Error fetching position overview:", error);
     res.status(500).json({ error: "Failed to fetch position overview" });
@@ -113,23 +115,7 @@ router.get("/positions", async (req, res) => {
 
 router.get("/attendances", async (req, res) => {
   try {
-    // SQL Server - Lấy dữ liệu chấm công theo tháng
-    // const sqlPool = await conn;
-    // const sqlResult = await sqlPool.request().query(`
-    //   SELECT
-    //     FORMAT(AttendanceMonth, 'MMM') AS Month,
-    //     SUM(WorkDays) AS totalWorkDays,
-    //     SUM(AbsentDays) AS totalAbsentDays,
-    //     SUM(LeaveDays) AS totalLeaveDays
-    //   FROM Attendance
-    //   GROUP BY FORMAT(AttendanceMonth, 'MMM')
-    //   ORDER BY MIN(AttendanceMonth)
-    // `);
-
-    // const sqlAttendance = sqlResult.recordset;
-
-    // MySQL - lấy tổng số ngày làm việc theo tháng
-    const [mysqlAttendance] = await promisePool.query(`
+    const mysqlQuery = `
       SELECT 
         DATE_FORMAT(AttendanceMonth, '%b') AS month,
         SUM(WorkDays) AS workDays,
@@ -138,21 +124,9 @@ router.get("/attendances", async (req, res) => {
       FROM Attendance
       GROUP BY DATE_FORMAT(AttendanceMonth, '%b'), MONTH(AttendanceMonth)
       ORDER BY MONTH(AttendanceMonth);
-    `);
+    `;
 
-    // Gộp dữ liệu theo Month
-    // const mergedAttendanceData = sqlAttendance.map((item) => {
-    //   const match = mysqlAttendance.find(
-    //     (m) => m.Month.slice(0, 3).toLowerCase() === item.Month.toLowerCase()
-    //   );
-    //   return {
-    //     month: item.Month,
-    //     workDaysSQL: item.totalWorkDays,
-    //     absentDays: item.totalAbsentDays,
-    //     leaveDays: item.totalLeaveDays,
-    //     workDaysMySQL: match?.totalWorkDaysMySQL || 0,
-    //   };
-    // });
+    const mysqlAttendance = await fetchMySQLData(mysqlQuery);
 
     res.json(mysqlAttendance);
   } catch (error) {
@@ -163,7 +137,7 @@ router.get("/attendances", async (req, res) => {
 
 router.get("/salaries", async (req, res) => {
   try {
-    const [rows] = await promisePool.query(`
+    const mysqlQuery = `
       SELECT 
         DATE_FORMAT(SalaryMonth, '%b') AS month,
         SUM(BaseSalary) AS baseSalary,
@@ -173,7 +147,9 @@ router.get("/salaries", async (req, res) => {
       FROM salaries
       GROUP BY DATE_FORMAT(SalaryMonth, '%b'), MONTH(SalaryMonth)
       ORDER BY MONTH(SalaryMonth);
-    `);
+    `;
+
+    const rows = await fetchMySQLData(mysqlQuery);
     res.json(rows);
   } catch (error) {
     console.error("Error fetching salary records:", error);
@@ -183,16 +159,16 @@ router.get("/salaries", async (req, res) => {
 
 router.get("/dividends", async (req, res) => {
   try {
-    const sqlPool = await conn;
-    const result = await sqlPool.request().query(`
-    SELECT 
-      FORMAT(DividendDate, 'MMM') AS month,
-      SUM(DividendAmount) AS amount
-    FROM Dividends
-    GROUP BY FORMAT(DividendDate, 'MMM'), MONTH(DividendDate)
-    ORDER BY MONTH(DividendDate)
-  `);
-    const dividendData = result.recordset;
+    const sqlQuery = `
+      SELECT 
+        FORMAT(DividendDate, 'MMM') AS month,
+        SUM(DividendAmount) AS amount
+      FROM Dividends
+      GROUP BY FORMAT(DividendDate, 'MMM'), MONTH(DividendDate)
+      ORDER BY MONTH(DividendDate)
+    `;
+
+    const dividendData = await fetchSQLServerData(sqlQuery);
     res.json(dividendData);
   } catch (error) {
     console.error("Error fetching dividend records:", error);
@@ -202,15 +178,15 @@ router.get("/dividends", async (req, res) => {
 
 router.get("/status", async (req, res) => {
   try {
-    const sqlPool = await conn;
-    const result = await sqlPool.request().query(`
+    const sqlQuery = `
       SELECT 
         Status, 
         COUNT(*) AS count
       FROM Employees
       GROUP BY Status
-    `);
-    const statusData = result.recordset;
+    `;
+
+    const statusData = await fetchSQLServerData(sqlQuery);
     res.json(statusData);
   } catch (error) {
     console.error("Error fetching status records:", error);
@@ -218,18 +194,45 @@ router.get("/status", async (req, res) => {
   }
 });
 
-router.get("/alerts", async (req, res) => {
+router.get("/notifications/employees", async (req, res) => {
   try {
-    const [rows] = await promisePool.query(`
-      SELECT AlertID as alertId, 
-        Type as type, 
-        EmployeeID as employeeId, 
-        EmployeeName as employeeName, 
-        Message as message, 
-        Source as source, 
-        CreatedAt as createdAt 
-      FROM alerts ORDER BY CreatedAt DESC
-    `);
+    const sqlQuery = `
+      SELECT 
+        EmployeeID AS id,
+        Fullname AS name,
+        HireDate AS startDate,
+        Email AS email
+      FROM Employees
+    `;
+
+    const statusData = await fetchSQLServerData(sqlQuery);
+    res.json(statusData);
+  } catch (error) {
+    console.error("Error fetching status records:", error);
+    res.status(500).json({ error: "Failed to fetch status records" });
+  }
+});
+
+router.get("/notifications/payrolls", async (req, res) => {
+  try {
+    const mysqlQuery = `
+      SELECT 
+        s1.SalaryID AS id,
+        e.EmployeeID AS employeeId,
+        e.FullName AS employeeName,
+        DATE_FORMAT(s1.SalaryMonth, '%M %Y') AS period,
+        s1.NetSalary AS amount,
+        IFNULL(s2.NetSalary, 0) AS previousAmount,
+        s1.NetSalary - IFNULL(s2.NetSalary, 0) AS discrepancy
+      FROM employees e
+      JOIN salaries s1 ON e.EmployeeID = s1.EmployeeID
+      LEFT JOIN salaries s2 
+        ON e.EmployeeID = s2.EmployeeID
+        AND DATE_FORMAT(s2.SalaryMonth, '%Y-%m') = DATE_FORMAT(DATE_SUB(s1.SalaryMonth, INTERVAL 1 MONTH), '%Y-%m')
+      ORDER BY s1.SalaryMonth DESC, e.EmployeeID;
+    `;
+
+    const rows = await fetchMySQLData(mysqlQuery);
     res.json(rows);
   } catch (error) {
     console.error("Error fetching salary records:", error);
@@ -237,7 +240,68 @@ router.get("/alerts", async (req, res) => {
   }
 });
 
-// Create a new alert
+router.get("/alerts", async (req, res) => {
+  try {
+    const mysqlQuery = `
+      SELECT 
+        e.EmployeeID AS id,
+        e.FullName AS employeeName,
+        d.DepartmentName AS department,
+        12 AS allowedDays,
+        IFNULL(a.LeaveDays, 0) AS usedDays,
+        IFNULL(a.LeaveDays, 0) - 12 AS daysExceeded,
+        DATE_FORMAT(NOW(), '%m/%d/%Y') AS date
+      FROM employees e
+      JOIN departments d ON e.DepartmentID = d.DepartmentID
+      JOIN attendance a ON e.EmployeeID = a.EmployeeID
+      WHERE IFNULL(a.LeaveDays, 0) > 12
+      ORDER BY daysExceeded DESC
+    `;
+
+    const rows = await fetchMySQLData(mysqlQuery);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error fetching salary records:", error);
+    res.status(500).json({ error: "Failed to fetch salary records" });
+  }
+});
+
+const sendEmail = async ({ email, subject, html }) => {
+  const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    host: "smtp.gmail.com",
+    auth: {
+      user: "hieugrth13@gmail.com",
+      pass: "czdy dqmr gikv stzr",
+    },
+  });
+
+  const message = {
+    from: "ADMIN",
+    to: email,
+    subject,
+    html,
+  };
+
+  return transporter.sendMail(message);
+};
+
+router.post("/notifications/send-payroll", async (req, res) => {
+  try {
+    const { email, subject, html } = req.body;
+
+    if (!email || !subject || !html) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const result = await sendEmail({ email, subject, html });
+    res.status(200).json({ message: "Email sent successfully", result });
+  } catch (err) {
+    console.error("Error sending email:", err);
+    res.status(500).json({ error: "Failed to send email" });
+  }
+});
+
 router.post("/add-alerts", async (req, res) => {
   try {
     const { type, employeeId, employeeName, message, source } = req.body;
@@ -269,7 +333,6 @@ router.post("/add-alerts", async (req, res) => {
   }
 });
 
-// Update an existing alert
 router.put("/update-alerts/:id", async (req, res) => {
   try {
     const alertId = req.params.id;
@@ -307,7 +370,6 @@ router.put("/update-alerts/:id", async (req, res) => {
   }
 });
 
-// Delete an alert
 router.delete("/delete-alerts/:id", async (req, res) => {
   try {
     const alertId = req.params.id;
@@ -326,10 +388,86 @@ router.delete("/delete-alerts/:id", async (req, res) => {
   }
 });
 
-// router.get("/test", async (req, res) => {
-//   const pool = await conn;
-//   const results = await pool.request().query("SELECT * FROM Employees");
-//   res.json(results);
-// });
+// Mock data for alerts
+const alertsData = [
+  {
+    id: 1,
+    employeeName: "John Smith",
+    employeeId: "EMP001",
+    department: "IT",
+    allowedDays: 12,
+    usedDays: 15,
+    daysExceeded: 3,
+    date: "04/15/2025",
+  },
+  {
+    id: 2,
+    employeeName: "Sarah Johnson",
+    employeeId: "EMP002",
+    department: "HR",
+    allowedDays: 12,
+    usedDays: 18,
+    daysExceeded: 6,
+    date: "04/16/2025",
+  },
+  {
+    id: 3,
+    employeeName: "Michael Lee",
+    employeeId: "EMP003",
+    department: "Finance",
+    allowedDays: 15,
+    usedDays: 16,
+    daysExceeded: 1,
+    date: "04/14/2025",
+  },
+  {
+    id: 4,
+    employeeName: "Emily Davis",
+    employeeId: "EMP004",
+    department: "Marketing",
+    allowedDays: 12,
+    usedDays: 17,
+    daysExceeded: 5,
+    date: "04/17/2025",
+  },
+  {
+    id: 5,
+    employeeName: "Robert Wilson",
+    employeeId: "EMP005",
+    department: "Sales",
+    allowedDays: 12,
+    usedDays: 16,
+    daysExceeded: 4,
+    date: "04/16/2025",
+  },
+];
+
+// Get all alerts
+router.get("/alerts", (req, res) => {
+  try {
+    res.json(alertsData);
+  } catch (error) {
+    console.error("Error fetching alerts:", error);
+    res.status(500).json({ error: "Failed to fetch alerts" });
+  }
+});
+
+// Delete an alert
+router.delete("/alerts/:id", (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const index = alertsData.findIndex((alert) => alert.id === id);
+
+    if (index === -1) {
+      return res.status(404).json({ error: "Alert not found" });
+    }
+
+    alertsData.splice(index, 1);
+    res.json({ message: "Alert dismissed successfully" });
+  } catch (error) {
+    console.error("Error dismissing alert:", error);
+    res.status(500).json({ error: "Failed to dismiss alert" });
+  }
+});
 
 module.exports = router;

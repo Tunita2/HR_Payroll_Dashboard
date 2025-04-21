@@ -25,7 +25,8 @@ const LayoutAdmin = () => {
                 location.pathname === "/admin/salaries" ||
                 location.pathname === "/admin/attendances" ||
                 location.pathname === "/admin/reports" ||
-                location.pathname === "/admin/alerts-and-notifications" ? (
+                location.pathname === "/admin/alerts" ||
+                location.pathname === "/admin/notifications" ? (
                     <Outlet />
                 ) : (
                     <AdminDashboard />

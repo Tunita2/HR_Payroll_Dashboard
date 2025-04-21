@@ -43,10 +43,13 @@ export const menuConfig = [
     path: "/admin/reports",
   },
   {
-    id: "alerts",
+    id: "alertsAndNotifications",
     icon: RiAlertLine,
     text: "Alerts & Notifications",
-    path: "/admin/alerts-and-notifications",
+    children: [
+      { text: "Alerts", path: "/admin/alerts" },
+      { text: "Notifications", path: "/admin/notifications" },
+    ],
   },
 ];
 
