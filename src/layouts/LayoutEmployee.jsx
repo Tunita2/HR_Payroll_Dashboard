@@ -21,8 +21,7 @@ const LayoutAdmin = () => {
                     {
                         location.pathname === "/employee/my-payroll" ||
                             location.pathname === "/employee/leave-work" ||
-                            location.pathname === "/employee/notifications" ||
-                            location.pathname === "/employee/celeb-info" ? (
+                            location.pathname === "/employee/notifications" ? (
                             <Outlet />
                         ) : (
                             <MyProfile />
