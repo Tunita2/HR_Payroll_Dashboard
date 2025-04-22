@@ -4,23 +4,20 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { conn, sql } = require("./sqlServerConfig");
 
-// JWT Secret Key - in a production environment, this should be stored in environment variables
 const JWT_SECRET = "your_jwt_secret_key_here";
 
-// Login endpoint
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Validate input
     if (!username || !password) {
       return res.status(400).json({ error: "Username and password are required" });
     }
 
-    // Connect to SQL Server
     const pool = await conn;
 
-    // Query to find the user by username
+    console.log('Login attempt:', { username });
+
     const result = await pool.request()
       .input("username", sql.VarChar, username)
       .query(`
@@ -29,22 +26,19 @@ router.post("/login", async (req, res) => {
         WHERE a.Username = @username
       `);
 
+    console.log('Query result:', result.recordset);
+
     const user = result.recordset[0];
 
-    // Check if user exists
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Compare passwords
-    // Check if the password is already hashed (starts with $2a$ for bcryptjs)
     let isPasswordValid = false;
 
     if (user.PasswordHash.startsWith('$2a$')) {
-      // For properly hashed passwords, use bcrypt.compare
       isPasswordValid = await bcrypt.compare(password, user.PasswordHash);
     } else {
-      // For plain text passwords (during development/testing)
       isPasswordValid = user.PasswordHash === password;
     }
 
@@ -52,7 +46,6 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       {
         userId: user.AccountID,
@@ -63,7 +56,6 @@ router.post("/login", async (req, res) => {
       { expiresIn: "8h" }
     );
 
-    // Return success response with token
     res.json({
       message: "Login successful",
       token,
@@ -76,7 +68,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -84,7 +75,7 @@ const verifyToken = (req, res, next) => {
     return res.status(401).json({ error: "Access denied. No token provided." });
   }
 
-  const token = authHeader.split(" ")[1]; // Bearer TOKEN format
+  const token = authHeader.split(" ")[1]; 
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -95,7 +86,6 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-// Protected route example
 router.get("/profile", verifyToken, async (req, res) => {
   try {
     const pool = await conn;

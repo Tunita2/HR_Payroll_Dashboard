@@ -26,20 +26,17 @@ const Login = () => {
     try {
       setLoading(true);
 
-      // Make API request to login endpoint
       const response = await axios.post('http://localhost:3001/api/auth/login', {
         username: values.username,
         password: values.password
       });
 
-      // Store token in localStorage
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('employeeId', response.data.employeeId);
       localStorage.setItem('role', response.data.role);
 
       message.success('Login Successful!');
 
-      // Redirect based on role
       switch (response.data.role) {
         case 'admin':
           navigate('/admin');
@@ -51,14 +48,24 @@ const Login = () => {
           navigate('/payroll');
           break;
         default:
-          navigate('/employee/profile');
+          navigate('/employee');
           break;
       }
     } catch (error) {
       console.error('Login error:', error);
-      if (error.response && error.response.data) {
+
+      if (error.response) {
+        console.error('Error response:', {
+          data: error.response.data,
+          status: error.response.status,
+          headers: error.response.headers
+        });
         message.error(error.response.data.error || 'Login failed');
+      } else if (error.request) {
+        console.error('Error request:', error.request);
+        message.error('No response from server. Please try again.');
       } else {
+        console.error('Error message:', error.message);
         message.error('Unable to connect to server');
       }
     } finally {
@@ -68,7 +75,7 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      {/* Left Image Section */}
+
       <div className="login-image-section">
         <img src={backgroundLogin} alt="Login Background" className="login-image" />
         <div className="login-image-text">
@@ -79,8 +86,6 @@ const Login = () => {
           </p>
         </div>
       </div>
-
-      {/* Right Login Section */}
       <div className="login-form-section">
         <Form
           name="login"
