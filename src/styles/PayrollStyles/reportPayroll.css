@@ -354,3 +354,15 @@ footer {
     margin-bottom: 1.5rem;
   }
 }
+
+.payroll-dashboard-container {
+  background: linear-gradient(
+    116.82deg,
+    rgb(33, 32, 45) 1%,
+    rgb(20, 10, 88) 22%,
+    rgb(42, 27, 130) 28%,
+    rgb(182, 174, 206) 100%
+  );
+  min-height: 100vh;
+  padding: 20px;
+}

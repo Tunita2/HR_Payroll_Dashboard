@@ -1,38 +1,55 @@
-import React from "react";
-import Sidebar from "../components/General/Sidebar";
-import Header from "../components/General/Header";
-import "../styles/GeneralStyles/Layout.css";
-import { Outlet, useLocation } from "react-router-dom";
-import PayrollDashboard from "../components/Payroll/PayrollDashboard";
-import {menuConfig, settingItems } from "../components/Payroll/PayrollConfig"
+import React, { useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
+import Header from '../components/General/Header';
+import Sidebar from '../components/General/Sidebar';
+import { menuConfig, settingItems } from '../components/Payroll/PayrollConfig';
+import '../styles/GeneralStyles/Layout.css';
 
 const LayoutPayroll = () => {
-  const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { pathname } = useLocation();
+  const theme = useTheme();
+  
+  // Get current page title from menu config
+  const currentPage = [...menuConfig, ...settingItems].find(
+    item => item.path === pathname || pathname.startsWith(item.path + '/')
+  );
+  
+  const pageTitle = currentPage?.text || 'Payroll Management';
+  
+  // In a real app, these would come from your auth context
+  const userName = "John Smith";
+  const userRole = "Payroll Officer";
+
+  const handleMenuClick = () => {
+    setIsSidebarOpen(prev => !prev);
+  };
+
   return (
-    <div className="dashboard-layout">
+    <div className="layout-container" style={{ backgroundColor: theme.colors.background }}>
       <Sidebar
-        menuConfig={ menuConfig }
-        settingItems = { settingItems }
-        userRole = "Payroll"
-      ></Sidebar>
-      <div className="main-content">
-        <Header></Header>
-        <div className="content-body">
-            {/* Kiểm tra nếu đường dẫn là "/staff" thì hiển thị StaffTable, ngược lại hiển thị DashboardTitle */}
-            {/* {location.pathname === "/staff" ? <Outlet /> : <DashboardTitle/>} */}
-            {
-                location.pathname === "/payroll/salary" ||
-                location.pathname === "/payroll/attendance" ||
-                location.pathname === "/payroll/schedule" ||
-                location.pathname === "/payroll/report"   ? (
-                    <Outlet />
-                ) : (
-                    <PayrollDashboard />
-                )
-            }
-        </div>
+        isOpen={isSidebarOpen}
+        menuItems={menuConfig}
+        settingItems={settingItems}
+        onToggle={handleMenuClick}
+        currentPath={pathname}
+      />
+      
+      <div className={`main-content ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+        <Header
+          title={pageTitle}
+          onMenuClick={handleMenuClick}
+          userName={userName}
+          userRole={userRole}
+        />
+        
+        <main className="page-content">
+          <Outlet />
+        </main>
       </div>
     </div>
   );
 };
+
 export default LayoutPayroll;

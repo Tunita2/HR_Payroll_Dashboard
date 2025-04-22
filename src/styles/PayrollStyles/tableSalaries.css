@@ -1,172 +1,179 @@
 /* Container chính */
 .appli-table-container {
-    width: 100%;
-    padding: 20px;
-    background-color: #0c014d;
-    margin-top: 50px;
-    position: relative;
-  }
-  
-  /* Header chứa thanh tìm kiếm và nút */
-  .appli-table-header {
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    padding: 12px 0ox;
-    /* background: linear-gradient(to right, #3b3b98, #262673); */
-    border-radius: 8px;
-    font-size: 20px;
-  }
-  
-  /* Bảng nhân viên */
-  .appli-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #2a0b55;
-    border-radius: 8px;
-    overflow: hidden;
-    border-style: solid;
-    border-width: 10px;
-    border-color: white;
-  }
-  
-  .appli-table thead {
-    background-color: #2a0b55;
-    color: white;
-  }
-  
-  .appli-table th {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    font-weight: 700;
-    padding: 14px 20px;
-    text-align: center;
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .appli-table td {
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    font-size: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: center;
-    max-height: 60vh;
-    padding: 20px;
-  }
-  
-  .appli-table-row:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    cursor: pointer;
-  }
-  
-  /* Trạng thái làm việc */
-  .appli-status-circle {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: inline-block;
-  }
-  
-  .appli-status-circle.active {
-    background-color: #2ecc71;
-  }
-  
-  .appli-status-circle.inactive {
-    background-color: #e74c3c;
-  }
-  
-  /* Nút xóa */
-  .delete-icon {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #e74c3c;
-    font-size: 16px;
-    transition: 0.3s;
-  }
-  
-  .delete-icon:hover {
-    color: #c0392b;
-  }
-  
-  .appli-table-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    background-color: inherit;
-  }
-  
-  .table-search-appli-input {
-    padding: 8px 16px;
-    border-radius: 4px;
-    border: 1px solid #cfcfcf;
-    background-color: transparent;
-    color: #fff;
-    width: 300px;
-    margin-right: 700px;
-  }
-  
-  .table-button-container {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .table-button {
-    width: 100px;
-    padding: 8px 16px;
-    border-radius: 4px;
-    border: 1px solid #5c30fb;
-    background-color: #060070;
-    color: #fff;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .table-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .appli-search-bar-icon {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #888;
-    cursor: pointer;
-    margin-right: 700px;
-  }
-  
-  .search-bar-input::placeholder {
-    color: #fff;
-  }
-  
-  .appli-search-container {
-    position: relative;
-    display: inline-block;
-  }
-  .history {
-    padding : 8px 10px;
-    display: inline-block;
-    background-color: #060070;
-    border-radius : 10px;
-    font-size : 15px;
-    margin-right : 15px;
-    text-align : center;
-    cursor: pointer;
-    transition : background-color 0.3s;
-  }
-  
-  .history:hover{
-      background-color :#4a96ff;
-  
-  }
-  .button-group{
-      text-align: center;
-      justify-content: center;
-      display: flex;
-  }
+  background: linear-gradient(
+    116.82deg,
+    rgb(33, 32, 45) 1%,
+    rgb(20, 10, 88) 22%,
+    rgb(42, 27, 130) 28%,
+    rgb(182, 174, 206) 100%
+  );
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px;
+  background-color: #0c014d;
+  margin-top: 50px;
+  position: relative;
+}
+
+/* Header chứa thanh tìm kiếm và nút */
+.appli-table-header {
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 12px 0ox;
+  /* background: linear-gradient(to right, #3b3b98, #262673); */
+  border-radius: 8px;
+  font-size: 20px;
+}
+
+/* Bảng nhân viên */
+.appli-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #2a0b55;
+  border-radius: 8px;
+  overflow: hidden;
+  border-style: solid;
+  border-width: 10px;
+  border-color: white;
+}
+
+.appli-table thead {
+  background-color: #2a0b55;
+  color: white;
+}
+
+.appli-table th {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-weight: 700;
+  padding: 14px 20px;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.appli-table td {
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  max-height: 60vh;
+  padding: 20px;
+}
+
+.appli-table-row:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+/* Trạng thái làm việc */
+.appli-status-circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.appli-status-circle.active {
+  background-color: #2ecc71;
+}
+
+.appli-status-circle.inactive {
+  background-color: #e74c3c;
+}
+
+/* Nút xóa */
+.delete-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #e74c3c;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.delete-icon:hover {
+  color: #c0392b;
+}
+
+.appli-table-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: inherit;
+}
+
+.table-search-appli-input {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid #cfcfcf;
+  background-color: transparent;
+  color: #fff;
+  width: 300px;
+  margin-right: 700px;
+}
+
+.table-button-container {
+  display: flex;
+  gap: 10px;
+}
+
+.table-button {
+  width: 100px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid #5c30fb;
+  background-color: #060070;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.table-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.appli-search-bar-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  cursor: pointer;
+  margin-right: 700px;
+}
+
+.search-bar-input::placeholder {
+  color: #fff;
+}
+
+.appli-search-container {
+  position: relative;
+  display: inline-block;
+}
+.history {
+  padding: 8px 10px;
+  display: inline-block;
+  background-color: #060070;
+  border-radius: 10px;
+  font-size: 15px;
+  margin-right: 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.history:hover {
+  background-color: #4a96ff;
+}
+.button-group {
+  text-align: center;
+  justify-content: center;
+  display: flex;
+}

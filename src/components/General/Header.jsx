@@ -1,84 +1,43 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { FaBars, FaUserCircle, FaBell } from 'react-icons/fa';
 import '../../styles/GeneralStyles/Header.css';
-import SearchBar from './SearchBar';
-import { useTheme } from '../../context/ThemeContext';
-import { FaMoon, FaSun, FaUser, FaCog, FaSignOutAlt } from 'react-icons/fa';
 
-const Header = ({ userName = 'Tuan', userRole = 'Payroll manager' }) => {
-  const [showProfile, setShowProfile] = useState(false);
-  const { isDarkMode, toggleDarkMode } = useTheme();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    // Clear user data from localStorage or your auth state
-    localStorage.removeItem('user');
-    // Redirect to login
-    navigate('/login');
-  };
+const Header = ({ title, onMenuClick, userName, userRole }) => {
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 
   return (
-    <div className={`header-container ${isDarkMode ? 'dark' : ''}`}>
-      <div className="header-background">
-        <div className="header-content">
-          <SearchBar />
-          <div className="notification-section">
-            <button 
-              className="theme-toggle"
-              onClick={toggleDarkMode}
-              aria-label="Toggle dark mode"
-            >
-              {isDarkMode ? <FaSun /> : <FaMoon />}
-            </button>
+    <header className="header">
+      <div className="header-left">
+        <button className="menu-toggle" onClick={onMenuClick}>
+          <FaBars />
+        </button>
+        <h1 className="header-title">{title}</h1>
+      </div>
 
-            {/* Profile Section */}
-            <div className="profile-section">
-              <div 
-                className="user-info"
-                onClick={() => setShowProfile(!showProfile)}
-              >
-                <img 
-                  src="https://dashboard.codeparrot.ai/api/image/Z-Evp2s0ZhD5c3df/ellipse.png" 
-                  alt="user" 
-                  className="user-avatar" 
-                />
-                <div className="user-details">
-                  <span className="user-greeting">Hi, {userName}</span>
-                  <span className="user-role">{userRole}</span>
-                </div>
-              </div>
+      <div className="header-right">
+        <div className="header-date">
+          {currentDate}
+        </div>
 
-              {showProfile && (
-                <div className="profile-dropdown">
-                  <div className="dropdown-header">
-                    <img 
-                      src="https://dashboard.codeparrot.ai/api/image/Z-Evp2s0ZhD5c3df/ellipse.png" 
-                      alt="user" 
-                      className="dropdown-avatar" 
-                    />
-                    <div className="dropdown-user-info">
-                      <span className="dropdown-name">{userName}</span>
-                      <span className="dropdown-role">{userRole}</span>
-                    </div>
-                  </div>
-                  <div className="dropdown-divider"></div>
-                  <button onClick={() => navigate('/profile')} className="dropdown-item">
-                    <FaUser /> My Profile
-                  </button>
-                  <button onClick={() => navigate('/settings')} className="dropdown-item">
-                    <FaCog /> Settings
-                  </button>
-                  <div className="dropdown-divider"></div>
-                  <button onClick={handleLogout} className="dropdown-item logout">
-                    <FaSignOutAlt /> Logout
-                  </button>
-                </div>
-              )}
-            </div>
+        <button className="notification-button">
+          <FaBell />
+          <span className="notification-badge">3</span>
+        </button>
+
+        <div className="user-profile">
+          <FaUserCircle className="user-avatar" />
+          <div className="user-info">
+            <div className="user-name">{userName}</div>
+            <div className="user-role">{userRole}</div>
           </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 };
 

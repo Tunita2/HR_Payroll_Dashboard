@@ -1,110 +1,141 @@
-import React from 'react';
-import "../../styles/PayrollStyles/tableAttendance.css"
+import React, { useState, useEffect } from 'react';
+import { FaSearch, FaFileDownload, FaPlus, FaFilter } from 'react-icons/fa';
+import { attendanceRecords } from '../../lib/mock-data';
+import { formatDate, formatTime, getStatusColor } from '../../lib/utils';
+import SearchBar from '../General/SearchBar';
+import "../../styles/PayrollStyles/tableAttendance.css";
 
 const AttendanceTable = () => {
-  const list_attendance = [
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      workDays: "200",
-      AbsentDays: "19",
-      LeaveDays: "19",
-      AttendanceMonth: "June",
-      Created_at: "20/10/2025",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      workDays: "200",
-      AbsentDays: "19",
-      LeaveDays: "19",
-      AttendanceMonth: "April",
-      Created_at: "20/10/2025",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      workDays: "200",
-      AbsentDays: "19",
-      LeaveDays: "19",
-      AttendanceMonth: "March",
-      Created_at: "20/10/2025",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      workDays: "200",
-      AbsentDays: "19",
-      LeaveDays: "19",
-      AttendanceMonth: "February",
-      Created_at: "20/10/2025",
-    },
-    {
-      id: "01",
-      employee_id: "101",
-      fullname: "Văn An",
-      position: "Manager",
-      department: "Marketing",
-      workDays: "200",
-      AbsentDays: "19",
-      LeaveDays: "19",
-      AttendanceMonth: "January",
-      Created_at: "20/10/2025",
-    },
-  ];
+  const [records, setRecords] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
+  useEffect(() => {
+    const fetchAttendanceData = () => {
+      try {
+        setLoading(true);
+        // In a real app, this would be an API call
+        setRecords(attendanceRecords);
+      } catch (err) {
+        setError('Failed to fetch attendance data');
+        console.error('Error fetching attendance data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAttendanceData();
+  }, []);
+
+  const filteredRecords = records.filter(record =>
+    Object.values(record).some(value =>
+      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  );
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+  };
+
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value);
+  };
+
+  const handleExport = () => {
+    // Implement export functionality
+    console.log('Exporting attendance data...');
+  };
+
+  const handleNewRecord = () => {
+    // Implement new record functionality
+    console.log('Creating new attendance record...');
+  };
+
+  if (loading) return <div className="loading">Loading attendance data...</div>;
+  if (error) return <div className="error">{error}</div>;
+
   return (
-    <div>
-      <div class="appli-table-header">
-        <div>Attendance list</div>
-        <img src="https://dashboard.codeparrot.ai/api/image/Z-oMCgz4-w8v6Rpi/refresh.png" alt="Refresh" style={{ width: '30px', height: '30px', marginRight: '10px' }} />
+    <div className="attendance-table-container">
+      <div className="table-header">
+        <div className="header-left">
+          <SearchBar
+            onSearch={handleSearch}
+            placeholder="Search attendance records..."
+          />
+          <div className="date-filter">
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              className="date-input"
+            />
+            <button className="filter-button">
+              <FaFilter /> Filter
+            </button>
+          </div>
+        </div>
+        
+        <div className="header-right">
+          <button className="action-button" onClick={handleExport}>
+            <FaFileDownload /> Export
+          </button>
+          <button className="action-button primary" onClick={handleNewRecord}>
+            <FaPlus /> New Record
+          </button>
+        </div>
       </div>
 
-      {/* Bảng Dữ liệu attendance */}
-      <div>
-        <table className="appli-table">
+      <div className="table-container">
+        <table>
           <thead>
             <tr>
-              <th>ID</th>
               <th>Employee ID</th>
-              <th>Full name</th>
-              <th>Department</th>
-              <th>Position</th>
-              <th>Work Days</th>
-              <th>Absent Days</th>
-              <th>Leave Days</th>
-              <th>Attendance month</th>
-              <th>Create At</th>
+              <th>Date</th>
+              <th>Check In</th>
+              <th>Check Out</th>
+              <th>Total Hours</th>
+              <th>Overtime</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {list_attendance.map((employee, index) => (
-              <tr key={index} className="appli-table-row">
-                <td>{employee.id}</td>
-                <td>{employee.employee_id}</td>
-                <td>{employee.fullname}</td>
-                <td>{employee.department}</td>
-                <td>{employee.position}</td>
-                <td>{employee.workDays}</td>
-                <td>{employee.AbsentDays}</td>
-                <td>{employee.LeaveDays}</td>
-                <td>{employee.AttendanceMonth}</td>
-                <td>{employee.Created_at}</td>
+            {filteredRecords.map((record) => (
+              <tr key={record.id}>
+                <td>{record.employeeId}</td>
+                <td>{formatDate(record.date)}</td>
+                <td>{formatTime(record.checkIn)}</td>
+                <td>{formatTime(record.checkOut)}</td>
+                <td>{record.totalHours}</td>
+                <td>{record.overtime}</td>
+                <td>
+                  <span 
+                    className="status-badge"
+                    style={{ backgroundColor: getStatusColor(record.status) }}
+                  >
+                    {record.status}
+                  </span>
+                </td>
+                <td>
+                  <div className="action-buttons">
+                    <button className="edit-button">Edit</button>
+                    <button className="view-button">View</button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="table-footer">
+        <div className="pagination">
+          <button className="pagination-button" disabled>Previous</button>
+          <span className="pagination-info">Page 1 of 1</span>
+          <button className="pagination-button" disabled>Next</button>
+        </div>
       </div>
     </div>
   );
