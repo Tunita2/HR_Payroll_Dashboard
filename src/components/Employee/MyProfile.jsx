@@ -4,7 +4,7 @@ import "../../styles/EmployeeStyles/MyProfile.css";
 import EditProfileModal from "./EditProfileModal";
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api/employee';
+const API_URL = 'http://localhost:3001/api/auth';
 
 const MyProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
@@ -25,22 +25,28 @@ const MyProfile = () => {
         manager: ""
     });
 
-    const employeeId = 1;
+    // Lấy employeeId từ localStorage
+    const employeeId = localStorage.getItem('employeeId');
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${API_URL}/profile/${employeeId}`);
+                const response = await axios.get(`${API_URL}/profile`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
 
                 const apiData = response.data;
-                const formattedDate = apiData.dateOfBirth ? new Date(apiData.dateOfBirth).toLocaleDateString('en-US', {
+                const formattedDate = apiData.DateOfBirth ? new Date(apiData.DateOfBirth).toLocaleDateString('en-US', {
                     day: 'numeric',
                     month: 'short',
                     year: 'numeric'
                 }) : '';
 
-                const formattedJoinDate = apiData.joinDate ? new Date(apiData.joinDate).toLocaleDateString('en-US', {
+                const formattedJoinDate = apiData.HireDate ? new Date(apiData.HireDate).toLocaleDateString('en-US', {
                     day: 'numeric',
                     month: 'short',
                     year: 'numeric'
@@ -48,15 +54,16 @@ const MyProfile = () => {
 
                 setProfileData({
                     ...profileData,
-                    fullName: apiData.fullName || '',
+                    fullName: apiData.FullName || '',
                     dateOfBirth: formattedDate,
-                    gender: apiData.gender || '',
-                    email: apiData.email || '',
-                    phone: apiData.phoneNumber || '',
-                    employeeId: apiData.employeeId?.toString() || '',
-                    department: apiData.department || '',
-                    position: apiData.position || '',
-                    joinDate: formattedJoinDate
+                    gender: apiData.Gender || '',
+                    email: apiData.Email || '',
+                    phone: apiData.PhoneNumber || '',
+                    employeeId: apiData.EmployeeID?.toString() || '',
+                    department: apiData.DepartmentName || '',
+                    position: apiData.PositionName || '',
+                    joinDate: formattedJoinDate,
+                    status: apiData.Status || ''
                 });
 
                 setError(null);
@@ -94,7 +101,11 @@ const MyProfile = () => {
         try {
             setLoading(true);
 
-            await axios.put(`${API_URL}/profile/${employeeId}`, apiData);
+            await axios.put(`${API_URL}/profile`, apiData, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
             setProfileData(newData);
             setIsEditing(false);

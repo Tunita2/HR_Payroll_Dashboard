@@ -12,7 +12,7 @@ export const menuConfig = [
         icon: CgProfile,
         text: "My Profile",
         active: true,
-        path: "/employee",
+        path: "/employee/profile",
     },
     {
         id: "payroll",

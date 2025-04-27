@@ -48,24 +48,14 @@ const Login = () => {
           navigate('/payroll');
           break;
         default:
-          navigate('/employee');
+          navigate('/employee/profile');
           break;
       }
     } catch (error) {
       console.error('Login error:', error);
-
-      if (error.response) {
-        console.error('Error response:', {
-          data: error.response.data,
-          status: error.response.status,
-          headers: error.response.headers
-        });
+      if (error.response && error.response.data) {
         message.error(error.response.data.error || 'Login failed');
-      } else if (error.request) {
-        console.error('Error request:', error.request);
-        message.error('No response from server. Please try again.');
       } else {
-        console.error('Error message:', error.message);
         message.error('Unable to connect to server');
       }
     } finally {
@@ -75,7 +65,7 @@ const Login = () => {
 
   return (
     <div className="login-container">
-
+      {/* Left Image Section */}
       <div className="login-image-section">
         <img src={backgroundLogin} alt="Login Background" className="login-image" />
         <div className="login-image-text">
@@ -86,6 +76,8 @@ const Login = () => {
           </p>
         </div>
       </div>
+
+      {/* Right Login Section */}
       <div className="login-form-section">
         <Form
           name="login"
