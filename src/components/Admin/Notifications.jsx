@@ -3,91 +3,110 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react"
 import "../../styles/AdminStyles/Notifications.css"
 
-// Custom hook for fetching data
-const useFetch = (url) => {
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+const Notifications = () => {
+  const [activeTab, setActiveTab] = useState("all")
+  const [notifications, setNotifications] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [selectedNotification, setSelectedNotification] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [employees, setEmployees] = useState([])
+  const [payrolls, setPayrolls] = useState([])
 
+  // Fetch employee data
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchEmployees = async () => {
       try {
-        setIsLoading(true);
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`Failed to fetch data from ${url}`);
-        const result = await res.json();
-        setData(result);
-        setError(null);
+        const res = await fetch("http://localhost:3001/api/admin/notifications/employees")
+        if (!res.ok) throw new Error("Failed to fetch employees")
+        const data = await res.json()
+        setEmployees(data)
       } catch (err) {
-        console.error(`Error fetching data from ${url}:`, err);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+        console.error("Error fetching employees:", err)
       }
-    };
+    }
+    
+    fetchEmployees()
+  }, [])
 
-    fetchData();
-  }, [url]);
+  // Fetch payroll data
+  useEffect(() => {
+    const fetchPayrolls = async () => {
+      try {
+        const res = await fetch("http://localhost:3001/api/admin/notifications/payrolls")
+        if (!res.ok) throw new Error("Failed to fetch payrolls")
+        const data = await res.json()
+        setPayrolls(data)
+      } catch (err) {
+        console.error("Error fetching payrolls:", err)
+      }
+    }
+    
+    fetchPayrolls()
+  }, [])
 
-  return { data, isLoading, error };
-};
-
-// Notification generators
-const NotificationGenerators = {
-  anniversary: (employees, currentDate = new Date()) => {
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
-    const currentDay = currentDate.getDate();
+  // Generate anniversary notifications
+  const generateAnniversaryNotifications = useCallback(() => {
+    const today = new Date()
+    const currentYear = today.getFullYear()
+    const currentMonth = today.getMonth()
+    const currentDay = today.getDate()
 
     return employees
       .filter((employee) => {
-        const startDate = new Date(employee.startDate);
-        const startMonth = startDate.getMonth();
-        const startDay = startDate.getDate();
+        const startDate = new Date(employee.startDate)
+        const startMonth = startDate.getMonth()
+        const startDay = startDate.getDate()
 
+        // Check if the anniversary is within the next 30 days
         if (startMonth === currentMonth && startDay >= currentDay && startDay <= currentDay + 30) {
-          return true;
-        }
-        
-        if (startMonth === 11 && currentMonth === 0 && startDay >= 1 && startDay <= 31) {
-          return true;
+          return true
         }
 
-        return false;
+        // Handle year wrap (December to January)
+        if (startMonth === 11 && currentMonth === 0 && startDay >= 1 && startDay <= 31) {
+          return true
+        }
+
+        return false
       })
       .map((employee) => {
-        const startDate = new Date(employee.startDate);
-        const yearsOfService = currentYear - startDate.getFullYear();
+        const startDate = new Date(employee.startDate)
+        const yearsOfService = currentYear - startDate.getFullYear()
 
+        // Only notify for 1, 5, 10, 15, etc. year anniversaries
         if (yearsOfService % 5 === 0 || yearsOfService === 1) {
           return {
             id: `anniversary-${employee.id}`,
             type: "anniversary",
             title: `Work Anniversary: ${employee.name}`,
             message: `${employee.name} is approaching their ${yearsOfService} year work anniversary on ${startDate.toLocaleDateString()}.`,
-            date: currentDate.toISOString(),
+            date: new Date().toISOString(),
             read: false,
             data: employee,
-          };
+          }
         }
-        return null;
-      })
-      .filter(Boolean);
-  },
 
-  discrepancy: (payrolls) => {
+        return null
+      })
+      .filter(Boolean)
+  }, [employees])
+
+  // Generate discrepancy notifications
+  const generateDiscrepancyNotifications = useCallback(() => {
     return payrolls
       .filter((payroll) => {
-        const discrepancy = Number(payroll.discrepancy) || 0;
-        const previousAmount = Number(payroll.previousAmount) || 1;
-        const discrepancyPercentage = (discrepancy / previousAmount) * 100;
-        return discrepancyPercentage > 10;
+        // Convert values to numbers and ensure they exist
+        const discrepancy = Number(payroll.discrepancy) || 0
+        const previousAmount = Number(payroll.previousAmount) || 1 // Avoid division by zero
+        
+        // Consider a discrepancy significant if it's more than 10%
+        const discrepancyPercentage = previousAmount > 0 ? (discrepancy / previousAmount) * 100 : 0
+        return discrepancyPercentage > 10
       })
       .map((payroll) => {
-        const discrepancy = Number(payroll.discrepancy) || 0;
-        const previousAmount = Number(payroll.previousAmount) || 1;
-        const amount = Number(payroll.amount) || 0;
-        const discrepancyPercentage = (discrepancy / previousAmount) * 100;
+        const discrepancy = Number(payroll.discrepancy) || 0
+        const previousAmount = Number(payroll.previousAmount) || 1
+        const discrepancyPercentage = previousAmount > 0 ? (discrepancy / previousAmount) * 100 : 0
         
         return {
           id: `discrepancy-${payroll.id}`,
@@ -98,17 +117,19 @@ const NotificationGenerators = {
           read: false,
           data: {
             ...payroll,
-            discrepancy,
-            previousAmount,
-            amount
+            discrepancy: discrepancy,
+            previousAmount: previousAmount,
+            amount: Number(payroll.amount) || 0
           },
-        };
-      });
-  },
+        }
+      })
+  }, [payrolls])
 
-  payroll: (payrolls) => {
+  // Generate monthly payroll notifications
+  const generatePayrollNotifications = useCallback(() => {
     return payrolls.map((payroll) => {
-      const amount = Number(payroll.amount) || 0;
+      const amount = Number(payroll.amount) || 0
+      
       return {
         id: `payroll-${payroll.id}`,
         type: "payroll",
@@ -118,138 +139,50 @@ const NotificationGenerators = {
         read: false,
         data: {
           ...payroll,
-          amount,
+          amount: amount,
           discrepancy: Number(payroll.discrepancy) || 0,
           previousAmount: Number(payroll.previousAmount) || 0
         },
-      };
-    });
-  }
-};
+      }
+    })
+  }, [payrolls])
 
-// Tab Navigation Component
-const TabNavigation = ({ activeTab, setActiveTab }) => (
-  <div className="notifications-tabs">
-    {["all", "anniversary", "discrepancy", "payroll"].map(tab => (
-      <button 
-        key={tab}
-        className={activeTab === tab ? "active" : ""}
-        onClick={() => setActiveTab(tab)}
-      >
-        {tab === "all" ? "All" : tab.charAt(0).toUpperCase() + tab.slice(1) + "s"}
-      </button>
-    ))}
-  </div>
-);
-
-// Notification Details Component
-const NotificationDetails = ({ notification }) => {
-  if (!notification) return null;
-
-  const { type, data } = notification;
-
-  switch (type) {
-    case "anniversary":
-      return (
-        <div className="notification-detail-section">
-          <h4>Employee Details</h4>
-          <div className="notification-detail-item">
-            <span className="detail-label">Name:</span>
-            <span className="detail-value">{data.name}</span>
-          </div>
-          <div className="notification-detail-item">
-            <span className="detail-label">Start Date:</span>
-            <span className="detail-value">
-              {new Date(data.startDate).toLocaleDateString()}
-            </span>
-          </div>
-          <div className="notification-detail-item">
-            <span className="detail-label">Email:</span>
-            <span className="detail-value">{data.email}</span>
-          </div>
-        </div>
-      );
-
-    case "discrepancy":
-    case "payroll":
-      return (
-        <div className="notification-detail-section">
-          <h4>Payroll Details</h4>
-          <div className="notification-detail-item">
-            <span className="detail-label">Employee:</span>
-            <span className="detail-value">{data.employeeName}</span>
-          </div>
-          <div className="notification-detail-item">
-            <span className="detail-label">Period:</span>
-            <span className="detail-value">{data.period}</span>
-          </div>
-          <div className="notification-detail-item">
-            <span className="detail-label">Current Amount:</span>
-            <span className="detail-value">${data.amount.toFixed(2)}</span>
-          </div>
-          <div className="notification-detail-item">
-            <span className="detail-label">Previous Amount:</span>
-            <span className="detail-value">${data.previousAmount.toFixed(2)}</span>
-          </div>
-          {type === "discrepancy" && (
-            <div className="notification-detail-item">
-              <span className="detail-label">Discrepancy:</span>
-              <span className="detail-value discrepancy">
-                ${data.discrepancy.toFixed(2)} ({((data.discrepancy / data.previousAmount) * 100).toFixed(2)}%)
-              </span>
-            </div>
-          )}
-        </div>
-      );
-
-    default:
-      return null;
-  }
-};
-
-const Notifications = () => {
-  const [activeTab, setActiveTab] = useState("all");
-  const [notifications, setNotifications] = useState([]);
-  const [selectedNotification, setSelectedNotification] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Fetch employee and payroll data
-  const { data: employees, isLoading: employeesLoading, error: employeesError } = useFetch(
-    "http://localhost:3001/api/admin/notifications/employees"
-  );
-  const { data: payrolls, isLoading: payrollsLoading, error: payrollsError } = useFetch(
-    "http://localhost:3001/api/admin/notifications/payrolls"
-  );
-
-  // Generate notifications when data is available
+  // Generate notifications when employees and payrolls data is available
   useEffect(() => {
     if (employees.length > 0 && payrolls.length > 0) {
       const generatedNotifications = [
-        ...NotificationGenerators.anniversary(employees),
-        ...NotificationGenerators.discrepancy(payrolls),
-        ...NotificationGenerators.payroll(payrolls),
-      ];
+        ...generateAnniversaryNotifications(),
+        ...generateDiscrepancyNotifications(),
+        ...generatePayrollNotifications(),
+      ]
 
-      setNotifications(generatedNotifications);
+      setNotifications(generatedNotifications)
+      setIsLoading(false)
     }
-  }, [employees, payrolls]);
+  }, [employees, payrolls, generateAnniversaryNotifications, generateDiscrepancyNotifications, generatePayrollNotifications])
 
+  // Filter notifications based on active tab
   const filteredNotifications = useMemo(() => {
-    return activeTab === "all"
-      ? notifications
-      : notifications.filter((notification) => notification.type === activeTab);
-  }, [activeTab, notifications]);
+    return activeTab === "all" 
+      ? notifications 
+      : notifications.filter((notification) => notification.type === activeTab)
+  }, [activeTab, notifications])
 
+  // Mark notification as read
   const markAsRead = useCallback((id) => {
-    setNotifications(prev =>
-      prev.map(notification =>
+    setNotifications(prevNotifications =>
+      prevNotifications.map(notification =>
         notification.id === id ? { ...notification, read: true } : notification
       )
-    );
-  }, []);
+    )
+  }, [])
 
+  // Send email action
   const sendEmail = useCallback(async (notification) => {
     try {
+      console.log(`Sending payroll email to: ${notification.data.employeeName}`)
+      
+      // Here you would integrate with your backend to send the actual email
       const response = await fetch('http://localhost:3001/api/admin/notifications/send-payroll', {
         method: 'POST',
         headers: {
@@ -268,46 +201,119 @@ const Notifications = () => {
           `
         })
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to send email');
+      
+      if (response.ok) {
+        alert(`Payroll email sent to: ${notification.data.employeeName}`);
+      } else {
+        alert('Failed to send email. Please try again.');
       }
-
-      alert(`Payroll email sent to: ${notification.data.employeeName}`);
     } catch (error) {
       console.error('Error sending email:', error);
       alert('Error sending email. Please try again.');
     }
-  }, []);
+  }, [])
 
+  // Handle notification click
   const handleNotificationClick = useCallback((notification) => {
-    markAsRead(notification.id);
-    setSelectedNotification(notification);
-    setIsModalOpen(true);
-  }, [markAsRead]);
+    markAsRead(notification.id)
+    setSelectedNotification(notification)
+    setIsModalOpen(true)
+  }, [markAsRead])
 
+  // Close modal
   const closeModal = useCallback(() => {
-    setIsModalOpen(false);
-    setSelectedNotification(null);
-  }, []);
+    setIsModalOpen(false)
+    setSelectedNotification(null)
+  }, [])
 
-  if (employeesLoading || payrollsLoading) {
-    return <div className="loading">Loading notifications...</div>;
-  }
+  // Tab navigation component
+  const TabNavigation = () => (
+    <div className="notifications-tabs">
+      {["all", "anniversary", "discrepancy", "payroll"].map(tab => (
+        <button 
+          key={tab}
+          className={activeTab === tab ? "active" : ""}
+          onClick={() => setActiveTab(tab)}
+        >
+          {tab === "all" ? "All" : tab.charAt(0).toUpperCase() + tab.slice(1) + "s"}
+        </button>
+      ))}
+    </div>
+  )
 
-  if (employeesError || payrollsError) {
-    return <div className="error">Error loading notifications. Please try again later.</div>;
+  // Notification detail section for modal
+  const NotificationDetails = () => {
+    if (!selectedNotification) return null
+    
+    switch (selectedNotification.type) {
+      case "anniversary":
+        return (
+          <div className="notification-detail-section">
+            <h4>Employee Details</h4>
+            <div className="notification-detail-item">
+              <span className="detail-label">Name:</span>
+              <span className="detail-value">{selectedNotification.data.name}</span>
+            </div>
+            <div className="notification-detail-item">
+              <span className="detail-label">Start Date:</span>
+              <span className="detail-value">
+                {new Date(selectedNotification.data.startDate).toLocaleDateString()}
+              </span>
+            </div>
+            <div className="notification-detail-item">
+              <span className="detail-label">Email:</span>
+              <span className="detail-value">{selectedNotification.data.email}</span>
+            </div>
+          </div>
+        )
+      case "discrepancy":
+      case "payroll":
+        const { data } = selectedNotification
+        return (
+          <div className="notification-detail-section">
+            <h4>Payroll Details</h4>
+            <div className="notification-detail-item">
+              <span className="detail-label">Employee:</span>
+              <span className="detail-value">{data.employeeName}</span>
+            </div>
+            <div className="notification-detail-item">
+              <span className="detail-label">Period:</span>
+              <span className="detail-value">{data.period}</span>
+            </div>
+            <div className="notification-detail-item">
+              <span className="detail-label">Current Amount:</span>
+              <span className="detail-value">${data.amount.toFixed(2)}</span>
+            </div>
+            <div className="notification-detail-item">
+              <span className="detail-label">Previous Amount:</span>
+              <span className="detail-value">${data.previousAmount.toFixed(2)}</span>
+            </div>
+            {selectedNotification.type === "discrepancy" && (
+              <div className="notification-detail-item">
+                <span className="detail-label">Discrepancy:</span>
+                <span className="detail-value discrepancy">
+                  ${data.discrepancy.toFixed(2)} ({((data.discrepancy / data.previousAmount) * 100).toFixed(2)}%)
+                </span>
+              </div>
+            )}
+          </div>
+        )
+      default:
+        return null
+    }
   }
 
   return (
     <div className="notifications-container">
       <div className="notifications-header">
         <h2>Notifications</h2>
-        <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+        <TabNavigation />
       </div>
 
       <div className="notifications-content">
-        {filteredNotifications.length === 0 ? (
+        {isLoading ? (
+          <div className="loading">Loading notifications...</div>
+        ) : filteredNotifications.length === 0 ? (
           <div className="no-notifications">No notifications found</div>
         ) : (
           <ul className="notifications-list">
@@ -321,16 +327,14 @@ const Notifications = () => {
                 <div className="notification-content">
                   <h3>{notification.title}</h3>
                   <p>{notification.message}</p>
-                  <span className="notification-date">
-                    {new Date(notification.date).toLocaleString()}
-                  </span>
+                  <span className="notification-date">{new Date(notification.date).toLocaleString()}</span>
                 </div>
                 <div className="notification-actions">
                   <button
                     className="action-button mark-read"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      markAsRead(notification.id);
+                      e.stopPropagation()
+                      markAsRead(notification.id)
                     }}
                   >
                     {notification.read ? "Marked as Read" : "Mark as Read"}
@@ -362,19 +366,14 @@ const Notifications = () => {
               </div>
               <div className="notification-detail-item">
                 <span className="detail-label">Date:</span>
-                <span className="detail-value">
-                  {new Date(selectedNotification.date).toLocaleString()}
-                </span>
+                <span className="detail-value">{new Date(selectedNotification.date).toLocaleString()}</span>
               </div>
 
-              <NotificationDetails notification={selectedNotification} />
+              <NotificationDetails />
             </div>
             <div className="notification-modal-actions">
               {selectedNotification.type === "payroll" && (
-                <button 
-                  className="action-button"
-                  onClick={() => sendEmail(selectedNotification)}
-                >
+                <button className="action-button" onClick={() => sendEmail(selectedNotification)}>
                   Send Email
                 </button>
               )}
@@ -386,7 +385,7 @@ const Notifications = () => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Notifications;
+export default Notifications

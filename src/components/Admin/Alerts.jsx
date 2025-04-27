@@ -1,129 +1,130 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import "../../styles/AdminStyles/Alerts.css";
+import React, { useState, useEffect } from "react"; 
+import "../../styles/AdminStyles/Alerts.css"
 
-const API_URL = "http://localhost:3001/api/admin";
+// Sample data
+// const sampleData = [
+//   {
+//     id: 1,
+//     employeeName: "John Smith",
+//     employeeId: "EMP001",
+//     department: "Accounting",
+//     allowedDays: 12,
+//     usedDays: 15,
+//     daysExceeded: 3,
+//     date: "04/15/2025",
+//   },
+//   {
+//     id: 2,
+//     employeeName: "Sarah Johnson",
+//     employeeId: "EMP002",
+//     department: "Human Resources",
+//     allowedDays: 12,
+//     usedDays: 18,
+//     daysExceeded: 6,
+//     date: "04/16/2025",
+//   },
+//   {
+//     id: 3,
+//     employeeName: "Michael Lee",
+//     employeeId: "EMP003",
+//     department: "IT",
+//     allowedDays: 15,
+//     usedDays: 16,
+//     daysExceeded: 1,
+//     date: "04/14/2025",
+//   },
+//   {
+//     id: 4,
+//     employeeName: "Emily Davis",
+//     employeeId: "EMP004",
+//     department: "Marketing",
+//     allowedDays: 12,
+//     usedDays: 17,
+//     daysExceeded: 5,
+//     date: "04/17/2025",
+//   },
+//   {
+//     id: 5,
+//     employeeName: "Robert Wilson",
+//     employeeId: "EMP005",
+//     department: "Sales",
+//     allowedDays: 12,
+//     usedDays: 16,
+//     daysExceeded: 4,
+//     date: "04/16/2025",
+//   },
+// ]
 
 const Alerts = () => {
   const [alerts, setAlerts] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: "daysExceeded", direction: "desc" });
   const [filter, setFilter] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [errorDetails, setErrorDetails] = useState("");
 
   useEffect(() => {
-    const fetchAlerts = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`${API_URL}/alerts`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+    fetch("http://localhost:3001/api/alerts")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch data");
         }
-        
-        const data = await response.json();
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Dữ liệu nhận được:", data);
         setAlerts(data);
-        setError(null);
-        setErrorDetails("");
-      } catch (err) {
-        console.error("Error fetching alerts:", err);
-        setError("Failed to load alerts");
-        setErrorDetails(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAlerts();
-  }, []);
-
-  const sortedAlerts = useMemo(() => {
-    if (!sortConfig.key) return alerts;
-    
-    return [...alerts].sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
-      
-      if (aValue < bValue) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  }, [alerts, sortConfig]);
-
-  const filteredAlerts = useMemo(() => {
-    if (!filter) return sortedAlerts;
-    const searchTerm = filter.toLowerCase();
-    
-    return sortedAlerts.filter(alert => 
-      alert.employeeName.toLowerCase().includes(searchTerm) ||
-      alert.employeeId.toLowerCase().includes(searchTerm) ||
-      alert.department.toLowerCase().includes(searchTerm)
-    );
-  }, [sortedAlerts, filter]);
-
-  const requestSort = useCallback((key) => {
-    setSortConfig(prevConfig => ({
-      key,
-      direction: prevConfig.key === key && prevConfig.direction === "asc" ? "desc" : "asc"
-    }));
-  }, []);
-
-  const dismissAlert = useCallback(async (id) => {
-    try {
-      const response = await fetch(`${API_URL}/alerts/${id}`, {
-        method: 'DELETE'
+      })
+      .catch((err) => {
+        console.error("Lỗi khi lấy dữ liệu:", err);
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to dismiss alert');
-      }
-      
-      setAlerts(prevAlerts => prevAlerts.filter(alert => alert.id !== id));
-    } catch (err) {
-      console.error('Error dismissing alert:', err);
-      setError("Failed to dismiss alert");
-      setErrorDetails(err.message);
-      // Show error toast/notification
-      alert('Failed to dismiss alert. Please try again.');
+  }, []);
+
+
+  // Sort alerts
+  const sortedAlerts = React.useMemo(() => {
+    const sortableAlerts = [...alerts]
+    if (sortConfig.key) {
+      sortableAlerts.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? -1 : 1
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? 1 : -1
+        }
+        return 0
+      })
     }
-  }, []);
+    return sortableAlerts
+  }, [alerts, sortConfig])
 
-  const getSeverityClass = useCallback((daysExceeded) => {
-    if (daysExceeded >= 5) return "critical";
-    if (daysExceeded >= 3) return "high";
-    return "medium";
-  }, []);
+  // Filter alerts
+  const filteredAlerts = React.useMemo(() => {
+    if (!filter) return sortedAlerts
+    return sortedAlerts.filter(
+      (alert) =>
+        alert.employeeName.toLowerCase().includes(filter.toLowerCase()) ||
+        alert.employeeId.toLowerCase().includes(filter.toLowerCase()) ||
+        alert.department.toLowerCase().includes(filter.toLowerCase()),
+    )
+  }, [sortedAlerts, filter])
 
-  if (isLoading) {
-    return (
-      <div className="leave-alerts-container">
-        <div className="leave-alerts-loading">
-          <div className="spinner"></div>
-          <p>Loading alerts...</p>
-        </div>
-      </div>
-    );
+  // Request sort
+  const requestSort = (key) => {
+    let direction = "asc"
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc"
+    }
+    setSortConfig({ key, direction })
   }
 
-  if (error) {
-    return (
-      <div className="leave-alerts-container">
-        <div className="leave-alerts-error">
-          <h3>{error}</h3>
-          {errorDetails && <p className="error-details">{errorDetails}</p>}
-          <button 
-            className="retry-button"
-            onClick={() => window.location.reload()}
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
+  // Dismiss alert
+  const dismissAlert = (id) => {
+    setAlerts(alerts.filter((alert) => alert.id !== id))
+  }
+
+  // Get severity class
+  const getSeverityClass = (daysExceeded) => {
+    if (daysExceeded >= 5) return "critical"
+    if (daysExceeded >= 3) return "high"
+    return "medium"
   }
 
   return (
@@ -140,22 +141,17 @@ const Alerts = () => {
           />
           <div className="leave-alerts-sort">
             <span>Sort by: </span>
-            <select 
-              onChange={(e) => requestSort(e.target.value)} 
-              value={sortConfig.key}
-            >
+            <select onChange={(e) => requestSort(e.target.value)} value={sortConfig.key}>
               <option value="daysExceeded">Days exceeded</option>
               <option value="employeeName">Employee name</option>
               <option value="department">Department</option>
               <option value="date">Date</option>
             </select>
             <button
-              onClick={() => setSortConfig(prev => ({
-                ...prev,
-                direction: prev.direction === "asc" ? "desc" : "asc"
-              }))}
+              onClick={() =>
+                setSortConfig({ ...sortConfig, direction: sortConfig.direction === "asc" ? "desc" : "asc" })
+              }
               className="leave-alerts-sort-direction"
-              aria-label="Toggle sort direction"
             >
               {sortConfig.direction === "asc" ? "↑" : "↓"}
             </button>
@@ -164,16 +160,11 @@ const Alerts = () => {
       </div>
 
       {filteredAlerts.length === 0 ? (
-        <div className="leave-alerts-empty">
-          {filter ? "No alerts match your search" : "No alerts found"}
-        </div>
+        <div className="leave-alerts-empty">No alerts found</div>
       ) : (
         <div className="leave-alerts-list">
           {filteredAlerts.map((alert) => (
-            <div 
-              key={alert.id} 
-              className={`leave-alert-item ${getSeverityClass(alert.daysExceeded)}`}
-            >
+            <div key={alert.id} className={`leave-alert-item ${getSeverityClass(alert.daysExceeded)}`}>
               <div className="leave-alert-content">
                 <div className="leave-alert-employee">
                   <h3>{alert.employeeName}</h3>
@@ -198,12 +189,7 @@ const Alerts = () => {
                   <span>Updated: {alert.date}</span>
                 </div>
               </div>
-              <button 
-                className="leave-alert-dismiss" 
-                onClick={() => dismissAlert(alert.id)}
-                title="Dismiss alert"
-                aria-label="Dismiss alert"
-              >
+              <button className="leave-alert-dismiss" onClick={() => dismissAlert(alert.id)} title="Mark as read">
                 ×
               </button>
             </div>
@@ -222,7 +208,7 @@ const Alerts = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Alerts;
+export default Alerts

@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { mysqlPool } = require("./mysqlConfig");
-const promisePool = mysqlPool.promise();
-const { conn, sql } = require("./sqlServerConfig");
+const mysql = require("../config/mysql");
+const { conn, sql } = require("../config/mssql");
 const nodemailer = require("nodemailer");
 
 const fetchSQLServerData = async (query) => {
@@ -12,7 +11,7 @@ const fetchSQLServerData = async (query) => {
 };
 
 const fetchMySQLData = async (query, params = []) => {
-  const [rows] = await promisePool.query(query, params);
+  const [rows] = await mysql.query(query, params);
   return rows;
 };
 
@@ -385,88 +384,6 @@ router.delete("/delete-alerts/:id", async (req, res) => {
   } catch (err) {
     console.error("Error deleting alert:", err);
     res.status(500).json({ error: "Failed to delete alert" });
-  }
-});
-
-// Mock data for alerts
-const alertsData = [
-  {
-    id: 1,
-    employeeName: "John Smith",
-    employeeId: "EMP001",
-    department: "IT",
-    allowedDays: 12,
-    usedDays: 15,
-    daysExceeded: 3,
-    date: "04/15/2025",
-  },
-  {
-    id: 2,
-    employeeName: "Sarah Johnson",
-    employeeId: "EMP002",
-    department: "HR",
-    allowedDays: 12,
-    usedDays: 18,
-    daysExceeded: 6,
-    date: "04/16/2025",
-  },
-  {
-    id: 3,
-    employeeName: "Michael Lee",
-    employeeId: "EMP003",
-    department: "Finance",
-    allowedDays: 15,
-    usedDays: 16,
-    daysExceeded: 1,
-    date: "04/14/2025",
-  },
-  {
-    id: 4,
-    employeeName: "Emily Davis",
-    employeeId: "EMP004",
-    department: "Marketing",
-    allowedDays: 12,
-    usedDays: 17,
-    daysExceeded: 5,
-    date: "04/17/2025",
-  },
-  {
-    id: 5,
-    employeeName: "Robert Wilson",
-    employeeId: "EMP005",
-    department: "Sales",
-    allowedDays: 12,
-    usedDays: 16,
-    daysExceeded: 4,
-    date: "04/16/2025",
-  },
-];
-
-// Get all alerts
-router.get("/alerts", (req, res) => {
-  try {
-    res.json(alertsData);
-  } catch (error) {
-    console.error("Error fetching alerts:", error);
-    res.status(500).json({ error: "Failed to fetch alerts" });
-  }
-});
-
-// Delete an alert
-router.delete("/alerts/:id", (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    const index = alertsData.findIndex((alert) => alert.id === id);
-
-    if (index === -1) {
-      return res.status(404).json({ error: "Alert not found" });
-    }
-
-    alertsData.splice(index, 1);
-    res.json({ message: "Alert dismissed successfully" });
-  } catch (error) {
-    console.error("Error dismissing alert:", error);
-    res.status(500).json({ error: "Failed to dismiss alert" });
   }
 });
 
