@@ -1,41 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/EmployeeStyles/LeaveDays_WorkStatus.css';
+import axios from 'axios';
 
-// Mock data for leave days
-const mockLeaveData = {
-    annual: { total: 15, used: 7, pending: 2 },
-    sick: { total: 10, used: 3, pending: 0 },
-    personal: { total: 5, used: 1, pending: 1 },
-    unpaid: { total: 30, used: 0, pending: 0 }
-};
+// Hàm chuẩn hóa dữ liệu leave/attendance cho cả hai DB
+function normalizeLeaveWorkData(apiData) {
+    // Nghỉ phép
+    const leaveData = apiData.leaveData || apiData.leave || apiData.LeaveData || {};
+    // Chấm công
+    const workStatus = apiData.workStatus || apiData.attendance || apiData.WorkStatus || {};
+    // Lịch sử chấm công
+    const attendanceHistory = apiData.attendanceHistory || apiData.history || apiData.AttendanceHistory || [];
+    return {
+        leaveData: {
+            annual: leaveData.annual || leaveData.Annual || { total: 0, used: 0, pending: 0 },
+            sick: leaveData.sick || leaveData.Sick || { total: 0, used: 0, pending: 0 },
+            personal: leaveData.personal || leaveData.Personal || { total: 0, used: 0, pending: 0 },
+            unpaid: leaveData.unpaid || leaveData.Unpaid || { total: 0, used: 0, pending: 0 }
+        },
+        workStatus: {
+            currentMonth: workStatus.currentMonth || workStatus.CurrentMonth || {
+                workDays: 0, presentDays: 0, lateDays: 0, absentDays: 0, attendanceRate: 0, onTimeRate: 0
+            },
+            currentWeek: workStatus.currentWeek || workStatus.CurrentWeek || {
+                workHours: 0, completedHours: 0, progress: 0
+            }
+        },
+        attendanceHistory: attendanceHistory.map(item => ({
+            date: item.date || item.Date || '',
+            checkIn: item.checkIn || item.CheckIn || '',
+            checkOut: item.checkOut || item.CheckOut || '',
+            status: item.status || item.Status || ''
+        }))
+    };
+}
 
-// Mock data for work status
-const mockWorkStatus = {
-    currentMonth: {
-        workDays: 22,
-        presentDays: 18,
-        lateDays: 2,
-        absentDays: 2,
-        attendanceRate: 81.8,
-        onTimeRate: 90.0
-    },
-    currentWeek: {
-        workHours: 40,
-        completedHours: 32,
-        progress: 80
-    }
-};
-
-// Mock data for attendance history
-const mockAttendanceHistory = [
-    { date: '01/06/2023', checkIn: '08:02', checkOut: '17:05', status: 'On Time' },
-    { date: '02/06/2023', checkIn: '08:15', checkOut: '17:10', status: 'Late' },
-    { date: '03/06/2023', checkIn: '07:55', checkOut: '17:00', status: 'On Time' },
-    { date: '06/06/2023', checkIn: '08:00', checkOut: '17:15', status: 'On Time' },
-    { date: '07/06/2023', checkIn: '08:30', checkOut: '17:05', status: 'Late' },
-    { date: '08/06/2023', checkIn: '07:50', checkOut: '17:00', status: 'On Time' },
-    { date: '09/06/2023', checkIn: '08:05', checkOut: '17:10', status: 'On Time' }
-];
+const API_URL = 'http://localhost:3001/api/leave-work-status';
 
 const LeaveDays_WorkStatus = () => {
     const [activeTab, setActiveTab] = useState('leave');
@@ -43,20 +42,29 @@ const LeaveDays_WorkStatus = () => {
     const [workStatus, setWorkStatus] = useState(null);
     const [attendanceHistory, setAttendanceHistory] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Simulate API calls to fetch data
         const fetchData = async () => {
-            setLoading(true);
-            // In a real app, these would be API calls
-            setTimeout(() => {
-                setLeaveData(mockLeaveData);
-                setWorkStatus(mockWorkStatus);
-                setAttendanceHistory(mockAttendanceHistory);
+            try {
+                setLoading(true);
+                setError(null);
+                const token = localStorage.getItem('token');
+                const response = await axios.get(API_URL, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const data = normalizeLeaveWorkData(response.data);
+                setLeaveData(data.leaveData);
+                setWorkStatus(data.workStatus);
+                setAttendanceHistory(data.attendanceHistory);
+            } catch (err) {
+                setError('Failed to load leave/work status data. Please try again later.');
+            } finally {
                 setLoading(false);
-            }, 800);
+            }
         };
-
         fetchData();
     }, []);
 
@@ -72,7 +80,7 @@ const LeaveDays_WorkStatus = () => {
 
     // Format percentage for display
     const formatPercentage = (value) => {
-        return value.toFixed(1);
+        return value ? value.toFixed(1) : '0.0';
     };
 
     if (loading) {
@@ -80,6 +88,15 @@ const LeaveDays_WorkStatus = () => {
             <div className="ldws-loading">
                 <div className="ldws-loading-spinner"></div>
                 <p>Đang tải dữ liệu...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="ldws-loading">
+                <div className="ldws-loading-spinner"></div>
+                <p>{error}</p>
             </div>
         );
     }

@@ -4,7 +4,7 @@ import Header from "../components/General/Header";
 import "../styles/GeneralStyles/Layout.css";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { menuConfig, settingItems } from "../components/Employee/EmployeeConfig"
-import MyProfile from "../components/Employee/MyProfile";
+
 
 const LayoutEmployee = () => {
     const location = useLocation();
@@ -39,17 +39,7 @@ const LayoutEmployee = () => {
             <div className="main-content">
                 <Header></Header>
                 <div className="content-body">
-
-                    {
-                        location.pathname === "/employee/my-payroll" ||
-                            location.pathname === "/employee/leave-work" ||
-                            location.pathname === "/employee/notifications" ||
-                            location.pathname === "/employee/profile" ? (
-                            <Outlet />
-                        ) : (
-                            <MyProfile />
-                        )
-                    }
+                    <Outlet />
                 </div>
             </div>
         </div>

@@ -27,7 +27,7 @@ export const menuConfig = [
         path: "/employee/leave-work"
     },
     {
-        id: "Notifications",
+        id: "notifications",
         icon: FaBell,
         text: "Notifications",
         path: "/employee/notifications",

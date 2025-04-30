@@ -326,6 +326,50 @@ router.delete("/delete-alerts/:id", async (req, res) => {
   }
 });
 
+// Get simple departments list
+router.get("/departments-list", async (req, res) => {
+  try {
+    const sqlPool = await conn;
+    const result = await sqlPool.request().query(`
+      SELECT DepartmentID, DepartmentName
+      FROM Departments
+      ORDER BY DepartmentName
+    `);
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+  } catch (error) {
+    console.error("Error fetching departments list:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to fetch departments list" 
+    });
+  }
+});
+
+// Get simple positions list
+router.get("/positions-list", async (req, res) => {
+  try {
+    const sqlPool = await conn;
+    const result = await sqlPool.request().query(`
+      SELECT PositionID, PositionName, DepartmentID
+      FROM Positions
+      ORDER BY PositionName
+    `);
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+  } catch (error) {
+    console.error("Error fetching positions list:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to fetch positions list" 
+    });
+  }
+});
+
 // router.get("/test", async (req, res) => {
 //   const pool = await conn;
 //   const results = await pool.request().query("SELECT * FROM Employees");
