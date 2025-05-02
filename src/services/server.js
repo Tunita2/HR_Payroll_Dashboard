@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 // Routes
 app.use("/api/admin", AdminAPI);
 app.use("/api/payroll", PayrollAPI);
-app.use("/api/admin", EmployeeAPI);
+app.use("/api/employee", EmployeeAPI);
 app.use("/api/auth", AuthAPI);
 
 app.listen(PORT, () => {

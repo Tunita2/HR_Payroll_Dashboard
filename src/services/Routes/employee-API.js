@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { conn: sqlConn, sql } = require("./sqlServerConfig");
-const { mysqlPool } = require("../mysqlConfig");
+const { conn: sqlConn, sql } = require("../config/mssql");
+const { mysqlPool } = require("../config/mysql");
 const { verifyToken } = require("../Auth/auth-middleware");
 
 // Helper: chọn DB theo role hoặc query param

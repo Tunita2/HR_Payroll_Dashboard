@@ -3,7 +3,7 @@ const router = express.Router();
 const mysql = require("../config/mysql");
 const { conn, sql } = require("../config/mssql");
 const nodemailer = require("nodemailer");
-const { verifyToken } = require("./auth-middleware");
+const { verifyToken } = require("../Auth/auth-middleware");
 
 // Middleware kiểm tra quyền admin
 function verifyAdmin(req, res, next) {
