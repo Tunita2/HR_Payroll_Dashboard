@@ -176,6 +176,26 @@ router.get("/payroll", verifyToken, async (req, res) => {
 
             console.log(`Found ${results.length} payroll records`);
 
+            // Lấy thông tin attendance từ MySQL
+            let attendanceData = [];
+            try {
+                const [attendanceResults] = await mysqlPool.query(
+                    `SELECT AttendanceID, EmployeeID, WorkDays, AbsentDays, LeaveDays, AttendanceMonth, CreatedAt
+                     FROM attendance
+                     WHERE EmployeeID = ?
+                     ORDER BY AttendanceMonth DESC`,
+                    [req.user.employeeId]
+                );
+
+                if (attendanceResults.length > 0) {
+                    attendanceData = attendanceResults;
+                    console.log(`Found ${attendanceData.length} attendance records for employee ID: ${req.user.employeeId}`);
+                }
+            } catch (attendanceErr) {
+                console.error('Error fetching attendance data:', attendanceErr);
+                // Không trả về lỗi, chỉ log lỗi và tiếp tục
+            }
+
             // Lấy thông tin dividend từ SQL Server
             let dividendData = [];
             try {
@@ -200,7 +220,8 @@ router.get("/payroll", verifyToken, async (req, res) => {
             res.json({
                 payrollHistory: results || [],
                 currentPayroll: results && results.length > 0 ? results[0] : null,
-                dividendData: dividendData || []
+                dividendData: dividendData || [],
+                attendanceData: attendanceData || []
             });
         } catch (queryErr) {
             console.error('MySQL query error:', queryErr);

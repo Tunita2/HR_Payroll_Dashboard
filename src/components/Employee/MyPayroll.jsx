@@ -13,6 +13,8 @@ function normalizePayrollData(apiData) {
     const history = apiData.payrollHistory || apiData.history || [];
     // Dữ liệu dividend
     const dividend = apiData.dividendData || {};
+    // Dữ liệu attendance
+    const attendance = apiData.attendanceData || [];
 
     // Chuẩn hóa lương hiện tại
     const normalizedCurrent = {
@@ -31,6 +33,8 @@ function normalizePayrollData(apiData) {
     const normalizedHistory = history.map((item, idx) => ({
         id: item.SalaryID || idx + 1,
         month: item.SalaryMonth ? new Date(item.SalaryMonth).toLocaleDateString('vi-VN', { month: 'long' }) : '',
+        // Thêm thông tin tháng và năm dạng số để lọc
+        monthNumber: item.SalaryMonth ? new Date(item.SalaryMonth).getMonth() + 1 : 0, // 1-12
         year: item.SalaryMonth ? new Date(item.SalaryMonth).getFullYear() : '',
         netSalary: item.NetSalary || 0,
         baseSalary: item.BaseSalary || 0,
@@ -54,10 +58,26 @@ function normalizePayrollData(apiData) {
         }))
         : [];
 
+    // Chuẩn hóa dữ liệu attendance
+    const normalizedAttendance = Array.isArray(attendance) && attendance.length > 0
+        ? attendance.map(att => ({
+            id: att.AttendanceID,
+            workDays: att.WorkDays || 0,
+            absentDays: att.AbsentDays || 0,
+            leaveDays: att.LeaveDays || 0,
+            month: att.AttendanceMonth ? new Date(att.AttendanceMonth).getMonth() + 1 : 0, // 1-12
+            year: att.AttendanceMonth ? new Date(att.AttendanceMonth).getFullYear() : 0,
+            monthName: att.AttendanceMonth ? new Date(att.AttendanceMonth).toLocaleDateString('vi-VN', { month: 'long' }) : '',
+            date: att.AttendanceMonth ? new Date(att.AttendanceMonth).toLocaleDateString('vi-VN') : '',
+            createdAt: att.CreatedAt ? new Date(att.CreatedAt).toLocaleDateString('vi-VN') : ''
+        }))
+        : [];
+
     return {
         currentPayroll: normalizedCurrent,
         payrollHistory: normalizedHistory,
-        dividendData: normalizedDividends
+        dividendData: normalizedDividends,
+        attendanceData: normalizedAttendance
     };
 }
 
@@ -68,10 +88,17 @@ const MyPayroll = () => {
     const [selectedPayslip, setSelectedPayslip] = useState(null);
     const [currentPayroll, setCurrentPayroll] = useState(null);
     const [payrollHistory, setPayrollHistory] = useState([]);
+    const [filteredPayroll, setFilteredPayroll] = useState(null);
     const [allDividendData, setAllDividendData] = useState([]);
     const [filteredDividendData, setFilteredDividendData] = useState([]);
+    const [allAttendanceData, setAllAttendanceData] = useState([]);
+    const [filteredAttendanceData, setFilteredAttendanceData] = useState([]);
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Default to current month (1-12)
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [yearRange, setYearRange] = useState({
+        start: new Date().getFullYear() - 10,
+        end: new Date().getFullYear() + 9
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -87,6 +114,32 @@ const MyPayroll = () => {
             setFilteredDividendData([]);
         }
     }, [allDividendData, selectedMonth, selectedYear]);
+
+    // Filter attendance data when month or year changes
+    useEffect(() => {
+        if (allAttendanceData.length > 0) {
+            const filtered = allAttendanceData.filter(
+                attendance => attendance.month === selectedMonth && attendance.year === selectedYear
+            );
+            setFilteredAttendanceData(filtered);
+            console.log(`Filtered attendance for month ${selectedMonth}/${selectedYear}: ${filtered.length} records`);
+        } else {
+            setFilteredAttendanceData([]);
+        }
+    }, [allAttendanceData, selectedMonth, selectedYear]);
+
+    // Filter payroll data when month or year changes
+    useEffect(() => {
+        if (payrollHistory.length > 0) {
+            const filtered = payrollHistory.find(
+                payroll => payroll.monthNumber === selectedMonth && payroll.year === selectedYear
+            );
+            setFilteredPayroll(filtered || null);
+            console.log(`Filtered payroll for month ${selectedMonth}/${selectedYear}: ${filtered ? 'Found' : 'Not found'}`);
+        } else {
+            setFilteredPayroll(null);
+        }
+    }, [payrollHistory, selectedMonth, selectedYear]);
 
     useEffect(() => {
         const fetchPayroll = async () => {
@@ -117,9 +170,16 @@ const MyPayroll = () => {
                 }
 
                 const data = normalizePayrollData(response.data);
+                console.log('Normalized payroll data:', data);
+                console.log('Payroll history with month numbers:', data.payrollHistory.map(p => ({
+                    month: p.month,
+                    monthNumber: p.monthNumber,
+                    year: p.year
+                })));
                 setCurrentPayroll(data.currentPayroll);
                 setPayrollHistory(data.payrollHistory);
                 setAllDividendData(data.dividendData);
+                setAllAttendanceData(data.attendanceData);
             } catch (err) {
                 console.error('Error fetching payroll data:', err);
                 if (err.response) {
@@ -150,6 +210,24 @@ const MyPayroll = () => {
 
     const closePayslipModal = () => {
         setSelectedPayslip(null);
+    };
+
+    // Hàm để chuyển đến phạm vi năm trước
+    const handlePreviousYearRange = () => {
+        const rangeSize = yearRange.end - yearRange.start + 1;
+        setYearRange({
+            start: yearRange.start - rangeSize,
+            end: yearRange.end - rangeSize
+        });
+    };
+
+    // Hàm để chuyển đến phạm vi năm sau
+    const handleNextYearRange = () => {
+        const rangeSize = yearRange.end - yearRange.start + 1;
+        setYearRange({
+            start: yearRange.start + rangeSize,
+            end: yearRange.end + rangeSize
+        });
     };
 
     if (loading) {
@@ -262,19 +340,75 @@ const MyPayroll = () => {
                     </div>
                 </div>
 
-                <div className="payroll-tabs">
-                    <button
-                        className={`payroll-tab ${activeTab === 'current' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('current')}
-                    >
-                        Current Payroll
-                    </button>
-                    <button
-                        className={`payroll-tab ${activeTab === 'history' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('history')}
-                    >
-                        Payroll History
-                    </button>
+                <div className="payroll-filter-container">
+                    <div className="month-filter">
+                        <label htmlFor="payroll-month">Month:</label>
+                        <select
+                            id="payroll-month"
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                            className="payroll-select"
+                        >
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+
+                        <div className="year-selector">
+                            <button
+                                className="year-nav-btn"
+                                onClick={handlePreviousYearRange}
+                                title="Previous years"
+                            >
+                                &lt;&lt;
+                            </button>
+
+                            <label htmlFor="payroll-year" style={{ marginLeft: '10px' }}>Year:</label>
+                            <select
+                                id="payroll-year"
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                className="payroll-select"
+                            >
+                                {[...Array(yearRange.end - yearRange.start + 1)].map((_, i) => {
+                                    const year = yearRange.start + i;
+                                    return <option key={year} value={year}>{year}</option>;
+                                })}
+                            </select>
+
+                            <button
+                                className="year-nav-btn"
+                                onClick={handleNextYearRange}
+                                title="Next years"
+                            >
+                                &gt;&gt;
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="payroll-tabs">
+                        <button
+                            className={`payroll-tab ${activeTab === 'current' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('current')}
+                        >
+                            Payroll Details
+                        </button>
+                        <button
+                            className={`payroll-tab ${activeTab === 'history' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('history')}
+                        >
+                            Payroll History
+                        </button>
+                    </div>
                 </div>
 
                 <div className="payroll-content">
@@ -283,22 +417,28 @@ const MyPayroll = () => {
                             <div className="payroll-section summary-section">
                                 <h2 className="section-title">
                                     <FaMoneyBillWave className="section-icon" />
-                                    Current Salary Summary
+                                    Salary Summary
                                 </h2>
-                                <div className="salary-summary">
-                                    <div className="summary-period">
-                                        <FaCalendarAlt className="summary-icon" />
-                                        <span>{currentPayroll?.month} {currentPayroll?.year}</span>
+                                {filteredPayroll ? (
+                                    <div className="salary-summary">
+                                        <div className="summary-period">
+                                            <FaCalendarAlt className="summary-icon" />
+                                            <span>{filteredPayroll.month} {filteredPayroll.year}</span>
+                                        </div>
+                                        <div className="summary-amount">
+                                            <h3>${filteredPayroll.netSalary?.toLocaleString()}</h3>
+                                            <span>Net Salary</span>
+                                        </div>
+                                        <button className="download-btn" onClick={handleDownloadPayslip}>
+                                            <FaDownload className="download-icon" />
+                                            Download Payslip
+                                        </button>
                                     </div>
-                                    <div className="summary-amount">
-                                        <h3>${currentPayroll?.salary?.netSalary?.toLocaleString()}</h3>
-                                        <span>Net Salary</span>
+                                ) : (
+                                    <div className="no-data-message">
+                                        <p>No salary data available for {new Date(selectedYear, selectedMonth - 1).toLocaleDateString('vi-VN', { month: 'long' })} {selectedYear}</p>
                                     </div>
-                                    <button className="download-btn" onClick={handleDownloadPayslip}>
-                                        <FaDownload className="download-icon" />
-                                        Download Payslip
-                                    </button>
-                                </div>
+                                )}
                             </div>
 
                             <div className="payroll-details-container">
@@ -307,20 +447,26 @@ const MyPayroll = () => {
                                         <FaChartLine className="section-icon" />
                                         Earnings
                                     </h2>
-                                    <div className="payroll-details">
-                                        <div className="detail-row">
-                                            <span className="detail-label">Basic Salary:</span>
-                                            <span className="detail-value">${currentPayroll?.salary?.basic?.toLocaleString()}</span>
+                                    {filteredPayroll ? (
+                                        <div className="payroll-details">
+                                            <div className="detail-row">
+                                                <span className="detail-label">Basic Salary:</span>
+                                                <span className="detail-value">${filteredPayroll.baseSalary?.toLocaleString()}</span>
+                                            </div>
+                                            <div className="detail-row">
+                                                <span className="detail-label">Bonus:</span>
+                                                <span className="detail-value">${filteredPayroll.bonus?.toLocaleString()}</span>
+                                            </div>
+                                            <div className="detail-row total-row">
+                                                <span className="detail-label">Gross Salary:</span>
+                                                <span className="detail-value">${((Number(filteredPayroll.baseSalary) || 0) + (Number(filteredPayroll.bonus) || 0)).toLocaleString()}</span>
+                                            </div>
                                         </div>
-                                        <div className="detail-row">
-                                            <span className="detail-label">Bonus:</span>
-                                            <span className="detail-value">${currentPayroll?.salary?.bonus?.toLocaleString()}</span>
+                                    ) : (
+                                        <div className="no-data-message">
+                                            <p>No earnings data available for this period</p>
                                         </div>
-                                        <div className="detail-row total-row">
-                                            <span className="detail-label">Gross Salary:</span>
-                                            <span className="detail-value">${((Number(currentPayroll?.salary?.basic) || 0) + (Number(currentPayroll?.salary?.bonus) || 0)).toLocaleString()}</span>
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
 
                                 <div className="payroll-section deductions-section">
@@ -328,13 +474,63 @@ const MyPayroll = () => {
                                         <FaMoneyBillWave className="section-icon" />
                                         Deductions
                                     </h2>
-                                    <div className="payroll-details">
-                                        <div className="detail-row">
-                                            <span className="detail-label">Total Deductions:</span>
-                                            <span className="detail-value">-${currentPayroll?.salary?.deductions?.toLocaleString()}</span>
+                                    {filteredPayroll ? (
+                                        <div className="payroll-details">
+                                            <div className="detail-row">
+                                                <span className="detail-label">Total Deductions:</span>
+                                                <span className="detail-value">-${filteredPayroll.deductions?.toLocaleString()}</span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="no-data-message">
+                                            <p>No deductions data available for this period</p>
+                                        </div>
+                                    )}
                                 </div>
+                            </div>
+
+                            {/* Attendance Section */}
+                            <div className="payroll-section attendance-section">
+                                <h2 className="section-title">
+                                    <FaCalendarAlt className="section-icon" />
+                                    Attendance Information
+                                </h2>
+
+                                {filteredAttendanceData.length > 0 ? (
+                                    <>
+                                        {filteredAttendanceData.map((attendance, index) => (
+                                            <div key={attendance.id || index} className="attendance-details">
+                                                <div className="attendance-summary">
+                                                    <div className="attendance-period">
+                                                        <span>Period: {attendance.date}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="attendance-data">
+                                                    <div className="detail-row">
+                                                        <span className="detail-label">Work Days:</span>
+                                                        <span className="detail-value">{attendance.workDays} days</span>
+                                                    </div>
+                                                    <div className="detail-row">
+                                                        <span className="detail-label">Absent Days:</span>
+                                                        <span className="detail-value">{attendance.absentDays} days</span>
+                                                    </div>
+                                                    <div className="detail-row">
+                                                        <span className="detail-label">Leave Days:</span>
+                                                        <span className="detail-value">{attendance.leaveDays} days</span>
+                                                    </div>
+                                                    <div className="detail-row total-row">
+                                                        <span className="detail-label">Total Days:</span>
+                                                        <span className="detail-value">{attendance.workDays + attendance.absentDays + attendance.leaveDays} days</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </>
+                                ) : (
+                                    <div className="no-attendance-data">
+                                        <p>No attendance data available for {selectedMonth}/{selectedYear}</p>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="payroll-section payment-section">
@@ -343,47 +539,18 @@ const MyPayroll = () => {
                                     Payment Information
                                 </h2>
 
-                                <div className="dividend-filter">
-                                    <label htmlFor="dividend-month">Dividend Month:</label>
-                                    <select
-                                        id="dividend-month"
-                                        value={selectedMonth}
-                                        onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                                        className="dividend-select"
-                                    >
-                                        <option value="1">January</option>
-                                        <option value="2">February</option>
-                                        <option value="3">March</option>
-                                        <option value="4">April</option>
-                                        <option value="5">May</option>
-                                        <option value="6">June</option>
-                                        <option value="7">July</option>
-                                        <option value="8">August</option>
-                                        <option value="9">September</option>
-                                        <option value="10">October</option>
-                                        <option value="11">November</option>
-                                        <option value="12">December</option>
-                                    </select>
-
-                                    <label htmlFor="dividend-year" style={{ marginLeft: '10px' }}>Year:</label>
-                                    <select
-                                        id="dividend-year"
-                                        value={selectedYear}
-                                        onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                        className="dividend-select"
-                                    >
-                                        {[...Array(5)].map((_, i) => {
-                                            const year = new Date().getFullYear() - 2 + i;
-                                            return <option key={year} value={year}>{year}</option>;
-                                        })}
-                                    </select>
-                                </div>
-
                                 <div className="payroll-details">
-                                    <div className="detail-row">
-                                        <span className="detail-label">Net Salary:</span>
-                                        <span className="detail-value">${currentPayroll?.salary?.netSalary?.toLocaleString()}</span>
-                                    </div>
+                                    {filteredPayroll ? (
+                                        <div className="detail-row">
+                                            <span className="detail-label">Net Salary:</span>
+                                            <span className="detail-value">${filteredPayroll.netSalary?.toLocaleString()}</span>
+                                        </div>
+                                    ) : (
+                                        <div className="detail-row">
+                                            <span className="detail-label">Net Salary:</span>
+                                            <span className="detail-value">No salary data for this period</span>
+                                        </div>
+                                    )}
 
                                     {filteredDividendData.length > 0 ? (
                                         <>
@@ -403,14 +570,21 @@ const MyPayroll = () => {
                                     ) : (
                                         <div className="detail-row">
                                             <span className="detail-label">Dividend:</span>
-                                            <span className="detail-value">No dividend data for {selectedMonth}/{selectedYear}</span>
+                                            <span className="detail-value">No dividend data for this period</span>
                                         </div>
                                     )}
 
-                                    <div className="detail-row">
-                                        <span className="detail-label">Created Date:</span>
-                                        <span className="detail-value">{currentPayroll?.createdAt}</span>
-                                    </div>
+                                    {filteredPayroll ? (
+                                        <div className="detail-row">
+                                            <span className="detail-label">Created Date:</span>
+                                            <span className="detail-value">{filteredPayroll.createdAt}</span>
+                                        </div>
+                                    ) : (
+                                        <div className="detail-row">
+                                            <span className="detail-label">Created Date:</span>
+                                            <span className="detail-value">N/A</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -527,6 +701,36 @@ const MyPayroll = () => {
                                         <span className="summary-label">Created Date:</span>
                                         <span className="summary-value">{selectedPayslip.createdAt}</span>
                                     </div>
+
+                                    {/* Attendance data in modal */}
+                                    {filteredAttendanceData.length > 0 && (
+                                        <>
+                                            <div className="payslip-summary-item" style={{ gridColumn: "1 / -1", marginTop: "20px" }}>
+                                                <span className="summary-label" style={{ fontSize: "16px", fontWeight: "600" }}>Attendance Information</span>
+                                            </div>
+
+                                            {filteredAttendanceData.map((attendance, index) => (
+                                                <React.Fragment key={attendance.id || index}>
+                                                    <div className="payslip-summary-item">
+                                                        <span className="summary-label">Work Days:</span>
+                                                        <span className="summary-value">{attendance.workDays} days</span>
+                                                    </div>
+                                                    <div className="payslip-summary-item">
+                                                        <span className="summary-label">Absent Days:</span>
+                                                        <span className="summary-value">{attendance.absentDays} days</span>
+                                                    </div>
+                                                    <div className="payslip-summary-item">
+                                                        <span className="summary-label">Leave Days:</span>
+                                                        <span className="summary-value">{attendance.leaveDays} days</span>
+                                                    </div>
+                                                    <div className="payslip-summary-item">
+                                                        <span className="summary-label">Total Days:</span>
+                                                        <span className="summary-value">{attendance.workDays + attendance.absentDays + attendance.leaveDays} days</span>
+                                                    </div>
+                                                </React.Fragment>
+                                            ))}
+                                        </>
+                                    )}
                                 </div>
                                 <p className="payslip-note">
                                     For detailed information about this payslip, please contact the HR department.
