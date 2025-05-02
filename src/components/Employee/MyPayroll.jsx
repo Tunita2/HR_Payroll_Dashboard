@@ -5,50 +5,45 @@ import { FaFileInvoiceDollar, FaCalendarAlt, FaMoneyBillWave, FaDownload, FaHist
 import "../../styles/EmployeeStyles/MyPayroll.css";
 import axios from 'axios';
 
-// Hàm chuẩn hóa dữ liệu payroll cho cả hai DB
+// Hàm chuẩn hóa dữ liệu payroll cho cả hai DB - đã cập nhật theo schema mới
 function normalizePayrollData(apiData) {
     // Dữ liệu lương hiện tại
     const current = apiData.currentPayroll || apiData.current || {};
     // Dữ liệu lịch sử lương
     const history = apiData.payrollHistory || apiData.history || [];
+
     // Chuẩn hóa lương hiện tại
     const normalizedCurrent = {
-        month: current.month || current.SalaryMonth || '',
-        year: current.year || (current.SalaryMonth ? new Date(current.SalaryMonth).getFullYear() : ''),
+        month: current.SalaryMonth ? new Date(current.SalaryMonth).toLocaleDateString('vi-VN', { month: 'long' }) : '',
+        year: current.SalaryMonth ? new Date(current.SalaryMonth).getFullYear() : '',
         salary: {
-            basic: current.BaseSalary || current.basic || 0,
-            allowances: current.Allowances || current.allowances || 0,
-            overtime: current.Overtime || current.overtime || 0,
-            bonus: current.Bonus || current.bonus || 0,
-            grossSalary: current.GrossSalary || current.grossSalary || 0,
-            deductions: {
-                tax: current.Tax || (current.deductions ? current.deductions.tax : 0) || 0,
-                insurance: current.Insurance || (current.deductions ? current.deductions.insurance : 0) || 0,
-                pension: current.Pension || (current.deductions ? current.deductions.pension : 0) || 0,
-                other: current.OtherDeductions || (current.deductions ? current.deductions.other : 0) || 0
-            },
-            netSalary: current.NetSalary || current.netSalary || 0
+            basic: current.BaseSalary || 0,
+            bonus: current.Bonus || 0,
+            deductions: current.Deductions || 0,
+            netSalary: current.NetSalary || 0
         },
-        paymentDate: current.PaymentDate || current.paymentDate || '',
-        paymentMethod: current.PaymentMethod || current.paymentMethod || '',
-        accountNumber: current.AccountNumber || current.accountNumber || ''
+        createdAt: current.CreatedAt || ''
     };
+
     // Chuẩn hóa lịch sử lương
     const normalizedHistory = history.map((item, idx) => ({
-        id: item.id || item.SalaryID || idx + 1,
-        month: item.month || item.SalaryMonth || '',
-        year: item.year || (item.SalaryMonth ? new Date(item.SalaryMonth).getFullYear() : ''),
-        netSalary: item.NetSalary || item.netSalary || 0,
-        paymentDate: item.PaymentDate || item.paymentDate || '',
-        status: item.Status || item.status || 'Paid'
+        id: item.SalaryID || idx + 1,
+        month: item.SalaryMonth ? new Date(item.SalaryMonth).toLocaleDateString('vi-VN', { month: 'long' }) : '',
+        year: item.SalaryMonth ? new Date(item.SalaryMonth).getFullYear() : '',
+        netSalary: item.NetSalary || 0,
+        baseSalary: item.BaseSalary || 0,
+        bonus: item.Bonus || 0,
+        deductions: item.Deductions || 0,
+        createdAt: item.CreatedAt ? new Date(item.CreatedAt).toLocaleDateString('vi-VN') : ''
     }));
+
     return {
         currentPayroll: normalizedCurrent,
         payrollHistory: normalizedHistory
     };
 }
 
-const API_URL = 'http://localhost:3001/api/payroll';
+const API_URL = 'http://localhost:3001/api/employee/payroll';
 
 const MyPayroll = () => {
     const [activeTab, setActiveTab] = useState('current');
@@ -64,16 +59,43 @@ const MyPayroll = () => {
                 setLoading(true);
                 setError(null);
                 const token = localStorage.getItem('token');
+
+                console.log('Fetching payroll data from:', API_URL);
+                console.log('Using token:', token ? 'Token exists' : 'No token found');
+
                 const response = await axios.get(API_URL, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
+
+                console.log('Payroll API response:', response.data);
+
+                // Check if we have valid data
+                if (!response.data || (Array.isArray(response.data.payrollHistory) && response.data.payrollHistory.length === 0)) {
+                    console.log('No payroll data found');
+                    setCurrentPayroll(null);
+                    setPayrollHistory([]);
+                    setError('No payroll data available for your account.');
+                    setLoading(false);
+                    return;
+                }
+
                 const data = normalizePayrollData(response.data);
                 setCurrentPayroll(data.currentPayroll);
                 setPayrollHistory(data.payrollHistory);
             } catch (err) {
-                setError('Failed to load payroll data. Please try again later.');
+                console.error('Error fetching payroll data:', err);
+                if (err.response) {
+                    console.error('Error response:', err.response.data);
+                    setError(`Failed to load payroll data: ${err.response.data.error || err.response.statusText}`);
+                } else if (err.request) {
+                    console.error('No response received');
+                    setError('Failed to load payroll data: No response from server. Please check your connection.');
+                } else {
+                    console.error('Error setting up request:', err.message);
+                    setError(`Failed to load payroll data: ${err.message}`);
+                }
             } finally {
                 setLoading(false);
             }
@@ -113,6 +135,73 @@ const MyPayroll = () => {
                     <button onClick={() => window.location.reload()} className="retry-button">
                         Retry
                     </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Handle case when there's no payroll data
+    if (!loading && (!currentPayroll || !payrollHistory.length)) {
+        return (
+            <div className="main-content-area">
+                <div className="payroll-container">
+                    <div className="payroll-header-banner">
+                        <div className="payroll-header-content">
+                            <div className="payroll-icon-wrapper">
+                                <div className="payroll-icon-container">
+                                    <FaFileInvoiceDollar className="payroll-icon" />
+                                </div>
+                            </div>
+                            <div className="payroll-title-container">
+                                <h1 className="payroll-title">My Payroll</h1>
+                                <div className="payroll-subtitle">
+                                    <span>View and manage your salary information</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="no-data-container" style={{
+                        padding: '2rem',
+                        textAlign: 'center',
+                        backgroundColor: '#f8f9fa',
+                        borderRadius: '8px',
+                        margin: '2rem'
+                    }}>
+                        <h2 style={{ marginBottom: '1rem', color: '#495057' }}>No Payroll Data Available</h2>
+                        <p style={{ marginBottom: '1.5rem', color: '#6c757d' }}>
+                            There is currently no payroll data available for your account.
+                            This could be because:
+                        </p>
+                        <ul style={{
+                            textAlign: 'left',
+                            maxWidth: '500px',
+                            margin: '0 auto',
+                            marginBottom: '1.5rem',
+                            color: '#6c757d'
+                        }}>
+                            <li>You are a new employee and your first payroll has not been processed yet</li>
+                            <li>The payroll system is being updated</li>
+                            <li>There might be a technical issue with the payroll database</li>
+                        </ul>
+                        <p style={{ color: '#6c757d' }}>
+                            If you believe this is an error, please contact the HR department.
+                        </p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            style={{
+                                marginTop: '1.5rem',
+                                padding: '0.5rem 1rem',
+                                backgroundColor: '#4a96ff',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Refresh Data
+                        </button>
+                    </div>
                 </div>
             </div>
         );
@@ -188,20 +277,12 @@ const MyPayroll = () => {
                                             <span className="detail-value">${currentPayroll?.salary?.basic?.toLocaleString()}</span>
                                         </div>
                                         <div className="detail-row">
-                                            <span className="detail-label">Allowances:</span>
-                                            <span className="detail-value">${currentPayroll?.salary?.allowances?.toLocaleString()}</span>
-                                        </div>
-                                        <div className="detail-row">
-                                            <span className="detail-label">Overtime:</span>
-                                            <span className="detail-value">${currentPayroll?.salary?.overtime?.toLocaleString()}</span>
-                                        </div>
-                                        <div className="detail-row">
                                             <span className="detail-label">Bonus:</span>
                                             <span className="detail-value">${currentPayroll?.salary?.bonus?.toLocaleString()}</span>
                                         </div>
                                         <div className="detail-row total-row">
                                             <span className="detail-label">Gross Salary:</span>
-                                            <span className="detail-value">${currentPayroll?.salary?.grossSalary?.toLocaleString()}</span>
+                                            <span className="detail-value">${((Number(currentPayroll?.salary?.basic) || 0) + (Number(currentPayroll?.salary?.bonus) || 0)).toLocaleString()}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -213,27 +294,8 @@ const MyPayroll = () => {
                                     </h2>
                                     <div className="payroll-details">
                                         <div className="detail-row">
-                                            <span className="detail-label">Tax:</span>
-                                            <span className="detail-value">-${currentPayroll?.salary?.deductions?.tax?.toLocaleString()}</span>
-                                        </div>
-                                        <div className="detail-row">
-                                            <span className="detail-label">Insurance:</span>
-                                            <span className="detail-value">-${currentPayroll?.salary?.deductions?.insurance?.toLocaleString()}</span>
-                                        </div>
-                                        <div className="detail-row">
-                                            <span className="detail-label">Pension:</span>
-                                            <span className="detail-value">-${currentPayroll?.salary?.deductions?.pension?.toLocaleString()}</span>
-                                        </div>
-                                        <div className="detail-row">
-                                            <span className="detail-label">Other Deductions:</span>
-                                            <span className="detail-value">-${currentPayroll?.salary?.deductions?.other?.toLocaleString()}</span>
-                                        </div>
-                                        <div className="detail-row total-row">
                                             <span className="detail-label">Total Deductions:</span>
-                                            <span className="detail-value">-${((currentPayroll?.salary?.deductions?.tax || 0) +
-                                                (currentPayroll?.salary?.deductions?.insurance || 0) +
-                                                (currentPayroll?.salary?.deductions?.pension || 0) +
-                                                (currentPayroll?.salary?.deductions?.other || 0)).toLocaleString()}</span>
+                                            <span className="detail-value">-${currentPayroll?.salary?.deductions?.toLocaleString()}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -246,16 +308,12 @@ const MyPayroll = () => {
                                 </h2>
                                 <div className="payroll-details">
                                     <div className="detail-row">
-                                        <span className="detail-label">Payment Date:</span>
-                                        <span className="detail-value">{currentPayroll?.paymentDate}</span>
+                                        <span className="detail-label">Net Salary:</span>
+                                        <span className="detail-value">${currentPayroll?.salary?.netSalary?.toLocaleString()}</span>
                                     </div>
                                     <div className="detail-row">
-                                        <span className="detail-label">Payment Method:</span>
-                                        <span className="detail-value">{currentPayroll?.paymentMethod}</span>
-                                    </div>
-                                    <div className="detail-row">
-                                        <span className="detail-label">Account Number:</span>
-                                        <span className="detail-value">{currentPayroll?.accountNumber}</span>
+                                        <span className="detail-label">Created Date:</span>
+                                        <span className="detail-value">{currentPayroll?.createdAt}</span>
                                     </div>
                                 </div>
                             </div>
@@ -272,9 +330,11 @@ const MyPayroll = () => {
                                         <thead>
                                             <tr>
                                                 <th>Period</th>
+                                                <th>Base Salary</th>
+                                                <th>Bonus</th>
+                                                <th>Gross Salary</th>
+                                                <th>Deductions</th>
                                                 <th>Net Salary</th>
-                                                <th>Payment Date</th>
-                                                <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -282,13 +342,11 @@ const MyPayroll = () => {
                                             {payrollHistory.map(payslip => (
                                                 <tr key={payslip.id}>
                                                     <td>{payslip.month} {payslip.year}</td>
+                                                    <td>${payslip.baseSalary.toLocaleString()}</td>
+                                                    <td>${payslip.bonus.toLocaleString()}</td>
+                                                    <td>${((Number(payslip.baseSalary) || 0) + (Number(payslip.bonus) || 0)).toLocaleString()}</td>
+                                                    <td>-${payslip.deductions.toLocaleString()}</td>
                                                     <td>${payslip.netSalary.toLocaleString()}</td>
-                                                    <td>{payslip.paymentDate}</td>
-                                                    <td>
-                                                        <span className={`status-badge ${payslip.status.toLowerCase()}`}>
-                                                            {payslip.status}
-                                                        </span>
-                                                    </td>
                                                     <td>
                                                         <div className="action-buttons">
                                                             <button
@@ -327,22 +385,32 @@ const MyPayroll = () => {
                             <div className="payslip-details">
                                 <div className="payslip-summary">
                                     <div className="payslip-summary-item">
+                                        <span className="summary-label">Base Salary:</span>
+                                        <span className="summary-value">${selectedPayslip.baseSalary.toLocaleString()}</span>
+                                    </div>
+                                    <div className="payslip-summary-item">
+                                        <span className="summary-label">Bonus:</span>
+                                        <span className="summary-value">${selectedPayslip.bonus.toLocaleString()}</span>
+                                    </div>
+                                    <div className="payslip-summary-item">
+                                        <span className="summary-label">Gross Salary:</span>
+                                        <span className="summary-value">${((Number(selectedPayslip.baseSalary) || 0) + (Number(selectedPayslip.bonus) || 0)).toLocaleString()}</span>
+                                    </div>
+                                    <div className="payslip-summary-item">
+                                        <span className="summary-label">Deductions:</span>
+                                        <span className="summary-value">-${selectedPayslip.deductions.toLocaleString()}</span>
+                                    </div>
+                                    <div className="payslip-summary-item">
                                         <span className="summary-label">Net Salary:</span>
                                         <span className="summary-value">${selectedPayslip.netSalary.toLocaleString()}</span>
                                     </div>
                                     <div className="payslip-summary-item">
-                                        <span className="summary-label">Payment Date:</span>
-                                        <span className="summary-value">{selectedPayslip.paymentDate}</span>
-                                    </div>
-                                    <div className="payslip-summary-item">
-                                        <span className="summary-label">Status:</span>
-                                        <span className={`status-badge ${selectedPayslip.status.toLowerCase()}`}>
-                                            {selectedPayslip.status}
-                                        </span>
+                                        <span className="summary-label">Created Date:</span>
+                                        <span className="summary-value">{selectedPayslip.createdAt}</span>
                                     </div>
                                 </div>
                                 <p className="payslip-note">
-                                    For detailed information about this payslip, please download the PDF version.
+                                    For detailed information about this payslip, please contact the HR department.
                                 </p>
                             </div>
                         </div>

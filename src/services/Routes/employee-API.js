@@ -149,17 +149,51 @@ router.put("/profile", verifyToken, async (req, res) => {
 // GET /payroll - lấy lương hiện tại và lịch sử lương
 router.get("/payroll", verifyToken, async (req, res) => {
     try {
+        console.log(`Fetching payroll data for employee ID: ${req.user.employeeId}`);
+
+        // Kiểm tra kết nối MySQL
+        try {
+            const [checkResult] = await mysqlPool.query('SELECT 1 as test');
+            console.log('MySQL connection is working:', checkResult);
+        } catch (connErr) {
+            console.error('MySQL connection error:', connErr);
+            return res.status(500).json({
+                error: "Database connection error",
+                details: "Could not connect to the payroll database"
+            });
+        }
+
         // Luôn sử dụng MySQL cho dữ liệu lương vì chỉ có trong database PAYROLL
-        mysqlPool.query(
-            `SELECT * FROM salaries WHERE EmployeeID = ? ORDER BY SalaryMonth DESC`,
-            [req.user.employeeId],
-            (err, results) => {
-                if (err) return res.status(500).json({ error: "MySQL error" });
-                res.json({ payrollHistory: results, currentPayroll: results[0] || null });
-            }
-        );
+        try {
+            // Bảng salaries đã được tạo sẵn trong cơ sở dữ liệu
+            console.log('Truy vấn dữ liệu lương từ bảng salaries');
+
+            // Truy vấn dữ liệu lương
+            const [results] = await mysqlPool.query(
+                `SELECT * FROM salaries WHERE EmployeeID = ? ORDER BY SalaryMonth DESC`,
+                [req.user.employeeId]
+            );
+
+            console.log(`Found ${results.length} payroll records`);
+
+            // Nếu không có dữ liệu, trả về mảng rỗng thay vì lỗi
+            res.json({
+                payrollHistory: results || [],
+                currentPayroll: results && results.length > 0 ? results[0] : null
+            });
+        } catch (queryErr) {
+            console.error('MySQL query error:', queryErr);
+            return res.status(500).json({
+                error: "Database query error",
+                details: queryErr.message
+            });
+        }
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        console.error('Unexpected error in payroll endpoint:', error);
+        res.status(500).json({
+            error: "Internal server error",
+            details: error.message
+        });
     }
 });
 
