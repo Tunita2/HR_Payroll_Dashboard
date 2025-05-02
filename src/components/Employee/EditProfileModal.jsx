@@ -11,11 +11,19 @@ function normalizeProfileForAPI(formData) {
   // Đảm bảo DateOfBirth được gửi đúng định dạng cho SQL Server (YYYY-MM-DD)
   let dateOfBirth = '';
 
-  if (formData.dateOfBirth) {
+  // Ưu tiên sử dụng dateOfBirthRaw từ input type="date" nếu có
+  if (formData.dateOfBirthRaw) {
+    // Input type="date" luôn trả về định dạng YYYY-MM-DD
+    dateOfBirth = formData.dateOfBirthRaw;
+    console.log("Using dateOfBirthRaw directly:", dateOfBirth);
+  }
+  // Nếu không có dateOfBirthRaw, thử dùng dateOfBirth
+  else if (formData.dateOfBirth) {
     // Kiểm tra xem đã là định dạng YYYY-MM-DD chưa
     if (/^\d{4}-\d{2}-\d{2}$/.test(formData.dateOfBirth)) {
       // Đã đúng định dạng, sử dụng trực tiếp
       dateOfBirth = formData.dateOfBirth;
+      console.log("Using dateOfBirth in YYYY-MM-DD format:", dateOfBirth);
     } else {
       // Thử chuyển đổi từ định dạng khác
       try {
@@ -26,6 +34,7 @@ function normalizeProfileForAPI(formData) {
           const month = String(date.getMonth() + 1).padStart(2, '0');
           const day = String(date.getDate()).padStart(2, '0');
           dateOfBirth = `${year}-${month}-${day}`;
+          console.log("Converted dateOfBirth to YYYY-MM-DD:", dateOfBirth);
         }
       } catch (err) {
         console.error("Error formatting date:", err);
@@ -68,7 +77,19 @@ const EditProfileModal = ({ profileData, onSave, onCancel }) => {
     // Đảm bảo dateOfBirth được lấy từ input type="date" (dateOfBirthRaw)
     if (formData.dateOfBirthRaw) {
       // Sử dụng giá trị từ input type="date" (đã ở định dạng YYYY-MM-DD)
-      processedFormData.dateOfBirth = formData.dateOfBirthRaw;
+      // Tạo định dạng hiển thị cho người dùng
+      try {
+        const date = new Date(formData.dateOfBirthRaw);
+        if (!isNaN(date.getTime())) {
+          const formattedDate = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+          processedFormData.dateOfBirth = formattedDate;
+          console.log("Formatted date for display:", formattedDate);
+          console.log("Raw date for API:", formData.dateOfBirthRaw);
+        }
+      } catch (err) {
+        console.error("Error formatting display date:", err);
+        processedFormData.dateOfBirth = formData.dateOfBirthRaw;
+      }
     }
 
     console.log("Form data before API submission:", processedFormData);
@@ -94,7 +115,7 @@ const EditProfileModal = ({ profileData, onSave, onCancel }) => {
             <Section icon={<FaUser />} title="Personal Information">
               <InputRow>
                 <InputField id="fullName" name="fullName" label="Full Name" value={formData.fullName} onChange={handleChange} />
-                <InputField id="dateOfBirth" name="dateOfBirth" label="Date of Birth" value={formData.dateOfBirthRaw || ''} onChange={handleChange} type="date" />
+                <InputField id="dateOfBirthRaw" name="dateOfBirthRaw" label="Date of Birth" value={formData.dateOfBirthRaw || ''} onChange={handleChange} type="date" />
               </InputRow>
               <InputRow>
                 <SelectField id="gender" name="gender" label="Gender" value={formData.gender} onChange={handleChange} options={['Male', 'Female', 'Other']} />

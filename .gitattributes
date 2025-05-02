@@ -1,1 +1,10 @@
 # Set default behavior to automatically normalize line endings\r\n* text=auto eol=crlf\r\n\r\n# Explicitly declare text files you want to always be normalized and converted\r\n# to CRLF line endings on checkout.\r\n*.js text eol=crlf\r\n*.jsx text eol=crlf\r\n*.ts text eol=crlf\r\n*.tsx text eol=crlf\r\n*.json text eol=crlf\r\n*.css text eol=crlf\r\n*.scss text eol=crlf\r\n*.html text eol=crlf\r\n*.md text eol=crlf\r\n*.yml text eol=crlf\r\n*.yaml text eol=crlf\r\n\r\n# Denote all files that are truly binary and should not be modified.\r\n*.png binary\r\n*.jpg binary\r\n*.jpeg binary\r\n*.gif binary\r\n*.ico binary\r\n*.svg binary\r\n*.woff binary\r\n*.woff2 binary\r\n*.ttf binary\r\n*.eot binary\r\n
+# Set default end-of-line normalization
+* text=auto
+
+# Force LF for code files
+*.js  text eol=lf
+*.jsx text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.md  text eol=lf

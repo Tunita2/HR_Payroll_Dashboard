@@ -115,14 +115,27 @@ const MyProfile = () => {
     const handleSaveProfile = async (newData, apiData) => {
         try {
             setLoading(true);
+            console.log("Sending API data to server:", apiData);
 
-            await axios.put(`${API_URL}/profile`, apiData, {
+            const response = await axios.put(`${API_URL}/profile`, apiData, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
 
-            setProfileData(normalizeProfileData(newData));
+            console.log("Server response:", response.data);
+
+            // Sau khi cập nhật thành công, lấy lại dữ liệu mới từ server
+            const updatedResponse = await axios.get(`${API_URL}/profile`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            console.log("Updated profile data from server:", updatedResponse.data);
+
+            // Cập nhật state với dữ liệu mới từ server
+            setProfileData(normalizeProfileData(updatedResponse.data));
             setIsEditing(false);
             setError(null);
 

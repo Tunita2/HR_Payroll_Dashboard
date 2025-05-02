@@ -124,6 +124,9 @@ router.put("/profile", verifyToken, async (req, res) => {
         if (hasValidDate && dateOfBirth) {
             // Sử dụng VarChar thay vì Date để tránh lỗi chuyển đổi
             request.input("DateOfBirth", sql.VarChar, dateOfBirth);
+            console.log("Adding DateOfBirth parameter:", dateOfBirth);
+        } else {
+            console.log("DateOfBirth not included in query. hasValidDate:", hasValidDate, "dateOfBirth:", dateOfBirth);
         }
 
         console.log("Executing SQL query:", query);
