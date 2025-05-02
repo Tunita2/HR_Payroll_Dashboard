@@ -11,6 +11,8 @@ function normalizePayrollData(apiData) {
     const current = apiData.currentPayroll || apiData.current || {};
     // Dữ liệu lịch sử lương
     const history = apiData.payrollHistory || apiData.history || [];
+    // Dữ liệu dividend
+    const dividend = apiData.dividendData || {};
 
     // Chuẩn hóa lương hiện tại
     const normalizedCurrent = {
@@ -37,9 +39,25 @@ function normalizePayrollData(apiData) {
         createdAt: item.CreatedAt ? new Date(item.CreatedAt).toLocaleDateString('vi-VN') : ''
     }));
 
+    // Chuẩn hóa dữ liệu dividend
+    const normalizedDividends = Array.isArray(dividend) && dividend.length > 0
+        ? dividend.map(div => ({
+            id: div.DividendID,
+            amount: div.DividendAmount || 0,
+            date: div.DividendDate ? new Date(div.DividendDate).toLocaleDateString('vi-VN') : '',
+            createdAt: div.CreatedAt ? new Date(div.CreatedAt).toLocaleDateString('vi-VN') : '',
+            // Thêm thông tin tháng và năm để lọc
+            month: div.DividendDate ? new Date(div.DividendDate).getMonth() + 1 : 0, // 1-12
+            year: div.DividendDate ? new Date(div.DividendDate).getFullYear() : 0,
+            // Thêm chuỗi tháng để hiển thị
+            monthName: div.DividendDate ? new Date(div.DividendDate).toLocaleDateString('vi-VN', { month: 'long' }) : ''
+        }))
+        : [];
+
     return {
         currentPayroll: normalizedCurrent,
-        payrollHistory: normalizedHistory
+        payrollHistory: normalizedHistory,
+        dividendData: normalizedDividends
     };
 }
 
@@ -50,8 +68,25 @@ const MyPayroll = () => {
     const [selectedPayslip, setSelectedPayslip] = useState(null);
     const [currentPayroll, setCurrentPayroll] = useState(null);
     const [payrollHistory, setPayrollHistory] = useState([]);
+    const [allDividendData, setAllDividendData] = useState([]);
+    const [filteredDividendData, setFilteredDividendData] = useState([]);
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Default to current month (1-12)
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Filter dividends when month or year changes
+    useEffect(() => {
+        if (allDividendData.length > 0) {
+            const filtered = allDividendData.filter(
+                dividend => dividend.month === selectedMonth && dividend.year === selectedYear
+            );
+            setFilteredDividendData(filtered);
+            console.log(`Filtered dividends for month ${selectedMonth}/${selectedYear}: ${filtered.length} records`);
+        } else {
+            setFilteredDividendData([]);
+        }
+    }, [allDividendData, selectedMonth, selectedYear]);
 
     useEffect(() => {
         const fetchPayroll = async () => {
@@ -84,6 +119,7 @@ const MyPayroll = () => {
                 const data = normalizePayrollData(response.data);
                 setCurrentPayroll(data.currentPayroll);
                 setPayrollHistory(data.payrollHistory);
+                setAllDividendData(data.dividendData);
             } catch (err) {
                 console.error('Error fetching payroll data:', err);
                 if (err.response) {
@@ -306,11 +342,71 @@ const MyPayroll = () => {
                                     <FaInfoCircle className="section-icon" />
                                     Payment Information
                                 </h2>
+
+                                <div className="dividend-filter">
+                                    <label htmlFor="dividend-month">Dividend Month:</label>
+                                    <select
+                                        id="dividend-month"
+                                        value={selectedMonth}
+                                        onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                                        className="dividend-select"
+                                    >
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                    </select>
+
+                                    <label htmlFor="dividend-year" style={{ marginLeft: '10px' }}>Year:</label>
+                                    <select
+                                        id="dividend-year"
+                                        value={selectedYear}
+                                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                        className="dividend-select"
+                                    >
+                                        {[...Array(5)].map((_, i) => {
+                                            const year = new Date().getFullYear() - 2 + i;
+                                            return <option key={year} value={year}>{year}</option>;
+                                        })}
+                                    </select>
+                                </div>
+
                                 <div className="payroll-details">
                                     <div className="detail-row">
                                         <span className="detail-label">Net Salary:</span>
                                         <span className="detail-value">${currentPayroll?.salary?.netSalary?.toLocaleString()}</span>
                                     </div>
+
+                                    {filteredDividendData.length > 0 ? (
+                                        <>
+                                            <div className="detail-row">
+                                                <span className="detail-label">Dividend Amount (Total):</span>
+                                                <span className="detail-value">
+                                                    ${filteredDividendData.reduce((sum, div) => sum + Number(div.amount), 0).toLocaleString()}
+                                                </span>
+                                            </div>
+                                            {filteredDividendData.map((dividend, index) => (
+                                                <div className="detail-row" key={dividend.id || index}>
+                                                    <span className="detail-label">Dividend {index + 1}:</span>
+                                                    <span className="detail-value">${Number(dividend.amount).toLocaleString()} ({dividend.date})</span>
+                                                </div>
+                                            ))}
+                                        </>
+                                    ) : (
+                                        <div className="detail-row">
+                                            <span className="detail-label">Dividend:</span>
+                                            <span className="detail-value">No dividend data for {selectedMonth}/{selectedYear}</span>
+                                        </div>
+                                    )}
+
                                     <div className="detail-row">
                                         <span className="detail-label">Created Date:</span>
                                         <span className="detail-value">{currentPayroll?.createdAt}</span>
@@ -404,6 +500,29 @@ const MyPayroll = () => {
                                         <span className="summary-label">Net Salary:</span>
                                         <span className="summary-value">${selectedPayslip.netSalary.toLocaleString()}</span>
                                     </div>
+
+                                    {filteredDividendData.length > 0 ? (
+                                        <>
+                                            <div className="payslip-summary-item">
+                                                <span className="summary-label">Dividend Amount (Total):</span>
+                                                <span className="summary-value">
+                                                    ${filteredDividendData.reduce((sum, div) => sum + Number(div.amount), 0).toLocaleString()}
+                                                </span>
+                                            </div>
+                                            {filteredDividendData.map((dividend, index) => (
+                                                <div className="payslip-summary-item" key={dividend.id || index}>
+                                                    <span className="summary-label">Dividend {index + 1}:</span>
+                                                    <span className="summary-value">${Number(dividend.amount).toLocaleString()} ({dividend.date})</span>
+                                                </div>
+                                            ))}
+                                        </>
+                                    ) : (
+                                        <div className="payslip-summary-item">
+                                            <span className="summary-label">Dividend:</span>
+                                            <span className="summary-value">No dividend data for {selectedMonth}/{selectedYear}</span>
+                                        </div>
+                                    )}
+
                                     <div className="payslip-summary-item">
                                         <span className="summary-label">Created Date:</span>
                                         <span className="summary-value">{selectedPayslip.createdAt}</span>

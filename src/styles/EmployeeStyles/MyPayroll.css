@@ -237,6 +237,31 @@
     color: #2196f3;
 }
 
+.dividend-filter {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    background-color: #e3f2fd;
+    border-radius: 8px;
+}
+
+.dividend-filter label {
+    margin-right: 8px;
+    font-weight: 500;
+    color: #1976d2;
+}
+
+.dividend-select {
+    padding: 6px 10px;
+    border: 1px solid #bbdefb;
+    border-radius: 4px;
+    background-color: white;
+    color: #1976d2;
+    font-size: 14px;
+    cursor: pointer;
+}
+
 .history-section {
     border-top: 4px solid #ff9800;
 }

@@ -176,10 +176,31 @@ router.get("/payroll", verifyToken, async (req, res) => {
 
             console.log(`Found ${results.length} payroll records`);
 
+            // Lấy thông tin dividend từ SQL Server
+            let dividendData = [];
+            try {
+                const pool = await sqlConn;
+                const dividendResult = await pool.request()
+                    .input("employeeId", sql.Int, req.user.employeeId)
+                    .query(`SELECT DividendID, EmployeeID, DividendAmount, DividendDate, CreatedAt
+                            FROM Dividends
+                            WHERE EmployeeID = @employeeId
+                            ORDER BY DividendDate DESC`);
+
+                if (dividendResult.recordset.length > 0) {
+                    dividendData = dividendResult.recordset;
+                    console.log(`Found ${dividendData.length} dividend records for employee ID: ${req.user.employeeId}`);
+                }
+            } catch (dividendErr) {
+                console.error('Error fetching dividend data:', dividendErr);
+                // Không trả về lỗi, chỉ log lỗi và tiếp tục
+            }
+
             // Nếu không có dữ liệu, trả về mảng rỗng thay vì lỗi
             res.json({
                 payrollHistory: results || [],
-                currentPayroll: results && results.length > 0 ? results[0] : null
+                currentPayroll: results && results.length > 0 ? results[0] : null,
+                dividendData: dividendData || []
             });
         } catch (queryErr) {
             console.error('MySQL query error:', queryErr);
