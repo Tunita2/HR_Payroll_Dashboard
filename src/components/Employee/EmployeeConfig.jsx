@@ -2,7 +2,6 @@ import { CgProfile } from "react-icons/cg";
 import { MdOutlineAttachMoney } from "react-icons/md";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { FaBell } from "react-icons/fa";
-import { FaCircleInfo } from "react-icons/fa6";
 
 import { IoSettings } from "react-icons/io5";
 import { RiLogoutBoxLine } from "react-icons/ri";
@@ -13,7 +12,7 @@ export const menuConfig = [
         icon: CgProfile,
         text: "My Profile",
         active: true,
-        path: "/employee",
+        path: "/employee/profile",
     },
     {
         id: "payroll",
@@ -28,17 +27,12 @@ export const menuConfig = [
         path: "/employee/leave-work"
     },
     {
-        id: "Notifications",
+        id: "notifications",
         icon: FaBell,
         text: "Notifications",
         path: "/employee/notifications",
     },
-    {
-        id: "CelebInfo",
-        icon: FaCircleInfo,
-        text: "Celeb Info",
-        path: "/employee/celeb-info",
-    },
+
 ];
 
 export const settingItems = [

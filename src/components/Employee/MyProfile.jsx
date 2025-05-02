@@ -1,33 +1,149 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaIdCard, FaBriefcase, FaCalendarAlt, FaUserTie } from 'react-icons/fa';
 import "../../styles/EmployeeStyles/MyProfile.css";
 import EditProfileModal from "./EditProfileModal";
+import axios from 'axios';
+
+const API_URL = 'http://localhost:3001/api/employee';
+
+// Hàm chuẩn hóa dữ liệu profile cho cả hai DB
+function normalizeProfileData(apiData) {
+    return {
+        fullName: apiData.FullName || apiData.fullName || '',
+        dateOfBirth: apiData.DateOfBirth
+            ? new Date(apiData.DateOfBirth).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+            : (apiData.dateOfBirth
+                ? new Date(apiData.dateOfBirth).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+                : ''),
+        gender: apiData.Gender || apiData.gender || '',
+        nationality: apiData.Nationality || apiData.nationality || 'Vietnamese',
+        email: apiData.Email || apiData.email || '',
+        phone: apiData.PhoneNumber || apiData.phone || '',
+        employeeId: apiData.EmployeeID?.toString() || apiData.employeeId?.toString() || '',
+        department: apiData.DepartmentName || apiData.departmentName || apiData.department || '',
+        position: apiData.PositionName || apiData.positionName || apiData.position || '',
+        joinDate: apiData.HireDate
+            ? new Date(apiData.HireDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+            : (apiData.joinDate
+                ? new Date(apiData.joinDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+                : ''),
+        status: apiData.Status || apiData.status || ''
+    };
+}
 
 const MyProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [profileData, setProfileData] = useState({
-        fullName: "John Doe",
-        dateOfBirth: "15 Jan 1990",
-        gender: "Male",
-        nationality: "American",
-        email: "john.doe@example.com",
-        phone: "+1 (555) 123-4567",
-        address: "123 Main Street, New York, NY 10001",
-        employeeId: "EMP-1234",
-        department: "IT",
-        position: "Software Engineer",
-        joinDate: "01 Mar 2020",
-        manager: "Jane Smith"
+        fullName: "",
+        dateOfBirth: "",
+        gender: "",
+        nationality: "Vietnamese",
+        email: "",
+        phone: "",
+        employeeId: "",
+        department: "",
+        position: "",
+        joinDate: "",
+        status: ""
     });
+
+    // Lấy employeeId từ localStorage
+    const employeeId = localStorage.getItem('employeeId');
+    const token = localStorage.getItem('token');
+
+    useEffect(() => {
+        const fetchProfileData = async () => {
+            try {
+                setLoading(true);
+                const response = await axios.get(`${API_URL}/profile`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                const apiData = response.data;
+                console.log("API profile data:", apiData);
+                setProfileData(normalizeProfileData(apiData));
+
+                setError(null);
+            } catch (err) {
+                console.error('Error fetching profile data:', err);
+                setError('Failed to load profile data. Please try again later.');
+
+                setProfileData({
+                    fullName: "John Doe",
+                    dateOfBirth: "15 Jan 1990",
+                    gender: "Male",
+                    nationality: "Vietnamese",
+                    email: "john.doe@example.com",
+                    phone: "+84 123 456 789",
+                    employeeId: "EMP-1234",
+                    department: "IT",
+                    position: "Software Engineer",
+                    joinDate: "01 Mar 2020",
+                    status: "Active"
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProfileData();
+    }, [employeeId]);
 
     const handleEditProfile = () => {
         setIsEditing(true);
     };
 
-    const handleSaveProfile = (newData) => {
-        setProfileData(newData);
-        setIsEditing(false);
+    const handleSaveProfile = async (newData, apiData) => {
+        try {
+            setLoading(true);
+
+            await axios.put(`${API_URL}/profile`, apiData, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            setProfileData(normalizeProfileData(newData));
+            setIsEditing(false);
+            setError(null);
+
+            alert('Profile updated successfully!');
+        } catch (err) {
+            console.error('Error updating profile:', err);
+            setError('Failed to update profile. Please try again.');
+            alert('Failed to update profile. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
+
+    if (loading) {
+        return (
+            <div className="main-content-area">
+                <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                    <p>Loading profile data...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="main-content-area">
+                <div className="error-container">
+                    <p className="error-message">{error}</p>
+                    <button onClick={() => window.location.reload()} className="retry-button">
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="main-content-area">
@@ -104,13 +220,6 @@ const MyProfile = () => {
                                     <span className="detail-value">{profileData.phone}</span>
                                 </div>
                             </div>
-                            <div className="detail-item with-icon">
-                                <FaMapMarkerAlt className="detail-icon" />
-                                <div className="detail-content">
-                                    <span className="detail-label">Address:</span>
-                                    <span className="detail-value">{profileData.address}</span>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -146,13 +255,6 @@ const MyProfile = () => {
                                 <div className="detail-content">
                                     <span className="detail-label">Join Date:</span>
                                     <span className="detail-value">{profileData.joinDate}</span>
-                                </div>
-                            </div>
-                            <div className="detail-item with-icon">
-                                <FaUserTie className="detail-icon" />
-                                <div className="detail-content">
-                                    <span className="detail-label">Manager:</span>
-                                    <span className="detail-value">{profileData.manager}</span>
                                 </div>
                             </div>
                         </div>

@@ -1,36 +1,65 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/GeneralStyles/Login.css';
-import { 
-  Form, 
-  Input, 
-  Button, 
-  Checkbox, 
-  Divider ,
-  message,
+import axios from 'axios';
+import {
+  Form,
+  Input,
+  Button,
+  Checkbox,
+  Divider,
+  message
 } from 'antd';
-import { 
-  GoogleOutlined, 
-  AppleFilled, 
-  MailOutlined, 
+import {
+  GoogleOutlined,
+  AppleFilled,
   LockOutlined,
-  UserOutlined 
+  UserOutlined
 } from '@ant-design/icons';
 import backgroundLogin from '../assets/background_login.jpg';
 
 const Login = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const onFinish = (values) => {
-    // Simple login validation (you'd typically replace this with actual authentication)
-    if (values.email && values.id && values.password) {
-      // Simulating successful login
+  const onFinish = async (values) => {
+    try {
+      setLoading(true);
+
+      const response = await axios.post('http://localhost:3001/api/auth/login', {
+        username: values.username,
+        password: values.password
+      });
+
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('employeeId', response.data.employeeId);
+      localStorage.setItem('role', response.data.role);
+
       message.success('Login Successful!');
-      
-      // Navigate to homepage after successful login
-      navigate('/payroll');
-    } else {
-      message.error('Login Failed. Please check your credentials.');
+
+      switch (response.data.role) {
+        case 'admin':
+          navigate('/admin');
+          break;
+        case 'hr':
+          navigate('/human');
+          break;
+        case 'payroll':
+          navigate('/payroll');
+          break;
+        default:
+          navigate('/employee/profile');
+          break;
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      if (error.response && error.response.data) {
+        message.error(error.response.data.error || 'Login failed');
+      } else {
+        message.error('Unable to connect to server');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -38,11 +67,11 @@ const Login = () => {
     <div className="login-container">
       {/* Left Image Section */}
       <div className="login-image-section">
-        <img src={backgroundLogin} alt="Login Background" className="login-image"/>
+        <img src={backgroundLogin} alt="Login Background" className="login-image" />
         <div className="login-image-text">
           <h2>Streamline Your Workday with Kerjasa</h2>
           <p>
-            Highlight how Kerjasa simplifies collaboration between HR and employees, 
+            Highlight how Kerjasa simplifies collaboration between HR and employees,
             with features like attendance tracking, leave management, and performance monitoring.
           </p>
         </div>
@@ -57,18 +86,18 @@ const Login = () => {
           onFinish={onFinish}
         >
           <h1>Hi, Welcome</h1>
-          
+
           <div className="social-login-buttons">
-            <Button 
-              icon={<GoogleOutlined />} 
-              block 
+            <Button
+              icon={<GoogleOutlined />}
+              block
               className="google-login-btn"
             >
               Google
             </Button>
-            <Button 
-              icon={<AppleFilled />} 
-              block 
+            <Button
+              icon={<AppleFilled />}
+              block
               className="apple-login-btn"
             >
               Apple
@@ -78,38 +107,24 @@ const Login = () => {
           <Divider>Or Sign in with</Divider>
 
           <Form.Item
-            name="email"
-            rules={[{ 
-              required: true, 
-              message: 'Please input your email!' 
+            name="username"
+            rules={[{
+              required: true,
+              message: 'Please input your username!'
             }]}
           >
-            <Input 
-              prefix={<MailOutlined />} 
-              placeholder="Input your email"
-              className="login-input"
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="id"
-            rules={[{ 
-              required: true, 
-              message: 'Please input your ID!' 
-            }]}
-          >
-            <Input 
-              prefix={<UserOutlined /> }
-              placeholder="Input your ID"
+            <Input
+              prefix={<UserOutlined />}
+              placeholder="Username"
               className="login-input"
             />
           </Form.Item>
 
           <Form.Item
             name="password"
-            rules={[{ 
-              required: true, 
-              message: 'Please input your password!' 
+            rules={[{
+              required: true,
+              message: 'Please input your password!'
             }]}
           >
             <Input.Password
@@ -120,31 +135,32 @@ const Login = () => {
           </Form.Item>
 
           <Form.Item>
-            <Form.Item 
-              name="remember" 
-              valuePropName="checked" 
+            <Form.Item
+              name="remember"
+              valuePropName="checked"
               noStyle
             >
               <Checkbox>Remember me</Checkbox>
             </Form.Item>
 
-            <a 
-            className="login-forgot-password" 
-            onClick={() => message.info("Chức năng đang phát triển")}
+            <a
+              className="login-forgot-password"
+              onClick={() => message.info("Chức năng đang phát triển")}
             >
-            Forgot password
+              Forgot password
             </a>
 
           </Form.Item>
 
           <Form.Item>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
+            <Button
+              type="primary"
+              htmlType="submit"
               block
               className="login-submit-btn"
+              loading={loading}
             >
-              Login
+              {loading ? 'Logging in...' : 'Login'}
             </Button>
           </Form.Item>
         </Form>
@@ -158,20 +174,20 @@ export default Login;
 // import React, { useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 // import '../styles/Login.css';
-// import { 
-//   Form, 
-//   Input, 
-//   Button, 
-//   Checkbox, 
+// import {
+//   Form,
+//   Input,
+//   Button,
+//   Checkbox,
 //   Divider ,
 //   message,
 // } from 'antd';
-// import { 
-//   GoogleOutlined, 
-//   AppleFilled, 
-//   MailOutlined, 
+// import {
+//   GoogleOutlined,
+//   AppleFilled,
+//   MailOutlined,
 //   LockOutlined,
-//   UserOutlined 
+//   UserOutlined
 // } from '@ant-design/icons';
 // import backgroundLogin from '../assets/background_login.jpg';
 
@@ -187,7 +203,7 @@ export default Login;
 //         headers: { 'Content-Type': 'application/json' },
 //         body: JSON.stringify(values)
 //       });
-  
+
 //       const data = await response.json();
 //       if (response.ok) {
 //         message.success(data.message);
@@ -203,16 +219,16 @@ export default Login;
 //       message.error("Lỗi kết nối đến server!");
 //     }
 //   };
-  
+
 
 //   return (
 //     <div className="login-container">
 //       <h1>Login</h1>
 //       <Form name="login" onFinish={onFinish}>
-//         <Form.Item name="email" rules={[{ required: true, message: 'Please input your email!' }]}> 
+//         <Form.Item name="email" rules={[{ required: true, message: 'Please input your email!' }]}>
 //           <Input placeholder="Email" />
 //         </Form.Item>
-//         <Form.Item name="password" rules={[{ required: true, message: 'Please input your password!' }]}> 
+//         <Form.Item name="password" rules={[{ required: true, message: 'Please input your password!' }]}>
 //           <Input.Password placeholder="Password" />
 //         </Form.Item>
 //         <Form.Item>

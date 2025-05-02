@@ -1,66 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/EmployeeStyles/Notifications.css';
+import axios from 'axios';
 
-// Mock data for notifications
-const mockNotifications = [
-    {
-        id: 1,
-        type: 'payroll',
-        title: 'Lương tháng 5 đã được chuyển',
-        message: 'Lương của bạn đã được chuyển vào tài khoản ngân hàng.',
-        timestamp: new Date(2023, 4, 25, 9, 30),
-        read: false
-    },
-    {
-        id: 2,
-        type: 'leave',
-        title: 'Đơn nghỉ phép đã được phê duyệt',
-        message: 'Đơn xin nghỉ phép từ ngày 10/06 đến 15/06 đã được phê duyệt.',
-        timestamp: new Date(2023, 5, 5, 14, 15),
-        read: true
-    },
-    {
-        id: 3,
-        type: 'task',
-        title: 'Nhiệm vụ mới được giao',
-        message: 'Bạn có một nhiệm vụ mới: "Hoàn thành báo cáo quý 2".',
-        timestamp: new Date(2023, 5, 10, 11, 0),
-        read: false
-    },
-    {
-        id: 4,
-        type: 'payroll',
-        title: 'Thông báo thưởng',
-        message: 'Bạn đã nhận được khoản thưởng thành tích xuất sắc.',
-        timestamp: new Date(2023, 5, 15, 16, 45),
-        read: false
-    },
-    {
-        id: 5,
-        type: 'task',
-        title: 'Nhắc nhở deadline',
-        message: 'Deadline dự án Marketing sẽ kết thúc vào ngày mai.',
-        timestamp: new Date(2023, 5, 18, 8, 0),
-        read: true
-    },
-];
+// Hàm chuẩn hóa dữ liệu notifications cho cả hai DB
+function normalizeNotifications(apiData) {
+    const notifications = apiData.notifications || apiData || [];
+    return notifications.map((item, idx) => ({
+        id: item.id || item.NotificationID || idx + 1,
+        type: item.type || item.Type || 'general',
+        title: item.title || item.Title || '',
+        message: item.message || item.Message || '',
+        timestamp: item.timestamp ? new Date(item.timestamp) : (item.Timestamp ? new Date(item.Timestamp) : new Date()),
+        read: item.read !== undefined ? item.read : (item.Read !== undefined ? item.Read : false)
+    }));
+}
+
+const API_URL = 'http://localhost:3001/api/notifications';
 
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
     const [filter, setFilter] = useState('all');
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Simulate API call to fetch notifications
         const fetchNotifications = async () => {
-            setLoading(true);
-            // In a real app, this would be an API call
-            setTimeout(() => {
-                setNotifications(mockNotifications);
+            try {
+                setLoading(true);
+                setError(null);
+                const token = localStorage.getItem('token');
+                const response = await axios.get(API_URL, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setNotifications(normalizeNotifications(response.data));
+            } catch (err) {
+                setError('Failed to load notifications. Please try again later.');
+            } finally {
                 setLoading(false);
-            }, 800);
+            }
         };
-
         fetchNotifications();
     }, []);
 
@@ -108,11 +88,11 @@ const Notifications = () => {
     };
 
     const formatDate = (date) => {
-        return date.toLocaleDateString('vi-VN');
+        return date instanceof Date ? date.toLocaleDateString('vi-VN') : '';
     };
 
     const formatTime = (date) => {
-        return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        return date instanceof Date ? date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '';
     };
 
     const getTimeAgo = (timestamp) => {
@@ -127,6 +107,34 @@ const Notifications = () => {
             return formatDate(timestamp);
         }
     };
+
+    if (loading) {
+        return (
+            <div className="notifications-wrapper">
+                <div className="notifications-container">
+                    <div className="notifications-loading">
+                        <div className="loading-spinner"></div>
+                        <p>Đang tải thông báo...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="notifications-wrapper">
+                <div className="notifications-container">
+                    <div className="error-container">
+                        <p className="error-message">{error}</p>
+                        <button onClick={() => window.location.reload()} className="retry-button">
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="notifications-wrapper">
@@ -199,12 +207,7 @@ const Notifications = () => {
                 </div>
 
                 <div className="notifications-content">
-                    {loading ? (
-                        <div className="notifications-loading">
-                            <div className="loading-spinner"></div>
-                            <p>Đang tải th��ng báo...</p>
-                        </div>
-                    ) : filteredNotifications.length === 0 ? (
+                    {filteredNotifications.length === 0 ? (
                         <div className="notifications-empty">
                             <div className="empty-icon">📭</div>
                             <p>Không có thông báo nào</p>
@@ -216,38 +219,21 @@ const Notifications = () => {
                                     key={notification.id}
                                     className={`notification-item ${!notification.read ? 'unread' : ''}`}
                                 >
-                                    <div className="notification-icon">
-                                        {getNotificationIcon(notification.type)}
-                                    </div>
+                                    <div className="notification-icon">{getNotificationIcon(notification.type)}</div>
                                     <div className="notification-content">
-                                        <div className="notification-header">
-                                            <h3 className="notification-title">{notification.title}</h3>
-                                            {!notification.read && <span className="new-badge">Mới</span>}
-                                        </div>
-                                        <p className="notification-message">{notification.message}</p>
-                                        <div className="notification-time">
-                                            <span className="time-item"><span className="time-icon">📅</span> {formatDate(notification.timestamp)}</span>
-                                            <span className="time-item"><span className="time-icon">⏰</span> {formatTime(notification.timestamp)}</span>
-                                            <span className="time-ago">({getTimeAgo(notification.timestamp)})</span>
-                                        </div>
-                                    </div>
-                                    <div className="notification-actions">
-                                        {!notification.read && (
-                                            <button
-                                                className="action-btn read-btn"
-                                                onClick={() => handleMarkAsRead(notification.id)}
-                                                title="Đánh dấu đã đọc"
-                                            >
-                                                ✓
+                                        <div className="notification-title">{notification.title}</div>
+                                        <div className="notification-message">{notification.message}</div>
+                                        <div className="notification-meta">
+                                            <span className="notification-time">{getTimeAgo(notification.timestamp)}</span>
+                                            {!notification.read && (
+                                                <button className="mark-read-btn" onClick={() => handleMarkAsRead(notification.id)}>
+                                                    Đánh dấu đã đọc
+                                                </button>
+                                            )}
+                                            <button className="delete-btn" onClick={() => handleDeleteNotification(notification.id)}>
+                                                Xóa
                                             </button>
-                                        )}
-                                        <button
-                                            className="action-btn delete-btn"
-                                            onClick={() => handleDeleteNotification(notification.id)}
-                                            title="Xóa"
-                                        >
-                                            ✕
-                                        </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
