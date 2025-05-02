@@ -4,7 +4,6 @@ const { conn: sqlConn, sql } = require("../config/mssql");
 const mysqlPool = require("../config/mysql");
 const { verifyToken } = require("../Auth/auth-middleware");
 
-// Helper: chọn DB theo role hoặc query param
 function getDB(req) {
     // Ưu tiên query param db, sau đó đến role
     const db = req.query.db || req.user?.role || 'sqlserver';
@@ -12,7 +11,6 @@ function getDB(req) {
     return 'sqlserver';
 }
 
-// GET /profile - lấy thông tin profile employee
 router.get("/profile", verifyToken, async (req, res) => {
     try {
         const db = getDB(req);
@@ -47,29 +45,24 @@ router.get("/profile", verifyToken, async (req, res) => {
     }
 });
 
-// PUT /profile - cập nhật thông tin profile employee
 router.put("/profile", verifyToken, async (req, res) => {
     try {
         const db = getDB(req);
         const data = req.body;
 
         console.log("Received data for update:", data);
-
-        // Xử lý DateOfBirth để đảm bảo định dạng đúng cho SQL Server
-        // Không sử dụng kiểu Date mà sẽ để SQL Server tự chuyển đổi
+        
         let dateOfBirth = null;
         let hasValidDate = false;
 
         if (data.DateOfBirth) {
             try {
-                // Kiểm tra xem đã là chuỗi định dạng YYYY-MM-DD chưa
                 if (typeof data.DateOfBirth === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data.DateOfBirth)) {
                     // Sử dụng chuỗi ngày tháng trực tiếp
                     dateOfBirth = data.DateOfBirth;
                     hasValidDate = true;
                     console.log("Using date string directly:", dateOfBirth);
                 } else {
-                    // Nếu không phải định dạng chuẩn, thử chuyển đổi
                     const date = new Date(data.DateOfBirth);
                     if (!isNaN(date.getTime())) {
                         // Format lại thành YYYY-MM-DD
@@ -92,10 +85,8 @@ router.put("/profile", verifyToken, async (req, res) => {
             }
         }
 
-        // Chỉ cập nhật trong database chính (SQL Server)
         const pool = await sqlConn;
 
-        // Tạo câu query với xử lý đặc biệt cho DateOfBirth
         let query = `UPDATE Employees SET
                     FullName=@FullName,
                     Gender=@Gender,
@@ -103,7 +94,6 @@ router.put("/profile", verifyToken, async (req, res) => {
                     PhoneNumber=@PhoneNumber,
                     Status=@Status`;
 
-        // Thêm DateOfBirth vào câu query nếu có giá trị
         if (hasValidDate && dateOfBirth) {
             // Sử dụng CONVERT để chuyển đổi chuỗi thành DATE trong SQL
             query += `, DateOfBirth=CONVERT(DATE, @DateOfBirth)`;
@@ -111,7 +101,6 @@ router.put("/profile", verifyToken, async (req, res) => {
 
         query += ` WHERE EmployeeID=@employeeId`;
 
-        // Tạo request
         const request = pool.request()
             .input("employeeId", sql.Int, req.user.employeeId)
             .input("FullName", sql.NVarChar, data.FullName)
@@ -146,12 +135,10 @@ router.put("/profile", verifyToken, async (req, res) => {
     }
 });
 
-// GET /payroll - lấy lương hiện tại và lịch sử lương
 router.get("/payroll", verifyToken, async (req, res) => {
     try {
         console.log(`Fetching payroll data for employee ID: ${req.user.employeeId}`);
 
-        // Kiểm tra kết nối MySQL
         try {
             const [checkResult] = await mysqlPool.query('SELECT 1 as test');
             console.log('MySQL connection is working:', checkResult);
@@ -163,9 +150,7 @@ router.get("/payroll", verifyToken, async (req, res) => {
             });
         }
 
-        // Luôn sử dụng MySQL cho dữ liệu lương vì chỉ có trong database PAYROLL
         try {
-            // Bảng salaries đã được tạo sẵn trong cơ sở dữ liệu
             console.log('Truy vấn dữ liệu lương từ bảng salaries');
 
             // Truy vấn dữ liệu lương
@@ -176,7 +161,6 @@ router.get("/payroll", verifyToken, async (req, res) => {
 
             console.log(`Found ${results.length} payroll records`);
 
-            // Lấy thông tin attendance từ MySQL
             let attendanceData = [];
             try {
                 const [attendanceResults] = await mysqlPool.query(
@@ -193,10 +177,8 @@ router.get("/payroll", verifyToken, async (req, res) => {
                 }
             } catch (attendanceErr) {
                 console.error('Error fetching attendance data:', attendanceErr);
-                // Không trả về lỗi, chỉ log lỗi và tiếp tục
             }
 
-            // Lấy thông tin dividend từ SQL Server
             let dividendData = [];
             try {
                 const pool = await sqlConn;
@@ -213,10 +195,8 @@ router.get("/payroll", verifyToken, async (req, res) => {
                 }
             } catch (dividendErr) {
                 console.error('Error fetching dividend data:', dividendErr);
-                // Không trả về lỗi, chỉ log lỗi và tiếp tục
             }
 
-            // Nếu không có dữ liệu, trả về mảng rỗng thay vì lỗi
             res.json({
                 payrollHistory: results || [],
                 currentPayroll: results && results.length > 0 ? results[0] : null,
