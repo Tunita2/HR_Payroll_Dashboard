@@ -52,27 +52,93 @@ router.put("/profile", verifyToken, async (req, res) => {
     try {
         const db = getDB(req);
         const data = req.body;
-        if (db === 'mysql') {
-            mysqlPool.query(
-                `UPDATE employees SET FullName=?, Email=?, Status=? WHERE EmployeeID=?`,
-                [data.FullName, data.Email, data.Status, req.user.employeeId],
-                (err, result) => {
-                    if (err) return res.status(500).json({ error: "MySQL error" });
-                    res.json({ message: "Profile updated" });
+
+        console.log("Received data for update:", data);
+
+        // Xử lý DateOfBirth để đảm bảo định dạng đúng cho SQL Server
+        // Không sử dụng kiểu Date mà sẽ để SQL Server tự chuyển đổi
+        let dateOfBirth = null;
+        let hasValidDate = false;
+
+        if (data.DateOfBirth) {
+            try {
+                // Kiểm tra xem đã là chuỗi định dạng YYYY-MM-DD chưa
+                if (typeof data.DateOfBirth === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data.DateOfBirth)) {
+                    // Sử dụng chuỗi ngày tháng trực tiếp
+                    dateOfBirth = data.DateOfBirth;
+                    hasValidDate = true;
+                    console.log("Using date string directly:", dateOfBirth);
+                } else {
+                    // Nếu không phải định dạng chuẩn, thử chuyển đổi
+                    const date = new Date(data.DateOfBirth);
+                    if (!isNaN(date.getTime())) {
+                        // Format lại thành YYYY-MM-DD
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        dateOfBirth = `${year}-${month}-${day}`;
+                        hasValidDate = true;
+                        console.log("Formatted date string:", dateOfBirth);
+                    } else {
+                        console.log("Invalid date detected, setting to null");
+                        dateOfBirth = null;
+                        hasValidDate = false;
+                    }
                 }
-            );
-        } else {
-            const pool = await sqlConn;
-            await pool.request()
-                .input("employeeId", sql.Int, req.user.employeeId)
-                .input("FullName", sql.NVarChar, data.FullName)
-                .input("Email", sql.NVarChar, data.Email)
-                .input("PhoneNumber", sql.NVarChar, data.PhoneNumber || '')
-                .input("Status", sql.NVarChar, data.Status)
-                .query(`UPDATE Employees SET FullName=@FullName, Email=@Email, PhoneNumber=@PhoneNumber, Status=@Status WHERE EmployeeID=@employeeId`);
-            res.json({ message: "Profile updated" });
+            } catch (err) {
+                console.error("Error parsing date:", err);
+                dateOfBirth = null;
+                hasValidDate = false;
+            }
         }
+
+        // Chỉ cập nhật trong database chính (SQL Server)
+        const pool = await sqlConn;
+
+        // Tạo câu query với xử lý đặc biệt cho DateOfBirth
+        let query = `UPDATE Employees SET
+                    FullName=@FullName,
+                    Gender=@Gender,
+                    Email=@Email,
+                    PhoneNumber=@PhoneNumber,
+                    Status=@Status`;
+
+        // Thêm DateOfBirth vào câu query nếu có giá trị
+        if (hasValidDate && dateOfBirth) {
+            // Sử dụng CONVERT để chuyển đổi chuỗi thành DATE trong SQL
+            query += `, DateOfBirth=CONVERT(DATE, @DateOfBirth)`;
+        }
+
+        query += ` WHERE EmployeeID=@employeeId`;
+
+        // Tạo request
+        const request = pool.request()
+            .input("employeeId", sql.Int, req.user.employeeId)
+            .input("FullName", sql.NVarChar, data.FullName)
+            .input("Gender", sql.NVarChar, data.Gender)
+            .input("Email", sql.NVarChar, data.Email)
+            .input("PhoneNumber", sql.NVarChar, data.PhoneNumber || '')
+            .input("Status", sql.NVarChar, data.Status);
+
+        // Thêm tham số DateOfBirth nếu có giá trị
+        if (hasValidDate && dateOfBirth) {
+            // Sử dụng VarChar thay vì Date để tránh lỗi chuyển đổi
+            request.input("DateOfBirth", sql.VarChar, dateOfBirth);
+        }
+
+        console.log("Executing SQL query:", query);
+
+        try {
+            await request.query(query);
+            console.log("Profile updated successfully");
+        } catch (error) {
+            console.error("SQL Error:", error);
+            throw error;
+        }
+
+        res.json({ message: "Profile updated" });
     } catch (error) {
+        console.error("Error updating profile:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });

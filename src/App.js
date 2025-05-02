@@ -5,7 +5,7 @@ import AdminRoutes from "./Routes/AdminRoutes";
 import HumanResourceRoutes from "./Routes/HumanResourceRoutes";
 import EmployeeRoutes from "./Routes/EmployeeRoutes";
 import Login from "./Login/Login";
-import EmployeeLayout from"./layouts/LayoutEmployee"
+import EmployeeLayout from"./layouts/LayoutEmployee";
 function App() {
   return (
     <Router>

@@ -8,13 +8,28 @@ const API_URL = 'http://localhost:3001/api/employee';
 
 // Hàm chuẩn hóa dữ liệu profile cho cả hai DB
 function normalizeProfileData(apiData) {
+    // Xử lý DateOfBirth để lưu cả định dạng hiển thị và định dạng gửi lên server
+    let dateOfBirthFormatted = '';
+    let dateOfBirthRaw = '';
+
+    if (apiData.DateOfBirth) {
+        const date = new Date(apiData.DateOfBirth);
+        dateOfBirthFormatted = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        dateOfBirthRaw = date.toISOString().split('T')[0]; // Format YYYY-MM-DD for input type="date"
+    } else if (apiData.dateOfBirth) {
+        const date = new Date(apiData.dateOfBirth);
+        dateOfBirthFormatted = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        dateOfBirthRaw = date.toISOString().split('T')[0]; // Format YYYY-MM-DD for input type="date"
+    }
+
+    console.log("API Data DateOfBirth:", apiData.DateOfBirth);
+    console.log("Formatted DateOfBirth:", dateOfBirthFormatted);
+    console.log("Raw DateOfBirth for input:", dateOfBirthRaw);
+
     return {
         fullName: apiData.FullName || apiData.fullName || '',
-        dateOfBirth: apiData.DateOfBirth
-            ? new Date(apiData.DateOfBirth).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
-            : (apiData.dateOfBirth
-                ? new Date(apiData.dateOfBirth).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
-                : ''),
+        dateOfBirth: dateOfBirthFormatted, // Định dạng hiển thị
+        dateOfBirthRaw: dateOfBirthRaw, // Định dạng cho input type="date"
         gender: apiData.Gender || apiData.gender || '',
         nationality: apiData.Nationality || apiData.nationality || 'Vietnamese',
         email: apiData.Email || apiData.email || '',

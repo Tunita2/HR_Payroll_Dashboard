@@ -14,19 +14,22 @@ import Reports from "../components/Admin/Reports";
 // import AlertsAndNotifications from "../components/Admin/AlertsAndNotifications";
 import Alerts from "../components/Admin/Alerts";
 import Notifications from "../components/Admin/Notifications";
+// Development Tools
+import CodebaseInfo from "../components/Admin/CodebaseInfo";
 
 const AdminRoutes = () => {
   return (
     <Route path="/admin" element={<LayoutAdmin />}>
-          <Route path="employees" element={<EmployeeTable />} />
-          <Route path="dividends" element={<DividendTable />} />
-          <Route path="departments" element={<DepartmentTable />} />
-          <Route path="positions" element={<PositionTable />} />
-          <Route path="salaries" element={<SalaryTable />} />
-          <Route path="attendances" element={<AttendanceTable />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="alerts" element={<Alerts />}/>
-          <Route path="notifications" element={<Notifications />}/>
+      <Route path="employees" element={<EmployeeTable />} />
+      <Route path="dividends" element={<DividendTable />} />
+      <Route path="departments" element={<DepartmentTable />} />
+      <Route path="positions" element={<PositionTable />} />
+      <Route path="salaries" element={<SalaryTable />} />
+      <Route path="attendances" element={<AttendanceTable />} />
+      <Route path="reports" element={<Reports />} />
+      <Route path="alerts" element={<Alerts />} />
+      <Route path="notifications" element={<Notifications />} />
+      <Route path="codebase" element={<CodebaseInfo />} />
     </Route>
   );
 };

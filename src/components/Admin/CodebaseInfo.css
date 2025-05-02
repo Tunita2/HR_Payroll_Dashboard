@@ -1,0 +1,98 @@
+.codebase-info-container {
+  margin: 20px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.stat-card {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card.wide {
+  grid-column: span 2;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 8px;
+  color: #1890ff;
+}
+
+.extension-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.extension-item {
+  display: flex;
+  justify-content: space-between;
+  background-color: #e6f7ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.extension-name {
+  font-family: monospace;
+}
+
+.extension-count {
+  font-weight: bold;
+}
+
+.search-container {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.structure-container {
+  margin-top: 16px;
+}
+
+.last-indexed {
+  margin-top: 16px;
+  color: #888;
+  font-style: italic;
+}
+
+/* Notification indicator styles */
+.notification-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.notification-indicator[data-type="error"] {
+  background-color: #ff4d4f;
+}
+
+.notification-indicator[data-type="warning"] {
+  background-color: #faad14;
+}
+
+.notification-indicator[data-type="info"] {
+  background-color: #1890ff;
+}
+
+.notification-indicator[data-type="success"] {
+  background-color: #52c41a;
+}

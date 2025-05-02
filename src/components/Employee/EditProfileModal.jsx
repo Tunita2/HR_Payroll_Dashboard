@@ -8,10 +8,41 @@ import {
 
 // Chuẩn hóa dữ liệu gửi về backend
 function normalizeProfileForAPI(formData) {
+  // Đảm bảo DateOfBirth được gửi đúng định dạng cho SQL Server (YYYY-MM-DD)
+  let dateOfBirth = '';
+
+  if (formData.dateOfBirth) {
+    // Kiểm tra xem đã là định dạng YYYY-MM-DD chưa
+    if (/^\d{4}-\d{2}-\d{2}$/.test(formData.dateOfBirth)) {
+      // Đã đúng định dạng, sử dụng trực tiếp
+      dateOfBirth = formData.dateOfBirth;
+    } else {
+      // Thử chuyển đổi từ định dạng khác
+      try {
+        const date = new Date(formData.dateOfBirth);
+        if (!isNaN(date.getTime())) {
+          // Format lại thành YYYY-MM-DD
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          dateOfBirth = `${year}-${month}-${day}`;
+        }
+      } catch (err) {
+        console.error("Error formatting date:", err);
+      }
+    }
+  }
+
+  // Đảm bảo Gender được gửi đúng định dạng
+  let gender = formData.gender || '';
+
+  console.log("Sending to API - DateOfBirth:", dateOfBirth);
+  console.log("Sending to API - Gender:", gender);
+
   return {
     FullName: formData.fullName || '',
-    DateOfBirth: formData.dateOfBirth || '',
-    Gender: formData.gender || '',
+    DateOfBirth: dateOfBirth,
+    Gender: gender,
     Email: formData.email || '',
     PhoneNumber: formData.phone || '',
     // Không gửi DepartmentID và PositionID vì chúng không thể được thay đổi bởi employee
@@ -30,8 +61,21 @@ const EditProfileModal = ({ profileData, onSave, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const apiData = normalizeProfileForAPI(formData);
-    onSave(formData, apiData);
+
+    // Tạo bản sao của formData để xử lý
+    const processedFormData = { ...formData };
+
+    // Đảm bảo dateOfBirth được lấy từ input type="date" (dateOfBirthRaw)
+    if (formData.dateOfBirthRaw) {
+      // Sử dụng giá trị từ input type="date" (đã ở định dạng YYYY-MM-DD)
+      processedFormData.dateOfBirth = formData.dateOfBirthRaw;
+    }
+
+    console.log("Form data before API submission:", processedFormData);
+    const apiData = normalizeProfileForAPI(processedFormData);
+    console.log("API data for submission:", apiData);
+
+    onSave(processedFormData, apiData);
   };
 
   return (
@@ -50,7 +94,7 @@ const EditProfileModal = ({ profileData, onSave, onCancel }) => {
             <Section icon={<FaUser />} title="Personal Information">
               <InputRow>
                 <InputField id="fullName" name="fullName" label="Full Name" value={formData.fullName} onChange={handleChange} />
-                <InputField id="dateOfBirth" name="dateOfBirth" label="Date of Birth" value={formData.dateOfBirth} onChange={handleChange} type="date" />
+                <InputField id="dateOfBirth" name="dateOfBirth" label="Date of Birth" value={formData.dateOfBirthRaw || ''} onChange={handleChange} type="date" />
               </InputRow>
               <InputRow>
                 <SelectField id="gender" name="gender" label="Gender" value={formData.gender} onChange={handleChange} options={['Male', 'Female', 'Other']} />
