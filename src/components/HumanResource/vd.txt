@@ -1,3 +1,209 @@
+import React, { useEffect, useState } from "react";
+import "../../styles/HumanResourceStyles/HR_DepartmentTable.css";
+
+const HR_DepartmentTable = ({ style }) => {
+  const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newDepartmentName, setNewDepartmentName] = useState("");
+  const [addingDepartment, setAddingDepartment] = useState(false);
+  const [addError, setAddError] = useState(null);
+
+  // Fetch departments
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  const fetchDepartments = () => {
+    fetch("http://localhost:5000/api/departments")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("✅ Dữ liệu nhận được:", data);
+        setDepartments(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  };
+
+  //THÊM PHÒNG BAN
+  const handleAddDepartment = async (e) => {
+    e.preventDefault();
+  
+    // Kiểm tra tên phòng ban có trống không
+    if (!newDepartmentName.trim()) {
+      setAddError("Tên phòng ban không được để trống");
+      return;
+    }
+  
+    setAddingDepartment(true);
+    setAddError(null);
+  
+    try {
+      const res = await fetch("http://localhost:5000/api/department/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ departmentName: newDepartmentName }),
+      });
+  
+      console.log('Response status:', res.status); // Log status code để kiểm tra phản hồi từ server
+  
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Không thể thêm phòng ban");
+      }
+  
+      const data = await res.json();
+      console.log("✅ Phòng ban đã được thêm:", data);
+  
+      setNewDepartmentName("");
+      setShowAddModal(false);
+      fetchDepartments();
+    } catch (err) {
+      setAddError(err.message);
+    } finally {
+      setAddingDepartment(false);
+    }
+  };
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  return (
+    <div>
+      <div className="depart-table-header">
+        <div>Department list</div>
+
+        {/* Button add - thêm phòng ban và delete - xóa phòng ban */}
+        <div className="table-button-container">
+          <button
+            className="table-button add"
+            onClick={() => setShowAddModal(true)}
+          >
+            <strong>Add</strong>
+          </button>
+          <button className="table-button">
+            <strong>Delete</strong>
+          </button>
+        </div>
+      </div>
+
+      {showAddModal && (
+        <div className="modal-overlay">
+          <div className="add-department-modal">
+            <h3>Add New Department</h3>
+            {addError && <div className="error-message">{addError}</div>}
+            <form onSubmit={handleAddDepartment}>
+              <div className="form-group">
+                {/* <label htmlFor="departmentName">Department Name:</label> */}
+                <input
+                  type="text"
+                  id="departmentName"
+                  value={newDepartmentName}
+                  onChange={(e) => setNewDepartmentName(e.target.value)}
+                  placeholder="Enter department name"
+                  required
+                />
+              </div>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn-cancel"
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setNewDepartmentName("");
+                    setAddError(null);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-submit"
+                  disabled={addingDepartment}
+                >
+                  {addingDepartment ? "Adding..." : "Add Department"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bảng hiển thị dữ liệu phòng ban */}
+      <div className="depart-table-container" style={style}>
+        <table className="depart-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Department name</th>
+              <th>Created At</th>
+              <th>Updated At</th>
+            </tr>
+          </thead>
+          <tbody>
+            {departments.map((dept, index) => (
+              <tr key={index} className="depart-table-row">
+                <td>{dept.id}</td>
+                <td>{dept.departmentName}</td>
+                <td>{dept.createdAt}</td>
+                <td>{dept.updatedAt}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+HR_DepartmentTable.defaultProps = {
+  style: {},
+};
+
+export default HR_DepartmentTable;
+
+
+
+
+//SEARCH
+import React from 'react';
+import '../../styles/GeneralStyles/SearchBar.css';
+
+const SearchBar = ({ onSearch = () => {}, placeholder = "Search" }) => {
+  return (
+    <div className="search-bar">
+        <input className="search-text" type='text' placeholder='Search'></input>
+      <img 
+        src="https://dashboard.codeparrot.ai/api/image/Z-NkkwzgNnZiU9gN/frame-9.png" 
+        alt="search" 
+        className="search-icon"
+        width={24}
+        height={24}
+      />
+    </div>
+  );
+};
+
+export default SearchBar;
+
+
 // src/components/HumanResource/HR_DepartmentTable.jsx
 import React, { useEffect, useState } from "react";
 import SearchBar from "../General/SearchBar"; // Đảm bảo đúng path

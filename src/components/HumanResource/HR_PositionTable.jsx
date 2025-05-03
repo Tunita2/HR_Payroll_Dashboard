@@ -1,15 +1,46 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../../styles/HumanResourceStyles/HR_PositionTable.css";
 
 const HR_PositionTable = ({ style }) => {
-  const job = [
-    {
-      id: "01",
-      positionName: "Sale",
-      createdAt: "Alex",
-      updatedAt: "Minh",
-    },
-  ];
+  // const job = [
+  //   {
+  //     id: "01",
+  //     positionName: "Sale",
+  //     createdAt: "Alex",
+  //     updatedAt: "Minh",
+  //   },
+  // ];
+
+  const [job, setPosition] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/positions")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("✅ Dữ liệu nhận được:", data); // THÊM DÒNG NÀY
+        setPosition(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div>

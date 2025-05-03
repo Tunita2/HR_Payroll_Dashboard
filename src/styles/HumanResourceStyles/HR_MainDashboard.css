@@ -1,3 +1,9 @@
+@font-face {
+  font-family: "Roboto Regular";
+  src: url("../../assets/fonts/Poppins-Regular.otf") format("truetype");
+}
+
+
 .dashboard-title-container {
   display: flex;
   flex-direction: column; /* Xếp theo chiều dọc */
@@ -30,6 +36,7 @@
   gap: 8px;
   margin-top: 130px;
   font-size: 14px;
+  font-family: "Roboto Regular";
 }
 
 /* Responsive giữ nguyên */
