@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MdOutlineRefresh } from "react-icons/md";
 
 import {
@@ -27,79 +27,36 @@ const HR_Report = ({ style = {} }) => {
   const [timeRange, setTimeRange] = useState("year");
   const [notesActiveTab, setNotesActiveTab] = useState("evaluations");
 
-  // Sample employee data
-  const employees = [
-    {
-      EmployeeID: "EMP001",
-      FullName: "John Doe",
-      Position: "HR Manager",
-      Department: "Human Resources",
-      Status: "Active",
-    },
-    {
-      EmployeeID: "EMP002",
-      FullName: "Jane Smith",
-      Position: "Software Engineer",
-      Department: "Engineering",
-      Status: "Active",
-    },
-    {
-      EmployeeID: "EMP003",
-      FullName: "Robert Johnson",
-      Position: "Marketing Specialist",
-      Department: "Marketing",
-      Status: "Active",
-    },
-    {
-      EmployeeID: "EMP004",
-      FullName: "Emily Davis",
-      Position: "Financial Analyst",
-      Department: "Finance",
-      Status: "Active",
-    },
-    {
-      EmployeeID: "EMP005",
-      FullName: "Michael Wilson",
-      Position: "IT Support",
-      Department: "IT",
-      Status: "Inactive",
-    },
-    {
-      EmployeeID: "EMP006",
-      FullName: "Sarah Brown",
-      Position: "UX Designer",
-      Department: "Design",
-      Status: "Active",
-    },
-    {
-      EmployeeID: "EMP007",
-      FullName: "David Lee",
-      Position: "Project Manager",
-      Department: "Engineering",
-      Status: "Active",
-    },
-    {
-      EmployeeID: "EMP008",
-      FullName: "Lisa Wang",
-      Position: "Data Analyst",
-      Department: "Analytics",
-      Status: "Active",
-    },
-    {
-      EmployeeID: "EMP009",
-      FullName: "James Taylor",
-      Position: "Sales Representative",
-      Department: "Sales",
-      Status: "Inactive",
-    },
-    {
-      EmployeeID: "EMP010",
-      FullName: "Jennifer Garcia",
-      Position: "Customer Support",
-      Department: "Support",
-      Status: "Active",
-    },
-  ];
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [count, setCount] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [empRes, countRes] = await Promise.all([
+          fetch("http://localhost:5000/api/employees"),
+          fetch("http://localhost:5000/api/report/count")
+        ]);
+
+        if (!empRes.ok || !countRes.ok) throw new Error("Failed to fetch data");
+
+        const employees = await empRes.json();
+        const count = await countRes.json();
+
+        setEmployees(employees);
+        setCount(count);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Sample HR movement data
   const monthlyData = [
@@ -212,13 +169,33 @@ const HR_Report = ({ style = {} }) => {
     },
   ];
 
-  const filteredEmployees = employees.filter(
-    (employee) =>
-      employee.FullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.Department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.Position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.EmployeeID.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // const filteredEmployees = employees.filter(
+  //   (employee) =>
+  //     employee.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     employee.departmentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     employee.positionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     employee.employeeID.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
+
+  const filteredEmployees = employees.filter((employee) => {
+    // Kiểm tra nếu searchQuery rỗng thì hiển thị tất cả
+    if (!searchQuery) return true;
+
+    // Chuyển các giá trị thành chuỗi an toàn trước khi so sánh
+    const fullName = String(employee.fullName || "");
+    const departmentName = String(employee.departmentName || "");
+    const positionName = String(employee.positionName || "");
+    const employeeID = String(employee.employeeID || "");
+
+    const query = searchQuery.toLowerCase();
+
+    return (
+      fullName.toLowerCase().includes(query) ||
+      departmentName.toLowerCase().includes(query) ||
+      positionName.toLowerCase().includes(query) ||
+      employeeID.toLowerCase().includes(query)
+    );
+  });
 
   const getDataByTimeRange = () => {
     switch (timeRange) {
@@ -254,13 +231,15 @@ const HR_Report = ({ style = {} }) => {
     { id: "notes", label: "Notes", width: "150px" },
   ];
 
-  const cards = [
-    { title: "Total Employees", value: "155" },
-    { title: "Total Department", value: "15" },
-    { title: "Total Position", value: "20" },
-    { title: "Total Male", value: "110" },
-    { title: "Total Female", value: "40" },
-  ];
+  const cards = count
+    ? [
+        { title: "Total Employees", value: count.totalEmployees },
+        { title: "Total Department", value: count.totalDepartments },
+        { title: "Total Position", value: count.totalPositions },
+        { title: "Total Male", value: count.totalMale },
+        { title: "Total Female", value: count.totalFemale },
+      ]
+    : [];
 
   // Function to render the Detail Staff View
   const renderDetailStaffView = () => {
@@ -283,25 +262,30 @@ const HR_Report = ({ style = {} }) => {
               <tr>
                 <th>Employee ID</th>
                 <th>Full Name</th>
-                <th>Position</th>
                 <th>Department</th>
+                <th>Position</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {filteredEmployees.map((employee) => (
-                <tr key={employee.EmployeeID}>
-                  <td>{employee.EmployeeID}</td>
-                  <td>{employee.FullName}</td>
-                  <td>{employee.Position}</td>
-                  <td>{employee.Department}</td>
+                <tr key={employee.employeeID}>
+                  <td>{employee.employeeID}</td>
+                  <td>{employee.fullName}</td>
+                  <td>{employee.departmentName}</td>
+                  <td>{employee.positionName}</td>
                   <td>
                     <span
                       className={`hr-status-badge ${
-                        employee.Status === "Active" ? "active" : "inactive"
+                        employee.status === "Đang làm việc"
+                          ? "active"
+                          : "inactive"
                       }`}
                     >
-                      {employee.Status}
+                      {employee.status === "Đang làm việc"
+                          ? "Active"
+                          : "Inactive"
+                      }
                     </span>
                   </td>
                 </tr>

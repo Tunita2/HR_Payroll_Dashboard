@@ -1,10 +1,16 @@
+// src/components/General/SearchBar.jsx
 import React from 'react';
 import '../../styles/GeneralStyles/SearchBar.css';
 
 const SearchBar = ({ onSearch = () => {}, placeholder = "Search" }) => {
   return (
     <div className="search-bar">
-        <input className="search-text" type='text' placeholder='Search'></input>
+      <input
+        className="search-text"
+        type="text"
+        placeholder={placeholder}
+        onChange={(e) => onSearch(e.target.value)}
+      />
       <img 
         src="https://dashboard.codeparrot.ai/api/image/Z-NkkwzgNnZiU9gN/frame-9.png" 
         alt="search" 

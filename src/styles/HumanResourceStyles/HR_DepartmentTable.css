@@ -1,3 +1,14 @@
+@font-face {
+  font-family: "Roboto Condensed Medium";
+  src: url("../../assets/fonts/Roboto_Condensed-Medium.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Roboto Semi Bold";
+  src: url("../../assets/fonts/Roboto-Bold.ttf") format("truetype");
+}
+
+
 /* Container chính */
 .depart-table-container {
   width: 100%;
@@ -63,7 +74,7 @@
   border-style: solid;
   border-width: 10px;
   border-color: white;
-  font-family: "Poppins", sans-serif;
+  font-family: "Roboto Condensed Medium";
 }
 
 .depart-table thead {
@@ -78,6 +89,7 @@
   padding: 14px 20px;
   text-align: center;
   border-right: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: "Roboto Semi Bold";
 }
 
 .depart-table td {
@@ -88,9 +100,110 @@
   text-align: center;
   max-height: 60vh;
   padding: 20px;
+  
 }
 
 .depart-table-row:hover {
   background-color: rgba(255, 255, 255, 0.1);
   cursor: pointer;
 }
+
+/* Phần ô cửa sổ thêm phòng ban */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.add-department-modal {
+  background-color: rgba(30, 4, 144, 0.6);
+  border-radius: 8px;
+  padding: 20px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-department-modal h3 {
+  margin-top: 0;
+  color: #ffffff;
+  font-family: "Poppins";
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 15px;
+}
+/* 
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #000000;
+} */
+
+.form-group input {
+  width: 100px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.floating-label {
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background-color: rgba(30, 4, 144, 0.6); /* hoặc background màu modal của bạn */
+  padding: 0 5px;
+  font-size: 12px;
+  color: white;
+  font-family: "Poppins", sans-serif;
+  pointer-events: none;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  margin-left: 10px;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  background-color: #a99e9e;
+  color: #ffffff;
+}
+
+.btn-submit {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-submit:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #f44336;
+  margin-bottom: 10px;
+  padding: 8px;
+  background-color: #ffebee;
+  border-radius: 4px;
+}
+

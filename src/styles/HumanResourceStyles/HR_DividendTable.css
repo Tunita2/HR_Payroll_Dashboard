@@ -1,3 +1,13 @@
+@font-face {
+  font-family: "Roboto Condensed Medium";
+  src: url("../../assets/fonts/Roboto_Condensed-Medium.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Roboto Semi Bold";
+  src: url("../../assets/fonts/Roboto-Bold.ttf") format("truetype");
+}
+
 /* Container chính */
 .dividend-table-container {
   width: 100%;
@@ -63,7 +73,7 @@
   border-style: solid;
   border-width: 10px;
   border-color: white;
-  font-family: "Poppins", sans-serif;
+  font-family: "Roboto Condensed Medium";
   
 }
 
@@ -79,6 +89,7 @@
   padding: 14px 20px;
   text-align: center;
   border-right: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: "Roboto Semi Bold";
 }
 
 .dividend-table td {
