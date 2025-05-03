@@ -54,13 +54,13 @@ const SalaryTable = () => {
             <div className="history">Salary history</div>
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <label htmlFor="month-filter">Sort by month:</label>
+            <label htmlFor="month-filter">Month:</label>
             <select
               id="month-filter"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
             >
-              <option value="all">Tất cả</option>
+              <option value="all">All Month</option>
               {allMonths.map((month, index) => (
                 <option key={index} value={month}>{month}</option>
               ))}

@@ -7,9 +7,8 @@
   padding: 0;
 }
 
-body {
+.body {
   font-family: "Roboto", "Segoe UI", sans-serif;
-  background-color: #f3f4f6;
   color: gray;
   line-height: 1.5;
 }
@@ -49,9 +48,10 @@ header .title-header {
 
 .date-selector input {
   padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  border: 1px solid #ccc;
-  color: gray;
+  border-radius: 10px;
+  border: 1px solid white;
+  background-color: #060070;
+  color: white;
 }
 
 /* Dashboard Grid */
@@ -294,7 +294,7 @@ footer {
 }
 
 /* Button styles */
-.btn {
+.btns {
   display: inline-block;
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
@@ -328,10 +328,6 @@ footer {
   footer,
   .date-selector {
     display: none;
-  }
-
-  body {
-    background: white;
   }
 
   .container {

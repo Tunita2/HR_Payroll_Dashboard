@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { mysqlPool } = require("./mysqlConfig");
+const mysqlPool = require("./mysqlConfig");
 const promisePool = mysqlPool.promise();
 const { conn, sql } = require("./sqlServerConfig");
 

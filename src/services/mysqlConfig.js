@@ -5,7 +5,9 @@ const mysqlPool = mysql.createPool({
   user: "root",
   password: "123456",
   database: "payroll",
-  connectionLimit: "10",
+  connectionLimit: 10,
+  waitForConnections: true,
+  queueLimit: 0
 });
 
-module.exports = { mysqlPool };
+module.exports = mysqlPool;
