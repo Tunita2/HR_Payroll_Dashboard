@@ -30,6 +30,14 @@ npm test
 npx jest admin-api.test.js
 ```
 
+Để chạy các test cho Employee API:
+
+```bash
+npx jest employee-api.test.js
+npx jest employee-data-sync.test.js
+npx jest employee-api-validation.test.js
+```
+
 ## Các test case
 
 ### Admin API Tests
@@ -70,6 +78,25 @@ npx jest admin-api.test.js
 
 9. **Data Synchronization Tests**
    - Kiểm tra đồng bộ dữ liệu giữa SQL Server và MySQL
+
+### Employee API Tests
+
+1. **GET /profile**
+   - Kiểm tra lấy thông tin hồ sơ nhân viên
+   - Kiểm tra xử lý khi không tìm thấy nhân viên
+
+2. **PUT /profile**
+   - Kiểm tra cập nhật thông tin hồ sơ nhân viên
+
+3. **GET /payroll**
+   - Kiểm tra lấy dữ liệu lương và điểm danh
+
+4. **Data Synchronization Tests**
+   - Kiểm tra tính nhất quán dữ liệu giữa hai hệ thống
+   - Kiểm tra liên kết dữ liệu lương với nhân viên
+   - Kiểm tra tính nhất quán sau khi cập nhật
+
+Để biết thêm chi tiết về các test case cho Employee API, vui lòng xem file `employee-tests-README.md`.
 
 ## Báo cáo test coverage
 

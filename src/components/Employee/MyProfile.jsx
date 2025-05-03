@@ -142,8 +142,15 @@ const MyProfile = () => {
             alert('Profile updated successfully!');
         } catch (err) {
             console.error('Error updating profile:', err);
-            setError('Failed to update profile. Please try again.');
-            alert('Failed to update profile. Please try again.');
+
+            // Hiển thị thông báo lỗi cụ thể từ API nếu có
+            let errorMessage = 'Failed to update profile. Please try again.';
+            if (err.response && err.response.data && err.response.data.error) {
+                errorMessage = err.response.data.error;
+            }
+
+            setError(errorMessage);
+            alert(errorMessage);
         } finally {
             setLoading(false);
         }

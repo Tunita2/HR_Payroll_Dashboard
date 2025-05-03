@@ -15,7 +15,6 @@ import Reports from "../components/Admin/Reports";
 import Alerts from "../components/Admin/Alerts";
 import Notifications from "../components/Admin/Notifications";
 // Development Tools
-import CodebaseInfo from "../components/Admin/CodebaseInfo";
 
 const AdminRoutes = () => {
   return (
@@ -29,9 +28,9 @@ const AdminRoutes = () => {
       <Route path="reports" element={<Reports />} />
       <Route path="alerts" element={<Alerts />} />
       <Route path="notifications" element={<Notifications />} />
-      <Route path="codebase" element={<CodebaseInfo />} />
     </Route>
   );
 };
 
 export default AdminRoutes;
+

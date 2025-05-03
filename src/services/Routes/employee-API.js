@@ -51,7 +51,18 @@ router.put("/profile", verifyToken, async (req, res) => {
         const data = req.body;
 
         console.log("Received data for update:", data);
-        
+
+        // Xác thực các trường bắt buộc
+        if (!data.FullName || !data.Gender || !data.Email || !data.Status) {
+            return res.status(400).json({ error: "Missing required fields: FullName, Gender, Email, and Status are required" });
+        }
+
+        // Xác thực định dạng email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(data.Email)) {
+            return res.status(400).json({ error: "Invalid email format" });
+        }
+
         let dateOfBirth = null;
         let hasValidDate = false;
 
@@ -128,7 +139,7 @@ router.put("/profile", verifyToken, async (req, res) => {
             throw error;
         }
 
-        res.json({ message: "Profile updated" });
+        res.json({ message: "Profile updated successfully" });
     } catch (error) {
         console.error("Error updating profile:", error);
         res.status(500).json({ error: "Internal server error" });

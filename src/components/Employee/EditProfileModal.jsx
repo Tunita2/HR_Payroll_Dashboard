@@ -56,7 +56,7 @@ function normalizeProfileForAPI(formData) {
     PhoneNumber: formData.phone || '',
     // Không gửi DepartmentID và PositionID vì chúng không thể được thay đổi bởi employee
     // Chỉ gửi các trường mà employee được phép cập nhật
-    Status: formData.status || ''
+    Status: formData.status || 'Active' // Đảm bảo luôn có giá trị Status
   };
 }
 
@@ -138,6 +138,7 @@ const EditProfileModal = ({ profileData, onSave, onCancel }) => {
               </InputRow>
               <InputRow>
                 <InputField id="position" name="position" label="Position" icon={<FaBriefcase />} value={formData.position} onChange={handleChange} disabled />
+                <SelectField id="status" name="status" label="Status" value={formData.status || 'Active'} onChange={handleChange} options={['Active', 'Inactive', 'On Leave']} />
               </InputRow>
             </Section>
           </div>

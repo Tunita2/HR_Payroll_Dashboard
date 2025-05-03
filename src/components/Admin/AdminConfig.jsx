@@ -3,7 +3,6 @@ import { IoIosPeople } from "react-icons/io";
 import { GiPayMoney } from "react-icons/gi";
 import { TbReportSearch } from "react-icons/tb";
 import { RiAlertLine } from "react-icons/ri";
-import { FiCode } from "react-icons/fi";
 
 import { IoSettings } from "react-icons/io5";
 import { RiLogoutBoxLine } from "react-icons/ri";
@@ -51,12 +50,6 @@ export const menuConfig = [
       { text: "Notifications", path: "/admin/notifications" },
     ],
   },
-  {
-    id: "codebase",
-    icon: FiCode,
-    text: "Codebase",
-    path: "/admin/codebase",
-  },
 ];
 
 export const settingItems = [
@@ -72,4 +65,5 @@ export const settingItems = [
     path: "/",
   },
 ];
+
 
