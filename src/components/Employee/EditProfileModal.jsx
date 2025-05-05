@@ -114,11 +114,11 @@ const EditProfileModal = ({ profileData, onSave, onCancel }) => {
             {/* Personal Information */}
             <Section icon={<FaUser />} title="Personal Information">
               <InputRow>
-                <InputField id="fullName" name="fullName" label="Full Name" value={formData.fullName} onChange={handleChange} />
-                <InputField id="dateOfBirthRaw" name="dateOfBirthRaw" label="Date of Birth" value={formData.dateOfBirthRaw || ''} onChange={handleChange} type="date" />
+                <InputField id="fullName" name="fullName" label="Full Name" value={formData.fullName} disabled={true} />
+                <InputField id="dateOfBirthRaw" name="dateOfBirthRaw" label="Date of Birth" value={formData.dateOfBirth || ''} disabled={true} />
               </InputRow>
               <InputRow>
-                <SelectField id="gender" name="gender" label="Gender" value={formData.gender} onChange={handleChange} options={['Male', 'Female', 'Other']} />
+                <InputField id="gender" name="gender" label="Gender" value={formData.gender} disabled={true} />
               </InputRow>
             </Section>
 
@@ -138,7 +138,7 @@ const EditProfileModal = ({ profileData, onSave, onCancel }) => {
               </InputRow>
               <InputRow>
                 <InputField id="position" name="position" label="Position" icon={<FaBriefcase />} value={formData.position} onChange={handleChange} disabled />
-                <SelectField id="status" name="status" label="Status" value={formData.status || 'Active'} onChange={handleChange} options={['Active', 'Inactive', 'On Leave']} />
+                <InputField id="status" name="status" label="Status" icon={<FaIdCard />} value={formData.status || 'Active'} disabled={true} />
               </InputRow>
             </Section>
           </div>

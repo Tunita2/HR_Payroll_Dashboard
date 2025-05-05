@@ -1,18 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/mysql");
+const { verifyToken } = require("../Auth/auth-middleware");
 
-const promisePool = pool.promise();
+// Middleware kiểm tra quyền payroll
+function verifyPayroll(req, res, next) {
+  if (req.user?.role !== "payroll") {
+    return res.status(403).json({ error: "Access denied: Payroll staff only" });
+  }
+  next();
+}
+
+// pool đã là promise pool vì mysql.js đã import mysql2/promise
+const promisePool = pool;
 
 // Lấy danh sách attendance
-router.get('/attendance', async (req, res) => {
+router.get('/attendance', verifyToken, verifyPayroll, async (req, res) => {
   try {
     const { year, month } = req.query;
 
     let query = `
-      SELECT 
-          a.AttendanceID, a.EmployeeID, e.FullName, d.DepartmentName, 
-          p.PositionName, a.WorkDays, a.AbsentDays, a.LeaveDays, 
+      SELECT
+          a.AttendanceID, a.EmployeeID, e.FullName, d.DepartmentName,
+          p.PositionName, a.WorkDays, a.AbsentDays, a.LeaveDays,
           a.AttendanceMonth, a.CreatedAt, e.Status
       FROM attendance a
       JOIN employees e ON a.EmployeeID = e.EmployeeID
@@ -38,14 +48,14 @@ router.get('/attendance', async (req, res) => {
 });
 
 // Lấy danh sách salary
-router.get('/salaries', async (req, res) => {
+router.get('/salaries', verifyToken, verifyPayroll, async (req, res) => {
   try {
     const { year, month } = req.query;
 
     let query = `
-      SELECT 
-          s.SalaryID, s.EmployeeID, e.FullName, d.DepartmentName, 
-          p.PositionName, s.SalaryMonth, s.BaseSalary, s.Bonus, 
+      SELECT
+          s.SalaryID, s.EmployeeID, e.FullName, d.DepartmentName,
+          p.PositionName, s.SalaryMonth, s.BaseSalary, s.Bonus,
           s.Deductions, s.NetSalary, s.CreatedAt, e.Status
       FROM salaries s
       JOIN employees e ON s.EmployeeID = e.EmployeeID
@@ -69,13 +79,13 @@ router.get('/salaries', async (req, res) => {
     res.status(500).json({ error: "Failed to fetching salaries records" });
   }
 })
-router.get('/salary', async (req, res) => {
+router.get('/salary', verifyToken, verifyPayroll, async (req, res) => {
   try {
     const { year, month } = req.query;
 
     let query = `
-      SELECT 
-          s.SalaryID, s.EmployeeID, e.FullName, s.SalaryMonth, s.BaseSalary, s.Bonus, 
+      SELECT
+          s.SalaryID, s.EmployeeID, e.FullName, s.SalaryMonth, s.BaseSalary, s.Bonus,
           s.Deductions, s.NetSalary, s.CreatedAt, e.Status
       FROM salaries s
       JOIN employees e ON s.EmployeeID = e.EmployeeID
@@ -98,10 +108,10 @@ router.get('/salary', async (req, res) => {
   }
 })
 
-router.get('/employees', async (req, res) => {
+router.get('/employees', verifyToken, verifyPayroll, async (req, res) => {
   try {
     const [rows] = await promisePool.query(`
-      SELECT e.*, d.DepartmentName, p.PositionName 
+      SELECT e.*, d.DepartmentName, p.PositionName
       FROM employees e
       LEFT JOIN departments d ON e.DepartmentID = d.DepartmentID
       LEFT JOIN positions p ON e.PositionID = p.PositionID
@@ -114,7 +124,7 @@ router.get('/employees', async (req, res) => {
 });
 
 // API GET - Lấy thông tin nhân viên theo ID
-router.get('/employees/:id', async (req, res) => {
+router.get('/employees/:id', verifyToken, verifyPayroll, async (req, res) => {
   const [rows] = await promisePool.query(
     'SELECT * FROM employees WHERE EmployeeID = ?',
     [req.params.id]
@@ -128,19 +138,19 @@ router.get('/employees/:id', async (req, res) => {
 });
 
 // API GET - Lấy danh sách phòng ban
-router.get('/departments', async (req, res) => {
+router.get('/departments', verifyToken, verifyPayroll, async (req, res) => {
   const [rows] = await promisePool.query('SELECT * FROM departments');
   res.json(rows);
 });
 
 // API GET - Lấy danh sách chức vụ
-router.get('/positions', async (req, res) => {
+router.get('/positions', verifyToken, verifyPayroll, async (req, res) => {
   const [rows] = await promisePool.query('SELECT * FROM positions');
   res.json(rows);
 });
 
 // API GET - Lấy lịch sử lương của nhân viên
-router.get('/salaries/employee/:id', async (req, res) => {
+router.get('/salaries/employee/:id', verifyToken, verifyPayroll, async (req, res) => {
   const [rows] = await promisePool.query(
     'SELECT * FROM salaries WHERE EmployeeID = ? ORDER BY SalaryMonth DESC',
     [req.params.id]
@@ -149,7 +159,7 @@ router.get('/salaries/employee/:id', async (req, res) => {
 });
 
 // API GET - Lấy lịch sử lương của nhân viên theo năm
-router.get('/salaries/employee/:id/year/:year', async (req, res) => {
+router.get('/salaries/employee/:id/year/:year', verifyToken, verifyPayroll, async (req, res) => {
   const [rows] = await promisePool.query(
     'SELECT * FROM salaries WHERE EmployeeID = ? AND YEAR(SalaryMonth) = ? ORDER BY SalaryMonth DESC',
     [req.params.id, req.params.year]
@@ -158,7 +168,7 @@ router.get('/salaries/employee/:id/year/:year', async (req, res) => {
 });
 
 // API GET - Lấy dữ liệu chấm công của nhân viên
-router.get('/attendance/employee/:id', async (req, res) => {
+router.get('/attendance/employee/:id', verifyToken, verifyPayroll, async (req, res) => {
   const [rows] = await promisePool.query(
     'SELECT * FROM attendance WHERE EmployeeID = ? ORDER BY AttendanceMonth DESC',
     [req.params.id]
@@ -167,7 +177,7 @@ router.get('/attendance/employee/:id', async (req, res) => {
 });
 
 // API GET - Lấy dữ liệu chấm công của nhân viên theo năm
-router.get('/attendance/employee/:id/year/:year', async (req, res) => {
+router.get('/attendance/employee/:id/year/:year', verifyToken, verifyPayroll, async (req, res) => {
   const [rows] = await promisePool.query(
     'SELECT * FROM attendance WHERE EmployeeID = ? AND YEAR(AttendanceMonth) = ? ORDER BY AttendanceMonth DESC',
     [req.params.id, req.params.year]

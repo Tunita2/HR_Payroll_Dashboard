@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify , request
+from flask import Blueprint, jsonify, request
 from db import get_mysql_connection, get_sqlserver_connection
 from datetime import datetime
 import unicodedata
 import re
+from auth import verify_token, verify_hr
 
 employees_bp = Blueprint("employees",__name__)
 
@@ -17,6 +18,8 @@ def convert_fullname_to_username(full_name):
     return username
 
 @employees_bp.route("/api/employees",methods = ["GET"])
+@verify_token
+@verify_hr
 def get_employees():
     try:
         conn = get_sqlserver_connection()
@@ -32,7 +35,7 @@ def get_employees():
         cursor.execute("SELECT PositionID, PositionName FROM Positions")
         positions = cursor.fetchall()
         position_dict = {row[0] : row[1] for row in positions}
-        
+
         # Gọi rõ từng cột
         cursor.execute("SELECT EmployeeID, FullName,DateOfBirth,Gender,PhoneNumber,Email,HireDate,DepartmentID,PositionID,Status, CreatedAt, UpdatedAt FROM Employees")
         employees = []
@@ -53,28 +56,30 @@ def get_employees():
                 "updatedAt": row[11].strftime('%d-%m-%Y %H:%M:%S') if row[3] else None
             }
             employees.append(employee)
-        
+
         return jsonify(employees)
     except Exception as e:
         print("❌ Failed to connect to DB:", e)
         return jsonify({"error": str(e)}), 500
-    
+
 
 # Thêm nhân viên
 @employees_bp.route("/api/employee/add" , methods = ["POST"])
-def add_employees(): 
+@verify_token
+@verify_hr
+def add_employees():
     try:
         data = request.get_json()
-        
+
         required_fields = [
             "fullName" , "dateOfBirth" , "gender" , "phoneNumber" , "email",
             "hireDate" , "departmentID" , "positionID" , "status" , "role"
         ]
 
         missing_fields = [field for field in required_fields if field not in data or not data[field]]
-        if missing_fields: 
+        if missing_fields:
             return jsonify({"error": f"Missing fields : {', '.join(missing_fields)}"}), 400
-        
+
         # Ket noi database
         sqlserver_conn = get_sqlserver_connection()
         sqlserver_cursor = sqlserver_conn.cursor()
@@ -82,13 +87,13 @@ def add_employees():
         mysql_conn = get_mysql_connection()
         mysql_cursor = mysql_conn.cursor()
 
-        #LỆNH SQL_SERVER CHÈN 
+        #LỆNH SQL_SERVER CHÈN
         query_sqlserver = """
-            INSERT INTO Employees 
-                (FullName, DateOfBirth , Gender , PhoneNumber, Email, HireDate, 
+            INSERT INTO Employees
+                (FullName, DateOfBirth , Gender , PhoneNumber, Email, HireDate,
                 DepartmentID, PositionID, Status, CreatedAt , UpdatedAt)
             OUTPUT INSERTED.EmployeeID
-            VALUES 
+            VALUES
                 (? , ? , ? , ? , ? , ? , ? , ? , ? , GETDATE() , GETDATE())
         """
         query_sqlserver_account = """
@@ -100,7 +105,7 @@ def add_employees():
 
         #LỆNH MYSQL CHÈN
         query_mysql = """
-            INSERT INTO employees 
+            INSERT INTO employees
                 (EmployeeID , FullName , DepartmentID , PositionID , Status)
             VALUES
                 (%s , %s , %s , %s , %s)
@@ -155,7 +160,7 @@ def add_employees():
             'createdAt': current_time,
             'updatedAt': current_time
         }), 201
-    
+
     except Exception as e:
         print("Failed to add employee: ",e)
         return jsonify({"error" : str(e)}),500
@@ -163,6 +168,8 @@ def add_employees():
 
 #Cập nhật nhân viên (phòng ban , vị trí , status)
 @employees_bp.route("/api/employee/update/<int:employee_id>", methods=["PUT"])
+@verify_token
+@verify_hr
 def update_employee(employee_id):
     try:
         data = request.get_json()
@@ -217,6 +224,8 @@ def update_employee(employee_id):
 
 # Xóa nhân viên bằng ID
 @employees_bp.route("/api/employee/delete/<int:employee_id>", methods=["DELETE"])
+@verify_token
+@verify_hr
 def delete_employee(employee_id):
     sqlserver_deleted = False
     mysql_deleted = False
@@ -243,7 +252,7 @@ def delete_employee(employee_id):
         else:
             sql_cursor.execute("DELETE FROM accounts WHERE EmployeeID=?" , (employee_id,))
             sql_conn.commit()
-            
+
             sql_cursor.execute("DELETE FROM Employees WHERE EmployeeID = ?", (employee_id,))
             sql_conn.commit()
 
@@ -257,7 +266,7 @@ def delete_employee(employee_id):
 
         sql_cursor.close()
         sql_conn.close()
-        
+
         mysql_cursor.close()
         mysql_conn.close()
 

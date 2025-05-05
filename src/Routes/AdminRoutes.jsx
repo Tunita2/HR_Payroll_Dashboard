@@ -1,6 +1,7 @@
 import React from "react";
 import { Route } from "react-router-dom";
 import LayoutAdmin from "../layouts/LayoutAdmin";
+import { ProtectedRoute } from "../Login/Login";
 // HR
 import EmployeeTable from "../components/Admin/HumanResource/EmployeeTable";
 import DividendTable from "../components/Admin/HumanResource/DividendTable";
@@ -9,6 +10,7 @@ import PositionTable from "../components/Admin/HumanResource/PositionTable";
 // Payroll
 import SalaryTable from "../components/Admin/Payroll/SalaryTable";
 import AttendanceTable from "../components/Admin/Payroll/AttendanceTable";
+import History from "../components/Admin/Payroll/History";
 // General
 import Reports from "../components/Admin/Reports";
 // import AlertsAndNotifications from "../components/Admin/AlertsAndNotifications";
@@ -18,12 +20,17 @@ import Notifications from "../components/Admin/Notifications";
 
 const AdminRoutes = () => {
   return (
-    <Route path="/admin" element={<LayoutAdmin />}>
+    <Route path="/admin" element={
+      <ProtectedRoute allowedRoles="admin">
+        <LayoutAdmin />
+      </ProtectedRoute>
+    }>
       <Route path="employees" element={<EmployeeTable />} />
       <Route path="dividends" element={<DividendTable />} />
       <Route path="departments" element={<DepartmentTable />} />
       <Route path="positions" element={<PositionTable />} />
       <Route path="salaries" element={<SalaryTable />} />
+      <Route path="salaries/history" element={<History />} />
       <Route path="attendances" element={<AttendanceTable />} />
       <Route path="reports" element={<Reports />} />
       <Route path="alerts" element={<Alerts />} />

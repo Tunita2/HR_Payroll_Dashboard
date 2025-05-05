@@ -45,9 +45,8 @@ const Sidebar_Admin = ({ menuConfig, settingItems, userRole }) => {
                         <Link
                           key={sub.path}
                           to={sub.path}
-                          className={`submenu-item ${
-                            activeItem === sub.path ? "active" : ""
-                          }`}
+                          className={`submenu-item ${activeItem === sub.path ? "active" : ""
+                            }`}
                           onClick={() => handleClick(sub.path)}
                         >
                           {sub.text}
@@ -79,7 +78,14 @@ const Sidebar_Admin = ({ menuConfig, settingItems, userRole }) => {
               to={item.path}
               key={item.id}
               className={`menu-item ${activeItem === item.path ? "active" : ""}`}
-              onClick={() => setActiveItem(item.path)}
+              onClick={(e) => {
+                if (item.onClick) {
+                  e.preventDefault();
+                  item.onClick();
+                } else {
+                  setActiveItem(item.path);
+                }
+              }}
             >
               <item.icon className="menu-icon" />
               <span>{item.text}</span>

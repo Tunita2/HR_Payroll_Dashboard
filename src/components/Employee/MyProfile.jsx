@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaIdCard, FaBriefcase, FaCalendarAlt, FaUserTie } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaPhone, FaIdCard, FaBriefcase, FaCalendarAlt } from 'react-icons/fa';
 import "../../styles/EmployeeStyles/MyProfile.css";
 import EditProfileModal from "./EditProfileModal";
 import axios from 'axios';
@@ -112,7 +112,7 @@ const MyProfile = () => {
         setIsEditing(true);
     };
 
-    const handleSaveProfile = async (newData, apiData) => {
+    const handleSaveProfile = async (_, apiData) => {
         try {
             setLoading(true);
             console.log("Sending API data to server:", apiData);
@@ -185,11 +185,6 @@ const MyProfile = () => {
             <div className="enhanced-profile-container">
                 <div className="profile-header-banner">
                     <div className="profile-header-content">
-                        <div className="profile-avatar-wrapper">
-                            <div className="profile-avatar-container">
-                                <img src="/assets/images/avatar.jpg" alt="User Avatar" className="profile-avatar" onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/150' }} />
-                            </div>
-                        </div>
                         <div className="profile-name-container">
                             <h1 className="profile-name">{profileData.fullName}</h1>
                             <div className="profile-position">

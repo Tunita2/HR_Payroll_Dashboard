@@ -1,10 +1,13 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from db import get_mysql_connection, get_sqlserver_connection
+from auth import verify_token, verify_hr
 
 report_bp = Blueprint("report",__name__)
 
 # REPORT : OVERVIEW - Đếm tổng nhân viên, phòng ban , vị trí , nam, nữ
 @report_bp.route("/api/report/count" , methods = ["GET"])
+@verify_token
+@verify_hr
 def get_count():
     try:
         conn = get_sqlserver_connection()

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import '../styles/GeneralStyles/Login.css';
 import axios from 'axios';
 import {
@@ -17,6 +17,47 @@ import {
   UserOutlined
 } from '@ant-design/icons';
 import backgroundLogin from '../assets/background_login.jpg';
+
+/**
+ * A component that protects routes based on authentication and role
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components to render if authorized
+ * @param {string|string[]} props.allowedRoles - Role(s) allowed to access this route
+ * @param {string} props.redirectPath - Path to redirect to if unauthorized (default: "/")
+ * @returns {React.ReactNode} - The protected route or a redirect
+ */
+export const ProtectedRoute = ({ children, allowedRoles, redirectPath = "/" }) => {
+  const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
+
+  // Check if user is authenticated
+  if (!token) {
+    return <Navigate to="/" />;
+  }
+
+  // Convert allowedRoles to array if it's a string
+  const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+
+  // Check if user has the required role
+  if (!roles.includes(role)) {
+    // Redirect to appropriate dashboard based on role
+    switch (role) {
+      case 'admin':
+        return <Navigate to="/admin" />;
+      case 'hr':
+        return <Navigate to="/human" />;
+      case 'payroll':
+        return <Navigate to="/payroll" />;
+      case 'employee':
+        return <Navigate to="/employee/profile" />;
+      default:
+        return <Navigate to={redirectPath} />;
+    }
+  }
+
+  // User is authenticated and has the required role
+  return children;
+};
 
 const Login = () => {
   const navigate = useNavigate();

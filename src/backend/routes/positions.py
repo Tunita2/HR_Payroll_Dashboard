@@ -1,17 +1,20 @@
-from flask import Blueprint , jsonify
+from flask import Blueprint, jsonify, request
 from db import get_mysql_connection, get_sqlserver_connection
+from auth import verify_token, verify_hr
 
 positions_bp = Blueprint("positions", __name__)
 
 # Vị trí (Position)
 # Lấy toàn bộ danh sách vị trí
 @positions_bp.route("/api/positions" , methods = ["GET"])
+@verify_token
+@verify_hr
 def get_positions():
     try:
         conn = get_sqlserver_connection()
         print("✅ Connected to DB successfully")
         cursor = conn.cursor()
-        
+
        # Gọi rõ từng cột
         cursor.execute("SELECT PositionID, PositionName, CreatedAt, UpdatedAt FROM Positions")
         positions = []
@@ -24,7 +27,7 @@ def get_positions():
                 "updatedAt": row[3].strftime('%d-%m-%Y %H:%M:%S') if row[3] else None
             }
             positions.append(position)
-        
+
         return jsonify(positions)
     except Exception as e:
         print("❌ Failed to connect to DB:", e)

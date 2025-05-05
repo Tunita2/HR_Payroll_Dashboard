@@ -4,7 +4,7 @@
   min-width: 768px;
   display: flex;
   align-items: center;
-  box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
 }
 
 .header-background {
@@ -17,13 +17,18 @@
 }
 
 .header-content {
-  margin-right: 15px;
   width: 100%;
   display: flex;
-  justify-content: right;
+  justify-content: space-between;
   align-items: center;
-  margin-right: 30px;
-  
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.search-section {
+  display: flex;
+  align-items: center;
+  flex: 1;
 }
 
 .notification-section {
@@ -65,7 +70,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  
+
 }
 
 .user-greeting {

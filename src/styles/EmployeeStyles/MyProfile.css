@@ -32,25 +32,7 @@
     padding: 0 30px;
 }
 
-.profile-avatar-wrapper {
-    margin-right: 30px;
-}
 
-.profile-avatar-container {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 5px solid white;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    background-color: white;
-}
-
-.profile-avatar {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
 
 .profile-name-container {
     padding-top: 20px;
@@ -59,8 +41,7 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    margin-top: 20px;
-    margin-bottom: 30px;
+    margin: 20px auto 30px;
 }
 
 .profile-name {
@@ -350,6 +331,20 @@
     border-color: #4a6cf7;
     box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
     outline: none;
+}
+
+.disabled-field input {
+    background-color: #f5f5f5;
+    color: #666;
+    cursor: not-allowed;
+    border-color: #ddd;
+}
+
+.read-only-input {
+    background-color: #f5f5f5 !important;
+    color: #666 !important;
+    cursor: not-allowed !important;
+    border-color: #ddd !important;
 }
 
 .modal-footer {

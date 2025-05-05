@@ -35,7 +35,7 @@ const mergeData = (primaryData, secondaryData, key, mapFn) => {
     .filter(Boolean);
 };
 
-router.get("/departments", async (req, res) => {
+router.get("/departments", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const sqlQuery = `
       SELECT d.DepartmentID, d.DepartmentName, COUNT(e.EmployeeID) AS employeeCount
@@ -44,15 +44,15 @@ router.get("/departments", async (req, res) => {
       GROUP BY d.DepartmentID, d.DepartmentName
     `;
     const mysqlQuery = `
-      SELECT 
+      SELECT
         d.DepartmentID,
         SUM(s.BaseSalary + s.Bonus - s.Deductions) AS totalBudget,
         AVG(s.BaseSalary + s.Bonus - s.Deductions) AS avgSalary
-      FROM 
+      FROM
         departments d
-      JOIN 
+      JOIN
         employees e ON d.DepartmentID = e.DepartmentID
-      JOIN 
+      JOIN
         salaries s ON e.EmployeeID = s.EmployeeID
       GROUP BY d.DepartmentID
     `;
@@ -79,7 +79,7 @@ router.get("/departments", async (req, res) => {
   }
 });
 
-router.get("/positions", async (req, res) => {
+router.get("/positions", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const sqlQuery = `
       SELECT p.PositionID, p.PositionName, COUNT(e.EmployeeID) AS employeeCount
@@ -88,14 +88,14 @@ router.get("/positions", async (req, res) => {
       GROUP BY p.PositionID, p.PositionName
     `;
     const mysqlQuery = `
-      SELECT 
+      SELECT
         p.PositionID,
         AVG(s.BaseSalary + s.Bonus - s.Deductions) AS avgSalary
-      FROM 
+      FROM
         positions p
-      JOIN 
+      JOIN
         employees e ON p.PositionID = e.PositionID
-      JOIN 
+      JOIN
         salaries s ON e.EmployeeID = s.EmployeeID
       GROUP BY p.PositionID
     `;
@@ -121,10 +121,10 @@ router.get("/positions", async (req, res) => {
   }
 });
 
-router.get("/attendances", async (req, res) => {
+router.get("/attendances", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const mysqlQuery = `
-      SELECT 
+      SELECT
         DATE_FORMAT(AttendanceMonth, '%b') AS month,
         SUM(WorkDays) AS workDays,
         SUM(AbsentDays) AS absentDays,
@@ -143,10 +143,10 @@ router.get("/attendances", async (req, res) => {
   }
 });
 
-router.get("/salaries", async (req, res) => {
+router.get("/salaries", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const mysqlQuery = `
-      SELECT 
+      SELECT
         DATE_FORMAT(SalaryMonth, '%b') AS month,
         SUM(BaseSalary) AS baseSalary,
         SUM(Bonus) AS bonus,
@@ -165,10 +165,10 @@ router.get("/salaries", async (req, res) => {
   }
 });
 
-router.get("/dividends", async (req, res) => {
+router.get("/dividends", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const sqlQuery = `
-      SELECT 
+      SELECT
         FORMAT(DividendDate, 'MMM') AS month,
         SUM(DividendAmount) AS amount
       FROM Dividends
@@ -184,11 +184,11 @@ router.get("/dividends", async (req, res) => {
   }
 });
 
-router.get("/status", async (req, res) => {
+router.get("/status", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const sqlQuery = `
-      SELECT 
-        Status, 
+      SELECT
+        Status,
         COUNT(*) AS count
       FROM Employees
       GROUP BY Status
@@ -202,10 +202,10 @@ router.get("/status", async (req, res) => {
   }
 });
 
-router.get("/notifications/employees", async (req, res) => {
+router.get("/notifications/employees", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const sqlQuery = `
-      SELECT 
+      SELECT
         EmployeeID AS id,
         Fullname AS name,
         HireDate AS startDate,
@@ -221,10 +221,10 @@ router.get("/notifications/employees", async (req, res) => {
   }
 });
 
-router.get("/notifications/payrolls", async (req, res) => {
+router.get("/notifications/payrolls", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const mysqlQuery = `
-      SELECT 
+      SELECT
         s1.SalaryID AS id,
         e.EmployeeID AS employeeId,
         e.FullName AS employeeName,
@@ -234,7 +234,7 @@ router.get("/notifications/payrolls", async (req, res) => {
         s1.NetSalary - IFNULL(s2.NetSalary, 0) AS discrepancy
       FROM employees e
       JOIN salaries s1 ON e.EmployeeID = s1.EmployeeID
-      LEFT JOIN salaries s2 
+      LEFT JOIN salaries s2
         ON e.EmployeeID = s2.EmployeeID
         AND DATE_FORMAT(s2.SalaryMonth, '%Y-%m') = DATE_FORMAT(DATE_SUB(s1.SalaryMonth, INTERVAL 1 MONTH), '%Y-%m')
       ORDER BY s1.SalaryMonth DESC, e.EmployeeID;
@@ -248,10 +248,10 @@ router.get("/notifications/payrolls", async (req, res) => {
   }
 });
 
-router.get("/alerts", async (req, res) => {
+router.get("/alerts", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const mysqlQuery = `
-      SELECT 
+      SELECT
         e.EmployeeID AS id,
         e.FullName AS employeeName,
         d.DepartmentName AS department,
@@ -294,7 +294,7 @@ const sendEmail = async ({ email, subject, html }) => {
   return transporter.sendMail(message);
 };
 
-router.post("/notifications/send-payroll", async (req, res) => {
+router.post("/notifications/send-payroll", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { email, subject, html } = req.body;
 

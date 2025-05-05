@@ -1,11 +1,14 @@
-from flask import Blueprint, jsonify
-from db import get_mysql_connection , get_sqlserver_connection
+from flask import Blueprint, jsonify, request
+from db import get_mysql_connection, get_sqlserver_connection
+from auth import verify_token, verify_hr
 
 dividends_bp = Blueprint("dividends",__name__)
 
 # Cổ đông (Dividend)
 # Lấy toàn bộ danh sách Cổ đông
 @dividends_bp.route("/api/dividends" , methods = ["GET"])
+@verify_token
+@verify_hr
 def get_dividends():
     try:
         conn = get_sqlserver_connection()
@@ -15,8 +18,8 @@ def get_dividends():
         # Lấy dữ liệu từ bảng Employee để tạo employee_dict
         cursor.execute("SELECT EmployeeID, FullName FROM Employees")
         employees = cursor.fetchall()
-        employee_dict = {row[0] : row[1] for row in employees}  
-        
+        employee_dict = {row[0] : row[1] for row in employees}
+
         # Gọi rõ từng cột
         cursor.execute("SELECT DividendID, EmployeeID, DividendAmount, DividendDate, CreatedAt FROM Dividends")
         dividends = []
@@ -31,8 +34,8 @@ def get_dividends():
                 "createdAt": row[4].strftime('%d-%m-%Y %H:%M:%S') if row[3] else None
             }
             dividends.append(dividend)
-        
+
         return jsonify(dividends)
     except Exception as e:
         print("❌ Failed to connect to DB:", e)
-        return jsonify({"error": str(e)}), 500 
+        return jsonify({"error": str(e)}), 500
