@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import "../../styles/PayrollStyles/tableSalaries.css"
+import "../../styles/PayrollStyles/tableSalaries.css";
+import SearchForPayroll from "../General/SearchForPayroll";
 
 
 const SalaryTable = () => {
   const [dataSalary, setSalary] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchCategory, setSearchCategory] = useState("FullName")
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchSalary = async () => {
@@ -41,14 +45,34 @@ const SalaryTable = () => {
     new Set(dataSalary.map((item) => getMonthYear(item.SalaryMonth)))
   );
 
-  const filteredData = selectedMonth === "all"
-    ? dataSalary
-    : dataSalary.filter(item => getMonthYear(item.SalaryMonth) === selectedMonth);
+  const searchCategories = [
+    { value: "FullName", label: "Name" },
+    { value: "EmployeeID", label: "Employee ID" },
+    { value: "DepartmentName", label: "Department" },
+    { value: "PositionName", label: "Position" }
+  ];
+
+  const filteredData = dataSalary
+    .filter(item => selectedMonth === "all" || getMonthYear(item.SalaryMonth) === selectedMonth)
+    .filter(item => {
+      if (!searchQuery) return true;
+
+      const searchValue = String(item[searchCategory] || "").toLowerCase();
+      return searchValue.includes(searchQuery.toLowerCase());
+    });
 
   return (
     <div>
+      <div className='main-title'>Salary list</div>
       <div class="appli-table-header">
-        <div>Salary list</div>
+        <SearchForPayroll
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          searchCategory={searchCategory}
+          setSearchCategory={setSearchCategory}
+          categories={searchCategories}
+          placeholder="Search salary information..."
+        />
         <div className="button-group">
           <Link to={'/payroll/salary/history'} style={{ color: 'white' }}>
             <div className="history">Salary history</div>
@@ -70,40 +94,46 @@ const SalaryTable = () => {
       </div>
 
       {/* Bảng Dữ liệu attendance */}
-      <div>
-        <table className="appli-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Employee ID</th>
-              <th>Full name</th>
-              <th>Department</th>
-              <th>Position</th>
-              <th>Salary month</th>
-              <th>Base salary</th>
-              <th>Bonus</th>
-              <th>Deductions</th>
-              <th>Net salary</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.map((employee, index) => (
-              <tr key={index} className="appli-table-row">
-                <td>{employee.SalaryID}</td>
-                <td>{employee.EmployeeID}</td>
-                <td>{employee.FullName}</td>
-                <td>{employee.DepartmentName}</td>
-                <td>{employee.PositionName}</td>
-                <td>{formatDate(employee.SalaryMonth)}</td>
-                <td>{employee.BaseSalary}</td>
-                <td>{employee.Bonus}</td>
-                <td>{employee.Deductions}</td>
-                <td>{employee.NetSalary}</td>
+      {loading ? (
+        <div className="loading">Loading salary data...</div>
+      ) : filteredData.length > 0 ? (
+        <div>
+          <table className="appli-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Employee ID</th>
+                <th>Full name</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Salary month</th>
+                <th>Base salary</th>
+                <th>Bonus</th>
+                <th>Deductions</th>
+                <th>Net salary</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {filteredData.map((employee, index) => (
+                <tr key={index} className="appli-table-row">
+                  <td>{employee.SalaryID}</td>
+                  <td>{employee.EmployeeID}</td>
+                  <td>{employee.FullName}</td>
+                  <td>{employee.DepartmentName}</td>
+                  <td>{employee.PositionName}</td>
+                  <td>{formatDate(employee.SalaryMonth)}</td>
+                  <td>{employee.BaseSalary}</td>
+                  <td>{employee.Bonus}</td>
+                  <td>{employee.Deductions}</td>
+                  <td>{employee.NetSalary}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="no-data">No salary records found for the selected filters</div>
+      )}
     </div >
   );
 };

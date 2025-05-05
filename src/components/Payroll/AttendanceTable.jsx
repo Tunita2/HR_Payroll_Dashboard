@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import "../../styles/PayrollStyles/tableAttendance.css";
+import SearchForPayroll from '../General/SearchForPayroll';
 
 const AttendanceTable = () => {
   const [dataAttendance, setAttendance] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchCategory, setSearchCategory] = useState("FullName")
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchAttendance = async () => {
@@ -39,14 +43,34 @@ const AttendanceTable = () => {
     new Set(dataAttendance.map((item) => getMonthYear(item.AttendanceMonth)))
   );
 
-  const filteredData = selectedMonth === "all"
-    ? dataAttendance
-    : dataAttendance.filter(item => getMonthYear(item.AttendanceMonth) === selectedMonth);
+  const searchCategories = [
+    { value: "FullName", label: "Name" },
+    { value: "EmployeeID", label: "Employee ID" },
+    { value: "DepartmentName", label: "Department" },
+    { value: "PositionName", label: "Position" }
+  ];
+
+  const filteredData = dataAttendance
+    .filter(item => selectedMonth === "all" || getMonthYear(item.AttendanceMonth) === selectedMonth)
+    .filter(item => {
+      if (!searchQuery) return true;
+
+      const searchValue = String(item[searchCategory] || "").toLowerCase();
+      return searchValue.includes(searchQuery.toLowerCase());
+    });
 
   return (
     <div>
+      <div className='main-title'>Attendance list</div>
       <div className="appli-table-header">
-        <div>Attendance list</div>
+        <SearchForPayroll
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          searchCategory={searchCategory}
+          setSearchCategory={setSearchCategory}
+          categories={searchCategories}
+          placeholder="Search attendance records..."
+        />
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <label htmlFor="month-filter">Month:</label>
           <select
@@ -61,41 +85,46 @@ const AttendanceTable = () => {
           </select>
         </div>
       </div>
-
-      <div>
-        <table className="appli-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Employee ID</th>
-              <th>Full name</th>
-              <th>Department</th>
-              <th>Position</th>
-              <th>Work Days</th>
-              <th>Absent Days</th>
-              <th>Leave Days</th>
-              <th>Attendance Month</th>
-              <th>Created At</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.map((employee, index) => (
-              <tr key={index} className="appli-table-row">
-                <td>{employee.AttendanceID}</td>
-                <td>{employee.EmployeeID}</td>
-                <td>{employee.FullName}</td>
-                <td>{employee.DepartmentName}</td>
-                <td>{employee.PositionName}</td>
-                <td>{employee.WorkDays}</td>
-                <td>{employee.AbsentDays}</td>
-                <td>{employee.LeaveDays}</td>
-                <td>{formatDate(employee.AttendanceMonth)}</td>
-                <td>{formatDate(employee.CreatedAt)}</td>
+      {loading ? (
+        <div className="loading">Loading salary data...</div>
+      ) : filteredData.length > 0 ? (
+        <div>
+          <table className="appli-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Employee ID</th>
+                <th>Full name</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Work Days</th>
+                <th>Absent Days</th>
+                <th>Leave Days</th>
+                <th>Attendance Month</th>
+                <th>Created At</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {filteredData.map((employee, index) => (
+                <tr key={index} className="appli-table-row">
+                  <td>{employee.AttendanceID}</td>
+                  <td>{employee.EmployeeID}</td>
+                  <td>{employee.FullName}</td>
+                  <td>{employee.DepartmentName}</td>
+                  <td>{employee.PositionName}</td>
+                  <td>{employee.WorkDays}</td>
+                  <td>{employee.AbsentDays}</td>
+                  <td>{employee.LeaveDays}</td>
+                  <td>{formatDate(employee.AttendanceMonth)}</td>
+                  <td>{formatDate(employee.CreatedAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="no-data">No salary records found for the selected filters</div>
+      )}
     </div>
   );
 };

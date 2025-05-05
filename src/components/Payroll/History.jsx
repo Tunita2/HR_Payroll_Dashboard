@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { MdOutlineArrowBackIosNew } from "react-icons/md";
 import '../../styles/PayrollStyles/history.css';
+import SearchForPayroll from '../General/SearchForPayroll';
 
 const History = () => {
   const [salaries, setSalaries] = useState([]);
@@ -12,6 +13,8 @@ const History = () => {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchCategory, setSearchCategory] = useState('FullName');
 
   // Fetch employees data on component mount
   useEffect(() => {
@@ -136,6 +139,7 @@ const History = () => {
     setSelectedEmployee('');
     setSelectedYear(new Date().getFullYear());
     setSelectedMonth('');
+    setSearchQuery(''); // Reset search query
     fetchAllSalaries();
   };
 
@@ -173,23 +177,42 @@ const History = () => {
     { value: 11, name: 'November' },
     { value: 12, name: 'December' },
   ];
+  const searchCategories = [
+    { value: 'FullName', label: 'Employee Name' },
+    { value: 'DepartmentName', label: 'Department' },
+    { value: 'PositionName', label: 'Position' }
+  ];
+  const filteredSalaries = salaries.filter(salary => {
+    if (!searchQuery) return true;
+
+    const searchValue = String(salary[searchCategory] || '').toLowerCase();
+    return searchValue.includes(searchQuery.toLowerCase());
+  });
 
   return (
     <div>
       <div className="header-title">
         <Link to={'/payroll/salary'} className='title-main'>
-          <MdOutlineArrowBackIosNew style={{paddingTop: '5px'}}/>
+          <MdOutlineArrowBackIosNew style={{ paddingTop: '5px' }} />
           <span>Back</span>
         </Link>
         <div className='title-main'>Salary history</div>
       </div>
-      
+
       <div className="filters">
+        <SearchForPayroll
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          searchCategory={searchCategory}
+          setSearchCategory={setSearchCategory}
+          categories={searchCategories}
+          placeholder="Search salary history..."
+        />
         <div className="filter-group">
           <label htmlFor="employee-select">Employee:</label>
-          <select 
-            id="employee-select" 
-            value={selectedEmployee} 
+          <select
+            id="employee-select"
+            value={selectedEmployee}
             onChange={handleEmployeeChange}
           >
             <option value="">All Employees</option>
@@ -203,9 +226,9 @@ const History = () => {
 
         <div className="filter-group">
           <label htmlFor="year-select">Year:</label>
-          <select 
-            id="year-select" 
-            value={selectedYear} 
+          <select
+            id="year-select"
+            value={selectedYear}
             onChange={handleYearChange}
           >
             <option value="">All Years</option>
@@ -217,9 +240,9 @@ const History = () => {
 
         <div className="filter-group">
           <label htmlFor="month-select">Month:</label>
-          <select 
-            id="month-select" 
-            value={selectedMonth} 
+          <select
+            id="month-select"
+            value={selectedMonth}
             onChange={handleMonthChange}
             disabled={!selectedYear}
           >
@@ -233,11 +256,13 @@ const History = () => {
         <button onClick={resetFilters} className="reset-button">Reset Filters</button>
       </div>
 
+
+
       {error && <div className="error-message">{error}</div>}
-      
+
       {loading ? (
         <div className="loading">Loading salary data...</div>
-      ) : salaries.length > 0 ? (
+      ) : filteredSalaries.length > 0 ? (
         <div className="salary-table-container">
           <table className="salary-table">
             <thead className='thead-table'>
@@ -254,7 +279,7 @@ const History = () => {
               </tr>
             </thead>
             <tbody>
-              {salaries.map((salary) => (
+              {filteredSalaries.map((salary) => (
                 <tr key={salary.SalaryID}>
                   <td>{salary.FullName}</td>
                   <td>{salary.DepartmentName}</td>

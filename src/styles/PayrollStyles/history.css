@@ -21,6 +21,7 @@ body {
 .filters {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
   gap: 15px;
   margin-bottom: 20px;
   padding: 15px;
@@ -51,7 +52,7 @@ select {
   padding: 8px 15px;
   cursor: pointer;
   align-self: flex-end;
-  margin-top: 22px;
+  margin-bottom: 5px;
 }
 
 .reset-button:hover {
@@ -76,9 +77,9 @@ select {
 .no-data {
   text-align: center;
   padding: 30px;
-  background-color: #f8f9fa;
+  background-color:rgb(185, 174, 254);
   border-radius: 5px;
-  color: #6c757d;
+  color:rgb(225, 40, 40);
 }
 
 .salary-table-container {
