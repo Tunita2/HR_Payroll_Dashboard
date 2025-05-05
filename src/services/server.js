@@ -12,7 +12,7 @@ const EmployeeAPI = require("./Routes/employee-API");
 const { router: AuthAPI } = require("./Auth/auth-API");
 const PORT = 3001;
 
-// Middleware
+// Middlewarew
 app.use(cors());
 app.use(bodyParser.json());
 

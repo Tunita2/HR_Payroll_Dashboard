@@ -1,0 +1,137 @@
+/* Custom CSS for Employee Salary History Dashboard */
+body {
+  color: #333;
+  line-height: 1.6;
+}
+.header-title {
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+}
+.header-title .title-main {
+  text-decoration: none;
+  color: inherit;
+  font-size: 20px;
+  display: inline-block;
+  cursor: pointer;
+}
+/* SalaryHistory.css */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  color: white;
+}
+
+select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 14px;
+  color: white;
+  background-color: #060070;
+}
+
+.reset-button {
+  background-color: #060070;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 15px;
+  cursor: pointer;
+  align-self: flex-end;
+  margin-bottom: 5px;
+}
+
+.reset-button:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: #dc3545;
+  background-color: #f8d7da;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #666;
+}
+
+.no-data {
+  text-align: center;
+  padding: 30px;
+  background-color:rgb(185, 174, 254);
+  border-radius: 5px;
+  color:rgb(225, 40, 40);
+}
+
+.salary-table-container {
+  overflow-x: auto;
+}
+
+.salary-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: white;
+  background: rgb(12, 6, 56);
+  border-radius: 8px;
+  overflow: hidden;
+  border-style: solid;
+  border-width: 10px;
+  border-color: white;
+}
+
+.salary-table th,
+.salary-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.salary-table th {
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+}
+
+.salary-table tr:hover {
+  background-color: rgba(245, 245, 245, 0.21);
+}
+
+.net-salary {
+  font-weight: bold;
+  color: #28a745;
+}
+
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .reset-button {
+    align-self: flex-start;
+    margin-top: 10px;
+  }
+}

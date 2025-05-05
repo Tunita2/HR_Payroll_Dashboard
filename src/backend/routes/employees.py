@@ -1,8 +1,20 @@
 from flask import Blueprint, jsonify , request
 from db import get_mysql_connection, get_sqlserver_connection
 from datetime import datetime
+import unicodedata
+import re
 
 employees_bp = Blueprint("employees",__name__)
+
+def convert_fullname_to_username(full_name):
+    # 1. Chuẩn hóa unicode và loại bỏ dấu tiếng Việt
+    normalized = unicodedata.normalize('NFD', full_name)
+    no_accent = ''.join([c for c in normalized if unicodedata.category(c) != 'Mn'])
+
+    # 2. Xóa khoảng trắng, chuyển thành chữ thường
+    username = re.sub(r'\s+', '', no_accent).lower()
+
+    return username
 
 @employees_bp.route("/api/employees",methods = ["GET"])
 def get_employees():
@@ -56,7 +68,7 @@ def add_employees():
         
         required_fields = [
             "fullName" , "dateOfBirth" , "gender" , "phoneNumber" , "email",
-            "hireDate" , "departmentID" , "positionID" , "status"
+            "hireDate" , "departmentID" , "positionID" , "status" , "role"
         ]
 
         missing_fields = [field for field in required_fields if field not in data or not data[field]]
@@ -78,6 +90,12 @@ def add_employees():
             OUTPUT INSERTED.EmployeeID
             VALUES 
                 (? , ? , ? , ? , ? , ? , ? , ? , ? , GETDATE() , GETDATE())
+        """
+        query_sqlserver_account = """
+            INSERT INTO accounts
+                (EmployeeID , Username, PasswordHash , CreatedAt , UpdatedAt , Role)
+            VALUES
+                (? , ? , ? , GETDATE() , GETDATE() , ?)
         """
 
         #LỆNH MYSQL CHÈN
@@ -105,9 +123,16 @@ def add_employees():
         )
         )
 
+        # Chuyển nhâ
+        full_name = data.get("fullName", "")
+        username = convert_fullname_to_username(full_name)
+
         # sqlserver_cursor.execute("SELECT SCOPE_IDENTITY()")
         new_employee_id = sqlserver_cursor.fetchone()[0]
         print("✅ New ID with OUTPUT INSERTED:", new_employee_id)
+        sqlserver_conn.commit()
+
+        sqlserver_cursor.execute(query_sqlserver_account,(new_employee_id, username , data["phoneNumber"], data["role"] ))
         sqlserver_conn.commit()
 
         mysql_cursor.execute(query_mysql , (new_employee_id, data["fullName"], data["departmentID"], data["positionID"], data["status"]))
@@ -134,6 +159,7 @@ def add_employees():
     except Exception as e:
         print("Failed to add employee: ",e)
         return jsonify({"error" : str(e)}),500
+
 
 #Cập nhật nhân viên (phòng ban , vị trí , status)
 @employees_bp.route("/api/employee/update/<int:employee_id>", methods=["PUT"])
@@ -197,38 +223,48 @@ def delete_employee(employee_id):
     errors = []
 
     try:
-        # SQL Server
+        # SQL Server and MySQL
         sql_conn = get_sqlserver_connection()
         sql_cursor = sql_conn.cursor()
-        sql_cursor.execute("DELETE FROM Employees WHERE EmployeeID = ?", (employee_id,))
-        sql_conn.commit()
-        if sql_cursor.rowcount > 0:
-            sqlserver_deleted = True
+
+        mysql_conn = get_mysql_connection()
+        mysql_cursor = mysql_conn.cursor()
+
+
+        # Kiểm tra ràng buộc khóa ngoại trong bảng Dividend
+        sql_cursor.execute("SELECT COUNT(*) FROM Dividends WHERE EmployeeID = ?", (employee_id,))
+        dividend_count = sql_cursor.fetchone()[0]
+
+        mysql_cursor.execute("SELECT COUNT(*) FROM salaries WHERE EmployeeID = %s", (employee_id,))
+        dividend_count_mysql = mysql_cursor.fetchone()[0]
+
+        if dividend_count > 0 or dividend_count_mysql > 0:
+            errors.append(f"SQL Server: Nhân viên ID {employee_id} đang được sử dụng trong bảng Dividend.")
         else:
-            errors.append("Không tìm thấy nhân viên trong SQL Server")
+            sql_cursor.execute("DELETE FROM accounts WHERE EmployeeID=?" , (employee_id,))
+            sql_conn.commit()
+            
+            sql_cursor.execute("DELETE FROM Employees WHERE EmployeeID = ?", (employee_id,))
+            sql_conn.commit()
+
+            mysql_cursor.execute("DELETE FROM employees WHERE EmployeeID = %s", (employee_id,))
+            mysql_conn.commit()
+            if mysql_cursor.rowcount > 0 and sql_cursor.rowcount > 0:
+                mysql_deleted = True
+                sqlserver_deleted = True
+            else:
+                errors.append("Không tìm thấy nhân viên trong MySQL")
 
         sql_cursor.close()
         sql_conn.close()
+        
+        mysql_cursor.close()
+        mysql_conn.close()
 
     except Exception as e:
         print("Lỗi SQL Server:", str(e))
         errors.append(f"SQL Server: {str(e)}")
 
-    try:
-        # MySQL
-        mysql_conn = get_mysql_connection()
-        mysql_cursor = mysql_conn.cursor()
-        mysql_cursor.execute("DELETE FROM employees WHERE EmployeeID = %s", (employee_id,))
-        mysql_conn.commit()
-        if mysql_cursor.rowcount > 0:
-            mysql_deleted = True
-        else:
-            errors.append("Không tìm thấy nhân viên trong MySQL")
-
-        mysql_cursor.close()
-        mysql_conn.close()
-
-    except Exception as e:
         print("Lỗi MySQL:", str(e))
         errors.append(f"MySQL: {str(e)}")
 
@@ -236,6 +272,6 @@ def delete_employee(employee_id):
     if sqlserver_deleted or mysql_deleted:
         return jsonify({"message": f"Đã xoá nhân viên {employee_id} thành công"}), 200
     elif errors:
-        return jsonify({"error": "Không thể xoá nhân viên", "details": errors}), 404
+        return jsonify({"error": "Không thể xoá nhân viên", "details": errors}), 400
     else:
         return jsonify({"error": "Không thể xoá nhân viên vì lý do không xác định"}), 500

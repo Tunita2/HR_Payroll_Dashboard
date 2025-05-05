@@ -28,7 +28,7 @@ const styles = {
     gap: '1.5rem',
   },
   card: {
-    backgroundColor: '#1e293b',
+    backgroundColor: 'rgb(12, 6, 56)',
     borderRadius: '0.375rem',
     padding: '1rem',
     boxShadow: '0 4px 6px rgba(0,0,0,0.2)',

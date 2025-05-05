@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../../styles/HumanResourceStyles/HR_EmployeeTable.css";
 import SearchBar from "../General/SearchBar";
+// import {ToastContainer} from "react-toastify"
 
 const HR_EmployeeTable = ({ style }) => {
   const [employees, setEmployees] = useState([]);
@@ -23,6 +24,7 @@ const HR_EmployeeTable = ({ style }) => {
     departmentID: "",
     positionID: "",
     status: "Đang làm việc",
+    role: "",
   });
   const [addingEmployee, setAddingEmployee] = useState(false);
   const [addError, setAddError] = useState(null);
@@ -98,6 +100,7 @@ const HR_EmployeeTable = ({ style }) => {
       hireDate,
       departmentID,
       positionID,
+      role,
     } = newEmployee;
 
     if (
@@ -108,7 +111,8 @@ const HR_EmployeeTable = ({ style }) => {
       !email ||
       !hireDate ||
       !departmentID ||
-      !positionID
+      !positionID||
+      !role
     ) {
       setAddError("Tất cả các trường thông tin đều phải điền.");
       return;
@@ -141,6 +145,7 @@ const HR_EmployeeTable = ({ style }) => {
         departmentID: "",
         positionID: "",
         status: "Đang làm việc",
+        role: "",
       });
       fetchEmployees();
     } catch (err) {
@@ -479,8 +484,26 @@ const HR_EmployeeTable = ({ style }) => {
                   }
                   required
                 >
-                  <option value="Đang làm việc">Active</option>
-                  <option value="Nghỉ việc">Inactive</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+              <div className="form-group-employee">
+                <label htmlFor="role">Role :</label>
+                <select
+                  value={newEmployee.role}
+                  onChange={(e) =>
+                    setNewEmployee({ ...newEmployee, role: e.target.value })
+                  }
+                  required
+                >
+                  <option value="" disabled>
+                    Role
+                  </option>
+                  <option value="admin">Admin</option>
+                  <option value="hr">HR</option>
+                  <option value="payroll">Payroll</option>
+                  <option value="employee">Employee</option>
                 </select>
               </div>
               <div className="modal-actions">
@@ -681,14 +704,14 @@ const HR_EmployeeTable = ({ style }) => {
                   <td>
                     <div
                       className={`enhanced-status-indicator ${
-                        employee.status === "Đang làm việc"
+                        employee.status === "Active"
                           ? "active"
                           : "inactive"
                       }`}
                     >
                       <span className="status-dot"></span>
                       <span className="status-text">
-                        {employee.status === "Đang làm việc"
+                        {employee.status === "Active"
                           ? "Active"
                           : "Inactive"}
                       </span>

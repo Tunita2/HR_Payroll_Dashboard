@@ -7,7 +7,7 @@ const Header = ({ userName = 'Tuan', userRole = 'Payroll manager' }) => {
     <div className="header-container">
       <div className="header-background">
         <div className="header-content">
-          {/* <SearchBar></SearchBar> */}
+          <SearchBar></SearchBar>
           <div className="notification-section">
             <div className="icon-wrapper">
               <img src="https://dashboard.codeparrot.ai/api/image/Z-Evp2s0ZhD5c3df/ic-round.png" alt="notifications" className="icon" />
