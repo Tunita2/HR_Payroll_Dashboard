@@ -222,6 +222,8 @@ def delete_employee(employee_id):
     mysql_deleted = False
     errors = []
 
+    force_delete = request.args.get("force", "false").lower() == "true"
+
     try:
         # SQL Server and MySQL
         sql_conn = get_sqlserver_connection()
@@ -235,20 +237,29 @@ def delete_employee(employee_id):
         sql_cursor.execute("SELECT COUNT(*) FROM Dividends WHERE EmployeeID = ?", (employee_id,))
         dividend_count = sql_cursor.fetchone()[0]
 
+        sql_cursor.execute("SELECT COUNT(*) FROM accounts WHERE EmployeeID = ?", (employee_id,))
+        account_count = sql_cursor.fetchone()[0]
+
         mysql_cursor.execute("SELECT COUNT(*) FROM salaries WHERE EmployeeID = %s", (employee_id,))
         dividend_count_mysql = mysql_cursor.fetchone()[0]
 
-        if dividend_count > 0 or dividend_count_mysql > 0:
-            errors.append(f"SQL Server: Nhân viên ID {employee_id} đang được sử dụng trong bảng Dividend.")
+        if (dividend_count > 0 or dividend_count_mysql > 0 or account_count > 0) and not force_delete:
+            # errors.append(f"SQL Server: Nhân viên ID {employee_id} đang được sử dụng trong bảng Dividend.")
+            return jsonify({
+                "error": "Ràng buộc dữ liệu",
+                "message": f"Nhân viên ID {employee_id} đang được có dữ liệu ràng buộc trong bảng Dividend hoặc salaries.",
+                "hasDependencies": True
+            }), 409  # HTTP 409 Conflict
         else:
-            sql_cursor.execute("DELETE FROM accounts WHERE EmployeeID=?" , (employee_id,))
-            sql_conn.commit()
-            
+            sql_cursor.execute("DELETE FROM Dividends WHERE EmployeeID = ?", (employee_id,))
+            sql_cursor.execute("DELETE FROM accounts WHERE EmployeeID = ?", (employee_id,))
             sql_cursor.execute("DELETE FROM Employees WHERE EmployeeID = ?", (employee_id,))
             sql_conn.commit()
 
+            mysql_cursor.execute("DELETE FROM salaries WHERE EmployeeID = %s", (employee_id,))
             mysql_cursor.execute("DELETE FROM employees WHERE EmployeeID = %s", (employee_id,))
             mysql_conn.commit()
+
             if mysql_cursor.rowcount > 0 and sql_cursor.rowcount > 0:
                 mysql_deleted = True
                 sqlserver_deleted = True
@@ -262,11 +273,7 @@ def delete_employee(employee_id):
         mysql_conn.close()
 
     except Exception as e:
-        print("Lỗi SQL Server:", str(e))
-        errors.append(f"SQL Server: {str(e)}")
-
-        print("Lỗi MySQL:", str(e))
-        errors.append(f"MySQL: {str(e)}")
+        errors.append(f"Lỗi hệ thống: {str(e)}")
 
     # Xử lý kết quả
     if sqlserver_deleted or mysql_deleted:

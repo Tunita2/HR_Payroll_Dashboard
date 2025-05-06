@@ -110,8 +110,19 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   text-align: center;
   max-height: 60vh;
-  min-width: 120px;
+  min-width: 200px;
   white-space: nowrap;
+}
+
+
+.select-col {
+  width: 60px;
+  text-align: center;
+}
+
+.employ-table td.last-cell {
+  border-right: 1px solid #ccc;
+  background-color: #1a1a40; /* tùy chỉnh để giữ nền */
 }
 
 .cell {
@@ -386,3 +397,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.comfirm-container{
+  display: block;
+  background-color: white;
+  border-radius: 10px;
+  color: black;
+  font-family: "Roboto Condensed Medium";
+  padding: 5px;
+  margin-top: 5px;
+}
+

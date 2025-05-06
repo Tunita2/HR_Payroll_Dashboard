@@ -111,7 +111,7 @@ const HR_EmployeeTable = ({ style }) => {
       !email ||
       !hireDate ||
       !departmentID ||
-      !positionID||
+      !positionID ||
       !role
     ) {
       setAddError("Tất cả các trường thông tin đều phải điền.");
@@ -243,6 +243,9 @@ const HR_EmployeeTable = ({ style }) => {
   const [deleteIdOrName, setDeleteIdOrName] = useState("");
   const [deleteError, setDeleteError] = useState(null);
 
+  const [deleteStep, setDeleteStep] = useState("input"); // hoặc "confirm"
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+
   const handleDeleteEmployee = async () => {
     if (!deleteIdOrName.trim()) {
       setDeleteError("Vui lòng nhập ID hoặc Họ tên nhân viên muốn xóa");
@@ -261,14 +264,39 @@ const HR_EmployeeTable = ({ style }) => {
 
       if (!res.ok) {
         const errorData = await res.json();
+
+        if (res.status === 409 && errorData.hasDependencies) {
+          setPendingDeleteId(deleteIdOrName);
+          setDeleteStep("confirm");
+          return;
+        }
+
         throw new Error(errorData.message || "Không thể xóa nhân viên");
       }
 
       setDeleteIdOrName("");
       setShowDeleteModal(false);
+      setDeleteStep("input");
       fetchEmployees();
     } catch (err) {
       setDeleteError(err.message);
+    }
+  };
+
+  const handleConfirmDeleteDependencies = async () => {
+    try {
+      await fetch(
+        `http://localhost:5000/api/employee/delete/${pendingDeleteId}?force=true`,
+        { method: "DELETE" }
+      );
+      alert("Đã xóa nhân viên và dữ liệu liên quan.");
+      setDeleteIdOrName("");
+      setShowDeleteModal(false);
+      setDeleteStep("input");
+      fetchEmployees();
+    } catch (err) {
+      setDeleteError(err.message);
+      setDeleteStep("input");
     }
   };
 
@@ -612,7 +640,7 @@ const HR_EmployeeTable = ({ style }) => {
         </div>
       )}
 
-      {showDeleteModal && (
+      {/* {showDeleteModal && (
         <div className="modal-overlay">
           <div className="delete-employee-modal">
             <h3>Delete Employee</h3>
@@ -643,7 +671,85 @@ const HR_EmployeeTable = ({ style }) => {
             </div>
           </div>
         </div>
+      )} */}
+
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="delete-employee-modal">
+            <h3>Delete Employee</h3>
+
+            {deleteStep === "input" && (
+              <>
+                {deleteError && (
+                  <div className="error-message">{deleteError}</div>
+                )}
+                <div className="form-group-employee">
+                  <input
+                    type="text"
+                    value={deleteIdOrName}
+                    onChange={(e) => setDeleteIdOrName(e.target.value)}
+                    placeholder="Enter Employee ID or Name"
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="btn-cancel"
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setDeleteStep("input");
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-submit"
+                    onClick={handleDeleteEmployee}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </>
+            )}
+
+            {deleteStep === "confirm" && (
+              <>
+                <div class="comfirm-container">
+                  <p className="confirm-message">
+                    Nhân viên ID <b>{pendingDeleteId}</b> đang có dữ liệu ràng buộc trong bảng{" "}
+                    <b>Dividend</b> hoặc <b>salaries</b>.
+                    <br />
+                    <i>Bạn có muốn xóa luôn dữ liệu liên quan không?</i>
+                  </p>
+                </div>
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="btn-cancel"
+                    onClick={() => {
+                      setDeleteStep("input");
+                      setDeleteError(null);
+                    }}
+                  >
+                    Không xóa
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-submit"
+                    onClick={handleConfirmDeleteDependencies}
+                    // style={{ background: 'red' }}
+                  >
+                    Xóa liên quan
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       )}
+
+      
 
       {/* Bảng hiển thị dữ liệu nhân viên */}
       <div className="employ-table-container" style={style}>
@@ -704,16 +810,12 @@ const HR_EmployeeTable = ({ style }) => {
                   <td>
                     <div
                       className={`enhanced-status-indicator ${
-                        employee.status === "Active"
-                          ? "active"
-                          : "inactive"
+                        employee.status === "Active" ? "active" : "inactive"
                       }`}
                     >
                       <span className="status-dot"></span>
                       <span className="status-text">
-                        {employee.status === "Active"
-                          ? "Active"
-                          : "Inactive"}
+                        {employee.status === "Active" ? "Active" : "Inactive"}
                       </span>
                     </div>
                   </td>
