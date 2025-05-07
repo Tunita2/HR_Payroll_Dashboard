@@ -12,7 +12,7 @@ def get_positions():
         print("✅ Connected to DB successfully")
         cursor = conn.cursor()
         
-       # Gọi rõ từng cột
+        # Gọi rõ từng cột
         cursor.execute("SELECT PositionID, PositionName, CreatedAt, UpdatedAt FROM Positions")
         positions = []
 
