@@ -14,7 +14,7 @@ def get_positions():
         conn = get_sqlserver_connection()
         print("✅ Connected to DB successfully")
         cursor = conn.cursor()
-
+        
        # Gọi rõ từng cột
         cursor.execute("SELECT PositionID, PositionName, CreatedAt, UpdatedAt FROM Positions")
         positions = []
