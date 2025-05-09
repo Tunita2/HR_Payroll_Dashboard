@@ -36,9 +36,18 @@ const HR_Report = ({ style = {} }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token không tồn tại");
+        }
+
+        const headers = {
+          "Authorization": `Bearer ${token}`,
+        };
+
         const [empRes, countRes] = await Promise.all([
-          fetch("http://localhost:5000/api/employees"),
-          fetch("http://localhost:5000/api/report/count")
+          fetch("http://localhost:5000/api/employees",{headers}),
+          fetch("http://localhost:5000/api/report/count",{headers}),
         ]);
 
         if (!empRes.ok || !countRes.ok) throw new Error("Failed to fetch data");
@@ -277,15 +286,14 @@ const HR_Report = ({ style = {} }) => {
                   <td>
                     <span
                       className={`hr-status-badge ${
-                        employee.status === "Đang làm việc"
+                        employee.status === "Active"
                           ? "active"
                           : "inactive"
                       }`}
                     >
-                      {employee.status === "Đang làm việc"
-                          ? "Active"
-                          : "Inactive"
-                      }
+                      {employee.status === "Active"
+                        ? "Active"
+                        : "Inactive"}
                     </span>
                   </td>
                 </tr>

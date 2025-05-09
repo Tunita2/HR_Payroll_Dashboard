@@ -16,7 +16,20 @@ const HR_PositionTable = ({ style }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/positions")
+    // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+    const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+    if (!token) {
+      console.error("Token không tồn tại");
+      return;
+    }
+
+    fetch("http://localhost:5000/api/positions", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`, // Gửi token dưới dạng Bearer token
+      },
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch data");

@@ -26,7 +26,20 @@ const HR_DepartmentTable = ({ style }) => {
   }, []);
 
   const fetchDepartments = () => {
-    fetch("http://localhost:5000/api/departments")
+    // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+    const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+    if (!token) {
+      console.error("Token không tồn tại");
+      return;
+    }
+
+    fetch("http://localhost:5000/api/departments", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`, // Gửi token dưới dạng Bearer token
+      },
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch data");
         return res.json();
@@ -52,9 +65,19 @@ const HR_DepartmentTable = ({ style }) => {
     setAddError(null);
 
     try {
+      // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+      const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+      if (!token) {
+        console.error("Token không tồn tại");
+        return;
+      }
       const res = await fetch("http://localhost:5000/api/department/add", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ departmentName: newDepartmentName }),
       });
 
@@ -101,11 +124,21 @@ const HR_DepartmentTable = ({ style }) => {
     setUpdateError(null);
 
     try {
+      // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+      const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+      if (!token) {
+        console.error("Token không tồn tại");
+        return;
+      }
       const res = await fetch(
         `http://localhost:5000/api/department/update/${selectedDepartment.id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({ departmentName: updatedDepartmentName }),
         }
       );
@@ -144,7 +177,10 @@ const HR_DepartmentTable = ({ style }) => {
         <div>Department list</div>
 
         <div className="table-button-container">
-          <button className="table-button add" onClick={() => setShowAddModal(true)}>
+          <button
+            className="table-button add"
+            onClick={() => setShowAddModal(true)}
+          >
             <strong>Add</strong>
           </button>
           <button className="table-button" onClick={handleOpenUpdate}>
@@ -176,10 +212,18 @@ const HR_DepartmentTable = ({ style }) => {
                 />
               </div>
               <div className="modal-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowAddModal(false)}>
+                <button
+                  type="button"
+                  className="btn-cancel"
+                  onClick={() => setShowAddModal(false)}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="btn-submit" disabled={addingDepartment}>
+                <button
+                  type="submit"
+                  className="btn-submit"
+                  disabled={addingDepartment}
+                >
                   {addingDepartment ? "Adding..." : "Add Department"}
                 </button>
               </div>
@@ -215,7 +259,11 @@ const HR_DepartmentTable = ({ style }) => {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn-submit" disabled={updatingDepartment}>
+                <button
+                  type="submit"
+                  className="btn-submit"
+                  disabled={updatingDepartment}
+                >
                   {updatingDepartment ? "Updating..." : "Update Department"}
                 </button>
               </div>

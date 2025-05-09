@@ -1,43 +1,56 @@
 import React, { useEffect, useState } from "react";
-import "../../styles/HumanResourceStyles/HR_DividendTable.css"
+import "../../styles/HumanResourceStyles/HR_DividendTable.css";
 
 const HR_DividendTable = ({ style }) => {
   const [dividends, setDividends] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-  
-    useEffect(() => {
-      fetch("http://localhost:5000/api/dividends")
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("Failed to fetch data");
-          }
-          return res.json();
-        })
-        .then((data) => {
-          console.log("✅ Dữ liệu nhận được:", data); // THÊM DÒNG NÀY
-          setDividends(data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError(err.message);
-          setLoading(false);
-        });
-    }, []);
-  
-    if (loading) {
-      return <div>Loading...</div>;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+    const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+    if (!token) {
+      console.error("Token không tồn tại");
+      return;
     }
-  
-    if (error) {
-      return <div>Error: {error}</div>;
-    }
+
+    fetch("http://localhost:5000/api/dividends", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`, // Gửi token dưới dạng Bearer token
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("✅ Dữ liệu nhận được:", data); // THÊM DÒNG NÀY
+        setDividends(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div>
       <div className="dividend-table-header">
         <div>Dividend list</div>
-        
+
         {/* <img
           src="https://dashboard.codeparrot.ai/api/image/Z-oMCgz4-w8v6Rpi/refresh.png"
           alt="Refresh"

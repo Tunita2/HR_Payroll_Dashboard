@@ -36,7 +36,20 @@ const HR_EmployeeTable = ({ style }) => {
   }, []);
 
   const fetchEmployees = () => {
-    fetch("http://localhost:5000/api/employees")
+    // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+    const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+    if (!token) {
+      console.error("Token không tồn tại");
+      return;
+    }
+
+    fetch("http://localhost:5000/api/employees", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`, // Gửi token dưới dạng Bearer token
+      },
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch data");
@@ -55,7 +68,20 @@ const HR_EmployeeTable = ({ style }) => {
   };
 
   const fetchDepartments = () => {
-    fetch("http://localhost:5000/api/departments")
+    // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+    const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+    if (!token) {
+      console.error("Token không tồn tại");
+      return;
+    }
+
+    fetch("http://localhost:5000/api/departments", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`, // Gửi token dưới dạng Bearer token
+      },
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch data");
         return res.json();
@@ -71,7 +97,19 @@ const HR_EmployeeTable = ({ style }) => {
   };
 
   const fetchPositions = () => {
-    fetch("http://localhost:5000/api/positions")
+    // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+    const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+    if (!token) {
+      console.error("Token không tồn tại");
+      return;
+    }
+    fetch("http://localhost:5000/api/positions", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`, // Gửi token dưới dạng Bearer token
+      },
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch data");
@@ -122,9 +160,19 @@ const HR_EmployeeTable = ({ style }) => {
     setAddError(null);
 
     try {
+      // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+      const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+      if (!token) {
+        console.error("Token không tồn tại");
+        return;
+      }
       const res = await fetch("http://localhost:5000/api/employee/add", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(newEmployee),
       });
 
@@ -208,11 +256,21 @@ const HR_EmployeeTable = ({ style }) => {
     setUpdateError(null);
 
     try {
+      // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+      const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+      if (!token) {
+        console.error("Token không tồn tại");
+        return;
+      }
       const res = await fetch(
         `http://localhost:5000/api/employee/update/${selectedEmployee.employeeID}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({
             departmentID: updatedDepartmentID,
             positionID: updatedPositionID,
@@ -255,10 +313,21 @@ const HR_EmployeeTable = ({ style }) => {
     setDeleteError(null);
 
     try {
+      // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+      const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+      if (!token) {
+        console.error("Token không tồn tại");
+        return;
+      }
       const res = await fetch(
         `http://localhost:5000/api/employee/delete/${deleteIdOrName}`,
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -285,9 +354,20 @@ const HR_EmployeeTable = ({ style }) => {
 
   const handleConfirmDeleteDependencies = async () => {
     try {
+      // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+      const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+      if (!token) {
+        console.error("Token không tồn tại");
+        return;
+      }
       await fetch(
         `http://localhost:5000/api/employee/delete/${pendingDeleteId}?force=true`,
-        { method: "DELETE" }
+        { method: "DELETE", 
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       alert("Đã xóa nhân viên và dữ liệu liên quan.");
       setDeleteIdOrName("");
@@ -717,8 +797,8 @@ const HR_EmployeeTable = ({ style }) => {
               <>
                 <div class="comfirm-container">
                   <p className="confirm-message">
-                    Nhân viên ID <b>{pendingDeleteId}</b> đang có dữ liệu ràng buộc trong bảng{" "}
-                    <b>Dividend</b> hoặc <b>salaries</b>.
+                    Nhân viên ID <b>{pendingDeleteId}</b> đang có dữ liệu ràng
+                    buộc trong bảng <b>Dividend</b> hoặc <b>salaries</b>.
                     <br />
                     <i>Bạn có muốn xóa luôn dữ liệu liên quan không?</i>
                   </p>
@@ -748,8 +828,6 @@ const HR_EmployeeTable = ({ style }) => {
           </div>
         </div>
       )}
-
-      
 
       {/* Bảng hiển thị dữ liệu nhân viên */}
       <div className="employ-table-container" style={style}>
