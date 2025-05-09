@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "../../styles/HumanResourceStyles/HR_DividendTable.css";
+import SearchBar from "../General/SearchBar";
 
 const HR_DividendTable = ({ style }) => {
   const [dividends, setDividends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   useEffect(() => {
     // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
@@ -38,6 +41,15 @@ const HR_DividendTable = ({ style }) => {
       });
   }, []);
 
+  const filteredDividend = dividends.filter((divi) => {
+    const keyword = searchKeyword.toLowerCase();
+    return (
+      divi.employeeName.toLowerCase().includes(keyword) ||
+      divi.dividendID.toString().includes(keyword) ||
+      divi.employeeID.toString().includes(keyword)
+    );
+  });
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -50,14 +62,7 @@ const HR_DividendTable = ({ style }) => {
     <div>
       <div className="dividend-table-header">
         <div>Dividend list</div>
-
-        {/* <img
-          src="https://dashboard.codeparrot.ai/api/image/Z-oMCgz4-w8v6Rpi/refresh.png"
-          alt="Refresh"
-          style={{ width: "30px", height: "30px", marginRight: "10px" }}
-        /> */}
-
-        {/* Button add - thêm cổ đông và delete - xóa cổ đông */}
+        
         <div className="table-button-container">
           <button className="table-button add">
             <strong>Add</strong>
@@ -66,6 +71,13 @@ const HR_DividendTable = ({ style }) => {
             <strong>Delete</strong>
           </button>
         </div>
+      </div>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <SearchBar
+          placeholder="Search by ID or Department Name"
+          onSearch={setSearchKeyword}
+        />
       </div>
 
       {/* Bảng hiển thị dữ liệu cổ đông */}
@@ -82,7 +94,7 @@ const HR_DividendTable = ({ style }) => {
             </tr>
           </thead>
           <tbody>
-            {dividends.map((divi, index) => (
+            {filteredDividend.map((divi, index) => (
               <tr key={index} className="dividend-table-row">
                 <td>{divi.dividendID}</td>
                 <td>{divi.employeeID}</td>

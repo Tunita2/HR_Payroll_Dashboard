@@ -171,3 +171,5 @@ def update_department(id):
         except:
             pass
         return jsonify({'error': 'Failed to update department'}), 500
+
+

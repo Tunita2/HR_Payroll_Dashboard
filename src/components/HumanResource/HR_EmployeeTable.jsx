@@ -720,39 +720,6 @@ const HR_EmployeeTable = ({ style }) => {
         </div>
       )}
 
-      {/* {showDeleteModal && (
-        <div className="modal-overlay">
-          <div className="delete-employee-modal">
-            <h3>Delete Employee</h3>
-            {deleteError && <div className="error-message">{deleteError}</div>}
-            <div className="form-group-employee">
-              <input
-                type="text"
-                value={deleteIdOrName}
-                onChange={(e) => setDeleteIdOrName(e.target.value)}
-                placeholder="Enter Employee ID or Name"
-              />
-            </div>
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="btn-cancel"
-                onClick={() => setShowDeleteModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="btn-submit"
-                onClick={handleDeleteEmployee}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
-
       {showDeleteModal && (
         <div className="modal-overlay">
           <div className="delete-employee-modal">

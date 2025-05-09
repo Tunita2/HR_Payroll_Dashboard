@@ -196,6 +196,7 @@ const HR_DepartmentTable = ({ style }) => {
         />
       </div>
 
+      {/* Modal thêm */}
       {showAddModal && (
         <div className="modal-overlay">
           <div className="add-department-modal">
@@ -232,6 +233,7 @@ const HR_DepartmentTable = ({ style }) => {
         </div>
       )}
 
+      {/* Modal update */}
       {showUpdateModal && (
         <div className="modal-overlay">
           <div className="add-department-modal">

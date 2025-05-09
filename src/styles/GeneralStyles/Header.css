@@ -13,13 +13,12 @@
   background: #030059;
   display: flex;
   align-items: center;
-
 }
 
 .header-content {
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
   align-items: center;
   padding-left: 30px;
   padding-right: 30px;
@@ -55,7 +54,7 @@
 
 .user-info {
   display: flex;
-  align-items: center;
+  align-items: end;
   gap: 12px;
   cursor: pointer;
 }
@@ -70,7 +69,6 @@
   display: flex;
   align-items: center;
   gap: 4px;
-
 }
 
 .user-greeting {

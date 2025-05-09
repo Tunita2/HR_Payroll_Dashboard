@@ -1,19 +1,14 @@
 import React, { useEffect, useState } from "react";
 import "../../styles/HumanResourceStyles/HR_PositionTable.css";
+import SearchBar from "../General/SearchBar";
 
 const HR_PositionTable = ({ style }) => {
-  // const job = [
-  //   {
-  //     id: "01",
-  //     positionName: "Sale",
-  //     createdAt: "Alex",
-  //     updatedAt: "Minh",
-  //   },
-  // ];
 
   const [job, setPosition] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [searchKeyword,setSearchKeyword] = useState("");
 
   useEffect(() => {
     // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
@@ -47,6 +42,15 @@ const HR_PositionTable = ({ style }) => {
       });
   }, []);
 
+  const filterPositions = job.filter((posit) =>{
+    const keyword = searchKeyword.toLowerCase();
+
+    return (
+      posit.id.toString().includes(keyword) ||
+      posit.positionName.toLowerCase().includes(keyword)
+    );
+  });
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -71,6 +75,13 @@ const HR_PositionTable = ({ style }) => {
         </div>
       </div>
 
+      <div style={{marginBottom: "1rem"}}>
+        <SearchBar
+          placeholder="Search by ID or Position Name"
+          onSearch={setSearchKeyword}
+        />
+      </div>
+
       {/* Bảng hiển thị dữ liệu chức vụ */}
       <div className="job-table-container" style={style}>
         <table className="job-table">
@@ -83,7 +94,7 @@ const HR_PositionTable = ({ style }) => {
             </tr>
           </thead>
           <tbody>
-            {job.map((job, index) => (
+            {filterPositions.map((job, index) => (
               <tr key={index} className="job-table-row">
                 <td>{job.id}</td>
                 <td>{job.positionName}</td>
