@@ -27,6 +27,8 @@ const HR_PositionTable = ({ style }) => {
   const [deleteStep, setDeleteStep] = useState("input"); // hoặc "confirm"
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
+  const userRole = localStorage.getItem("role"); 
+
   useEffect(() => {
     fetchPositions();
   }, []);
@@ -276,8 +278,8 @@ const HR_PositionTable = ({ style }) => {
       <div className="job-table-header">
         <div>Position List</div>
 
-        {/* Button add - thêm chức vụ và delete - xóa chức vụ */}
-        <div className="table-button-container">
+        {userRole === "admin" && (
+          <div className="table-button-container">
           <button
             className="table-button add"
             onClick={() => setShowAddModal(true)}
@@ -291,6 +293,8 @@ const HR_PositionTable = ({ style }) => {
             <strong>Delete</strong>
           </button>
         </div>
+        )}
+        
       </div>
 
       <div style={{ marginBottom: "1rem" }}>

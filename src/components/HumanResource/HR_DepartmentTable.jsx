@@ -21,6 +21,14 @@ const HR_DepartmentTable = ({ style }) => {
   const [updateError, setUpdateError] = useState(null);
   const [isUpdatingMode, setIsUpdatingMode] = useState(false);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteIdOrName, setDeleteIdOrName] = useState("");
+  const [deleteError, setDeleteError] = useState(null);
+  const [deleteStep, setDeleteStep] = useState("input"); // hoặc "confirm"
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+
+  const userRole = localStorage.getItem("role"); 
+
   useEffect(() => {
     fetchDepartments();
   }, []);
@@ -168,13 +176,6 @@ const HR_DepartmentTable = ({ style }) => {
     );
   });
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteIdOrName, setDeleteIdOrName] = useState("");
-  const [deleteError, setDeleteError] = useState(null);
-
-  const [deleteStep, setDeleteStep] = useState("input"); // hoặc "confirm"
-  const [pendingDeleteId, setPendingDeleteId] = useState(null);
-
   const handleDeleteDepartments = async () => {
     if (!deleteIdOrName.trim()) {
       setDeleteError("Vui lòng nhập ID hoặc tên phòng ban muốn xóa");
@@ -260,7 +261,8 @@ const HR_DepartmentTable = ({ style }) => {
       <div className="depart-table-header">
         <div>Department list</div>
 
-        <div className="table-button-container">
+        {userRole ==="admin" && (
+          <div className="table-button-container">
           <button
             className="table-button add"
             onClick={() => setShowAddModal(true)}
@@ -277,6 +279,8 @@ const HR_DepartmentTable = ({ style }) => {
             <strong>Delete</strong>
           </button>
         </div>
+        )}
+        
       </div>
 
       <div style={{ marginBottom: "1rem" }}>

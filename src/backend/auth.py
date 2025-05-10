@@ -74,7 +74,7 @@ def verify_hr(f):
         print(f"User role: {request.user.get('role')}")
 
         # Kiểm tra role
-        if request.user.get('role') != 'hr':
+        if request.user.get('role') not in ['hr', 'admin']:
             return jsonify({'error': 'Không có quyền truy cập. Chỉ HR mới được phép.'}), 403
         
         return f(*args, **kwargs)
