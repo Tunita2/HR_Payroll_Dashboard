@@ -363,7 +363,8 @@ const HR_EmployeeTable = ({ style }) => {
       }
       await fetch(
         `http://localhost:5000/api/employee/delete/${pendingDeleteId}?force=true`,
-        { method: "DELETE", 
+        {
+          method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -418,7 +419,7 @@ const HR_EmployeeTable = ({ style }) => {
 
       <div style={{ marginBottom: "1rem" }}>
         <SearchBar
-          placeholder="Search by EmployeeID or Department Name"
+          placeholder="Search by EmployeeID or Name"
           onSearch={setSearchKeyword}
         />
       </div>

@@ -122,7 +122,8 @@
   z-index: 1000;
 }
 
-.add-department-modal {
+.add-department-modal,
+.delete-department-modal {
   background-color: rgba(30, 4, 144, 0.6);
   border-radius: 8px;
   padding: 20px;
@@ -131,7 +132,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.add-department-modal h3 {
+.add-department-modal,.delete-department-modal h3 {
   margin-top: 0;
   color: #ffffff;
   font-family: "Poppins";
@@ -148,6 +149,17 @@
   font-weight: bold;
   color: #000000;
 } */
+
+.form-group-department input
+ {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 360px;
+  margin-top: 10px;
+}
 
 .form-group input {
   width: 100px;
@@ -205,5 +217,16 @@
   padding: 8px;
   background-color: #ffebee;
   border-radius: 4px;
+}
+
+
+.comfirm-container{
+  display: block;
+  background-color: white;
+  border-radius: 10px;
+  color: black;
+  font-family: "Roboto Condensed Medium";
+  padding: 5px;
+  margin-top: 5px;
 }
 

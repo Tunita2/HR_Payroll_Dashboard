@@ -253,12 +253,11 @@ def delete_employee(employee_id):
         dividend_count_mysql = mysql_cursor.fetchone()[0]
 
         if (dividend_count > 0 or dividend_count_mysql > 0 or account_count > 0) and not force_delete:
-            # errors.append(f"SQL Server: Nhân viên ID {employee_id} đang được sử dụng trong bảng Dividend.")
             return jsonify({
                 "error": "Ràng buộc dữ liệu",
                 "message": f"Nhân viên ID {employee_id} đang được có dữ liệu ràng buộc trong bảng Dividend hoặc salaries.",
                 "hasDependencies": True
-            }), 409  # HTTP 409 Conflict
+            }), 409  
         else:
             sql_cursor.execute("DELETE FROM Dividends WHERE EmployeeID = ?", (employee_id,))
             sql_cursor.execute("DELETE FROM accounts WHERE EmployeeID = ?", (employee_id,))

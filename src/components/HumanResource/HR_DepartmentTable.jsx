@@ -168,6 +168,90 @@ const HR_DepartmentTable = ({ style }) => {
     );
   });
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteIdOrName, setDeleteIdOrName] = useState("");
+  const [deleteError, setDeleteError] = useState(null);
+
+  const [deleteStep, setDeleteStep] = useState("input"); // hoặc "confirm"
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+
+  const handleDeleteDepartments = async () => {
+    if (!deleteIdOrName.trim()) {
+      setDeleteError("Vui lòng nhập ID hoặc tên phòng ban muốn xóa");
+      return;
+    }
+
+    setDeleteError(null);
+
+    try {
+      // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+      const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+      if (!token) {
+        console.error("Token không tồn tại");
+        return;
+      }
+      const res = await fetch(
+        `http://localhost:5000/api/department/delete/${deleteIdOrName}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+
+        if (res.status === 409 && errorData.hasDependencies) {
+          setPendingDeleteId(deleteIdOrName);
+          setDeleteStep("confirm");
+          return;
+        }
+
+        throw new Error(errorData.message || "Không thể xóa Phòng ban");
+      }
+
+      setDeleteIdOrName("");
+      setShowDeleteModal(false);
+      setDeleteStep("input");
+      fetchDepartments();
+    } catch (err) {
+      setDeleteError(err.message);
+    }
+  };
+
+  const handleConfirmDeleteDependencies = async () => {
+    try {
+      // Lấy token từ localStorage, sessionStorage, hoặc state (tuỳ vào cách bạn lưu trữ token)
+      const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+
+      if (!token) {
+        console.error("Token không tồn tại");
+        return;
+      }
+      await fetch(
+        `http://localhost:5000/api/department/delete/${pendingDeleteId}?force=true`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert("Đã xóa phòng ban và dữ liệu liên quan.");
+      setDeleteIdOrName("");
+      setShowDeleteModal(false);
+      setDeleteStep("input");
+      fetchDepartments();
+    } catch (err) {
+      setDeleteError(err.message);
+      setDeleteStep("input");
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
@@ -186,6 +270,12 @@ const HR_DepartmentTable = ({ style }) => {
           <button className="table-button" onClick={handleOpenUpdate}>
             <strong>Update</strong>
           </button>
+          <button
+            className="table-button delete"
+            onClick={() => setShowDeleteModal(true)}
+          >
+            <strong>Delete</strong>
+          </button>
         </div>
       </div>
 
@@ -203,7 +293,7 @@ const HR_DepartmentTable = ({ style }) => {
             <h3>Add New Department</h3>
             {addError && <div className="error-message">{addError}</div>}
             <form onSubmit={handleAddDepartment}>
-              <div className="form-group">
+              <div className="form-group-department">
                 <input
                   type="text"
                   value={newDepartmentName}
@@ -216,7 +306,10 @@ const HR_DepartmentTable = ({ style }) => {
                 <button
                   type="button"
                   className="btn-cancel"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setNewDepartmentName("");
+                  }}
                 >
                   Cancel
                 </button>
@@ -270,6 +363,83 @@ const HR_DepartmentTable = ({ style }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal delete */}
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="delete-department-modal">
+            <h3>Delete Departments</h3>
+
+            {deleteStep === "input" && (
+              <>
+                {deleteError && (
+                  <div className="error-message">{deleteError}</div>
+                )}
+                <div className="form-group-department">
+                  <input
+                    type="text"
+                    value={deleteIdOrName}
+                    onChange={(e) => setDeleteIdOrName(e.target.value)}
+                    placeholder="Enter Department ID or Name"
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="btn-cancel"
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setDeleteStep("input");
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-submit"
+                    onClick={handleDeleteDepartments}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </>
+            )}
+
+            {deleteStep === "confirm" && (
+              <>
+                <div class="comfirm-container">
+                  <p className="confirm-message">
+                    Phòng ban ID <b>{pendingDeleteId}</b> đang có dữ liệu ràng
+                    buộc trong bảng <b>Employees</b>.
+                    <br />
+                    <i>Bạn có muốn xóa luôn dữ liệu liên quan không?</i>
+                  </p>
+                </div>
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="btn-cancel"
+                    onClick={() => {
+                      setDeleteStep("input");
+                      setDeleteError(null);
+                    }}
+                  >
+                    Không xóa
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-submit"
+                    onClick={handleConfirmDeleteDependencies}
+                    // style={{ background: 'red' }}
+                  >
+                    Xóa liên quan
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

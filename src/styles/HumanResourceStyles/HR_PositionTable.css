@@ -106,3 +106,173 @@
   background-color: rgba(255, 255, 255, 0.1);
   cursor: pointer;
 }
+
+
+
+/* Phần ô cửa sổ thêm phòng ban */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.add-position-modal,
+.delete-position-modal {
+  background-color: rgba(30, 4, 144, 0.6);
+  border-radius: 8px;
+  padding: 20px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-position-modal,.delete-position-modal h3 {
+  margin-top: 0;
+  color: #ffffff;
+  font-family: "Roboto Condensed Medium";
+}
+
+.form-group-position {
+  position: relative;
+  padding: 0;
+  margin-bottom: 15px;
+}
+/* 
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #000000;
+} */
+
+.form-group-position input
+{
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 360px;
+  margin-top: 10px;
+}
+
+.form-group input {
+  width: 100px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.floating-label {
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background-color: rgba(30, 4, 144, 0.6); /* hoặc background màu modal của bạn */
+  padding: 0 5px;
+  font-size: 12px;
+  color: white;
+  font-family: "Roboto Condensed Medium";
+  pointer-events: none;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  margin-left: 10px;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  background-color: #a99e9e;
+  color: #ffffff;
+}
+
+.btn-submit {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-submit:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #f44336;
+  margin-bottom: 10px;
+  padding: 8px;
+  background-color: #ffebee;
+  border-radius: 4px;
+}
+
+
+.comfirm-container{
+  display: block;
+  background-color: white;
+  border-radius: 10px;
+  color: black;
+  font-family: "Roboto Condensed Medium";
+  padding: 5px;
+  margin-top: 5px;
+}
+
+/* 
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.loading-bar {
+  width: 80%;
+  height: 20px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.loading-progress {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #4caf50, #81c784);
+  animation: loadProgress 2s infinite;
+  border-radius: 10px;
+}
+
+@keyframes loadProgress {
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 80%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
+.loading-text {
+  font-size: 16px;
+  color: #555;
+  font-weight: 500;
+} */
+

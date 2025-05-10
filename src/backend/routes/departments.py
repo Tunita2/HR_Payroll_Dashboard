@@ -172,4 +172,79 @@ def update_department(id):
             pass
         return jsonify({'error': 'Failed to update department'}), 500
 
+# XÓA PHÒNG BAN
+@departments_bp.route('/api/department/delete/<int:department_id>', methods=['DELETE'])
+@verify_token
+@verify_hr
+def delete_department(department_id):
+    sqlserver_deleted = False
+    mysql_deleted = False
+    errors = []
+
+    force_delete = request.args.get("force", "false").lower() == "true"
+    
+    try:
+        # Kết nối DB
+        sqlserver_conn = get_sqlserver_connection()
+        sqlserver_cursor = sqlserver_conn.cursor()
+
+        mysql_conn = get_mysql_connection()
+        mysql_cursor = mysql_conn.cursor()
+
+
+        # Kiểm tra tồn tại
+        mysql_cursor.execute("SELECT COUNT(*) FROM departments WHERE DepartmentID = %s", (department_id,))
+        if mysql_cursor.fetchone()[0] == 0:
+            return jsonify({'error': 'Department not found in MySQL'}), 404
+
+        sqlserver_cursor.execute("SELECT COUNT(*) FROM Departments WHERE DepartmentID = ?", (department_id,))
+        if sqlserver_cursor.fetchone()[0] == 0:
+            return jsonify({'error': 'Department not found in SQL Server'}), 404
+        
+        sqlserver_cursor.execute("SELECT COUNT(*) FROM Employees WHERE DepartmentID = ?", (department_id,))
+        department_count = sqlserver_cursor.fetchone()[0]
+
+        mysql_cursor.execute("SELECT COUNT(*) FROM employees WHERE DepartmentID = %s", (department_id,))
+        department_count_mysql = mysql_cursor.fetchone()[0]
+
+        if (department_count > 0 or department_count_mysql>0) and not force_delete:
+            return jsonify({
+                "error": "Ràng buộc dữ liệu",
+                "message": f"Phòng ban ID {department_id} đang được có dữ liệu ràng buộc trong bảng Employee.",
+                "hasDependencies": True
+            }), 409  
+        else:
+
+            sqlserver_cursor.execute("UPDATE Employees SET DepartmentID = NULL WHERE DepartmentID = ?", (department_id,))
+            mysql_cursor.execute("UPDATE employees SET DepartmentID = NULL WHERE DepartmentID = %s", (department_id,))
+
+            sqlserver_cursor.execute("DELETE FROM Departments WHERE DepartmentID = ?", (department_id,))
+            mysql_cursor.execute("DELETE FROM departments WHERE DepartmentID = %s", (department_id,))
+            
+            sqlserver_conn.commit()
+            mysql_conn.commit()
+
+            if mysql_cursor.rowcount > 0 and sqlserver_cursor.rowcount > 0:
+                mysql_deleted = True
+                sqlserver_deleted = True
+            else:
+                errors.append("Không tìm thấy nhân viên trong MySQL")
+
+        # Đóng kết nối
+        mysql_cursor.close()
+        mysql_conn.close()
+
+        sqlserver_cursor.close()
+        sqlserver_conn.close()    
+
+        return jsonify({'message': f'Department ID {department_id} deleted successfully from both databases'}), 200
+
+    except Exception as e:
+        print("❌ Error deleting department:", e)
+        try:
+            mysql_conn.rollback()
+            sqlserver_conn.rollback()
+        except:
+            pass
+        return jsonify({'error': 'Failed to delete department'}), 500
 

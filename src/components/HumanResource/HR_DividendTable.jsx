@@ -67,6 +67,9 @@ const HR_DividendTable = ({ style }) => {
           <button className="table-button add">
             <strong>Add</strong>
           </button>
+          <button className="table-button update">
+            <strong>Update</strong>
+          </button>
           <button className="table-button delete">
             <strong>Delete</strong>
           </button>
@@ -75,10 +78,13 @@ const HR_DividendTable = ({ style }) => {
 
       <div style={{ marginBottom: "1rem" }}>
         <SearchBar
-          placeholder="Search by ID or Department Name"
+          placeholder="Search by ID or Employee Name"
           onSearch={setSearchKeyword}
         />
       </div>
+
+      
+
 
       {/* Bảng hiển thị dữ liệu cổ đông */}
       <div className="dividend-table-container" style={style}>
