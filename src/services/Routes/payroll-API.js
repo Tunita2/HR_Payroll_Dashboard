@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const pool = require("../config/mysql");
-
-const promisePool = pool.promise();
+const promisePool = require("../config/mysql");
 
 // Lấy danh sách attendance
-router.get('/attendance', async (req, res) => {
+router.get('/attendance',  async (req, res) => {
   try {
     const { year, month } = req.query;
 
@@ -24,21 +22,31 @@ router.get('/attendance', async (req, res) => {
     if (year && month) {
       query += ` WHERE YEAR(a.AttendanceMonth) = ? AND MONTH(a.AttendanceMonth) = ?`;
       const [rows] = await promisePool.query(query, [year, month]);
-      res.json(rows);
+
+      if (rows.length === 0) {
+        return res.status(404).json({ message: 'No attendance records found' });
+      }
+
+      return res.json(rows);
     } else {
       // If no year/month specified, return all records
       query += ` ORDER BY a.AttendanceMonth DESC, e.FullName ASC`;
       const [rows] = await promisePool.query(query);
-      res.json(rows);
+
+      if (rows.length === 0) {
+        return res.status(404).json({ message: 'No attendance records found' });
+      }
+
+      return res.json(rows);
     }
   } catch (error) {
     console.error("Error fetching attendance records: ", error);
-    res.status(500).json({ error: "Failed to fetching attendance records" });
+    res.status(500).json({ error: "Failed to fetch attendance records" });
   }
 });
 
 // Lấy danh sách salary
-router.get('/salaries', async (req, res) => {
+router.get('/salaries',  async (req, res) => {
   try {
     const { year, month } = req.query;
 
@@ -57,19 +65,70 @@ router.get('/salaries', async (req, res) => {
     if (year && month) {
       query += ` WHERE YEAR(s.SalaryMonth) = ? AND MONTH(s.SalaryMonth) = ?`;
       const [rows] = await promisePool.query(query, [year, month]);
-      res.json(rows);
+
+      if (rows.length === 0) {
+        return res.status(404).json({ message: 'No salary records found' });
+      }
+
+      return res.json(rows);
     } else {
       // If no year/month specified, return all records
       query += ` ORDER BY s.SalaryMonth DESC, e.FullName ASC`;
       const [rows] = await promisePool.query(query);
-      res.json(rows);
+
+      if (rows.length === 0) {
+        return res.status(404).json({ message: 'No salary records found' });
+      }
+
+      return res.json(rows);
     }
   } catch (error) {
-    console.error("Error fetching salaries records: ", error);
-    res.status(500).json({ error: "Failed to fetching salaries records" });
+    console.error("Error fetching salary records: ", error);
+    res.status(500).json({ error: "Failed to fetch salary record" });
   }
-})
-router.get('/salary', async (req, res) => {
+});
+
+router.put('/salaries/:id',  async (req, res) => {
+  try {
+    const salaryId = req.params.id;
+    const { BaseSalary, Bonus, Deductions } = req.body;
+
+    if (typeof BaseSalary !== 'number' || typeof Bonus !== 'number' || typeof Deductions !== 'number') {
+      return res.status(400).json({ message: 'Invalid salary data' });
+    }
+
+    // Tính toán NetSalary
+    const netSalary = parseFloat(BaseSalary) + parseFloat(Bonus) - parseFloat(Deductions);
+
+    // Thực hiện cập nhật trong database
+    const [result] = await promisePool.query(
+      `UPDATE salaries 
+       SET BaseSalary = ?, Bonus = ?, Deductions = ?, NetSalary = ? 
+       WHERE SalaryID = ?`,
+      [BaseSalary, Bonus, Deductions, netSalary, salaryId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'ID not found' });
+    }
+
+    // Lấy dữ liệu đã cập nhật để trả về
+    const [updatedSalary] = await promisePool.query(
+      'SELECT * FROM salaries WHERE SalaryID = ?',
+      [salaryId]
+    );
+
+    res.json({
+      message: 'Completed updating!',
+      data: updatedSalary[0]
+    });
+  } catch (error) {
+    console.error("Error updating salary records:", error);
+    res.status(500).json({ error: "Error to fetch salary records" });
+  }
+});
+
+router.get('/salary',  async (req, res) => {
   try {
     const { year, month } = req.query;
 
@@ -93,12 +152,12 @@ router.get('/salary', async (req, res) => {
       res.json(rows);
     }
   } catch (error) {
-    console.error("Error fetching salaries records: ", error);
-    res.status(500).json({ error: "Failed to fetching salaries records" });
+    console.error("Error fetching salary records: ", error);
+    res.status(500).json({ error: "Failed to fetch salary record" });
   }
 })
 
-router.get('/employees', async (req, res) => {
+router.get('/employees',  async (req, res) => {
   try {
     const [rows] = await promisePool.query(`
       SELECT e.*, d.DepartmentName, p.PositionName 
@@ -108,39 +167,39 @@ router.get('/employees', async (req, res) => {
     `);
     res.json(rows);
   } catch (error) {
-    console.error("Error fetching salaries records: ", error);
-    res.status(500).json({ error: "Failed to fetching salaries records" });
+    console.error("Error fetching salary records: ", error);
+    res.status(500).json({ error: "Failed to fetch salary record" });
   }
 });
 
 // API GET - Lấy thông tin nhân viên theo ID
-router.get('/employees/:id', async (req, res) => {
+router.get('/employees/:id',  async (req, res) => {
   const [rows] = await promisePool.query(
     'SELECT * FROM employees WHERE EmployeeID = ?',
     [req.params.id]
   );
 
   if (rows.length === 0) {
-    return res.status(404).json({ message: 'Không tìm thấy nhân viên' });
+    return res.status(404).json({ message: 'Employee not found' });
   }
 
   res.json(rows[0]);
 });
 
 // API GET - Lấy danh sách phòng ban
-router.get('/departments', async (req, res) => {
+router.get('/departments',  async (req, res) => {
   const [rows] = await promisePool.query('SELECT * FROM departments');
   res.json(rows);
 });
 
 // API GET - Lấy danh sách chức vụ
-router.get('/positions', async (req, res) => {
+router.get('/positions',  async (req, res) => {
   const [rows] = await promisePool.query('SELECT * FROM positions');
   res.json(rows);
 });
 
 // API GET - Lấy lịch sử lương của nhân viên
-router.get('/salaries/employee/:id', async (req, res) => {
+router.get('/salaries/employee/:id',  async (req, res) => {
   const [rows] = await promisePool.query(
     'SELECT * FROM salaries WHERE EmployeeID = ? ORDER BY SalaryMonth DESC',
     [req.params.id]
@@ -149,7 +208,7 @@ router.get('/salaries/employee/:id', async (req, res) => {
 });
 
 // API GET - Lấy lịch sử lương của nhân viên theo năm
-router.get('/salaries/employee/:id/year/:year', async (req, res) => {
+router.get('/salaries/employee/:id/year/:year',  async (req, res) => {
   const [rows] = await promisePool.query(
     'SELECT * FROM salaries WHERE EmployeeID = ? AND YEAR(SalaryMonth) = ? ORDER BY SalaryMonth DESC',
     [req.params.id, req.params.year]
@@ -158,7 +217,7 @@ router.get('/salaries/employee/:id/year/:year', async (req, res) => {
 });
 
 // API GET - Lấy dữ liệu chấm công của nhân viên
-router.get('/attendance/employee/:id', async (req, res) => {
+router.get('/attendance/employee/:id',  async (req, res) => {
   const [rows] = await promisePool.query(
     'SELECT * FROM attendance WHERE EmployeeID = ? ORDER BY AttendanceMonth DESC',
     [req.params.id]
@@ -167,7 +226,7 @@ router.get('/attendance/employee/:id', async (req, res) => {
 });
 
 // API GET - Lấy dữ liệu chấm công của nhân viên theo năm
-router.get('/attendance/employee/:id/year/:year', async (req, res) => {
+router.get('/attendance/employee/:id/year/:year',  async (req, res) => {
   const [rows] = await promisePool.query(
     'SELECT * FROM attendance WHERE EmployeeID = ? AND YEAR(AttendanceMonth) = ? ORDER BY AttendanceMonth DESC',
     [req.params.id, req.params.year]
