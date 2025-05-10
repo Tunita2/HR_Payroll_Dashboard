@@ -6,7 +6,7 @@ import SearchBar from "../General/SearchBar";
 const HR_EmployeeTable = ({ style }) => {
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [positions, setPositions] = useState([]); // Dữ liệu phòng ban
+  const [positions, setPositions] = useState([]); 
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -641,7 +641,7 @@ const HR_EmployeeTable = ({ style }) => {
 
       {showUpdateModal && (
         <div className="modal-overlay">
-          <div className="add-department-modal">
+          <div className="add-employee-modal">
             <h3>Update Employee Info</h3>
             {updateError && <div className="error-message">{updateError}</div>}
             <form onSubmit={handleUpdateEmployee}>

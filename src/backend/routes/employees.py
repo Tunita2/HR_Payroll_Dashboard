@@ -128,7 +128,7 @@ def add_employees():
         )
         )
 
-        # Chuyển nhâ
+        # Chuyển tên TK
         full_name = data.get("fullName", "")
         username = convert_fullname_to_username(full_name)
 

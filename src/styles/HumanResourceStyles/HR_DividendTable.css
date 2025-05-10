@@ -106,3 +106,121 @@
   background-color: rgba(255, 255, 255, 0.1);
   cursor: pointer;
 }
+
+/* Phần ô cửa sổ thêm phòng ban */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.add-dividend-modal,
+.delete-dividend-modal {
+  background-color: rgba(30, 4, 144, 0.6);
+  border-radius: 8px;
+  padding: 20px;
+  width: 450px;
+  max-width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-dividend-modal,.delete-dividend-modal h3 {
+  margin-top: 0;
+  color: #ffffff;
+  font-family: "Roboto Semi Bold";
+}
+
+.form-group-dividend {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  margin-top: 10px;
+}
+
+/* .form-group input {
+  width: 100px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 10px;
+} */
+
+.form-group-dividend input,
+.form-group-dividend select {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group-dividend label {
+  width: 100px; /* Độ rộng cố định cho label */
+  /* margin-right: 0px; Khoảng cách với ô input */
+  font-size: 13px;
+  color: white;
+  font-family: "Roboto Semi Bold";
+  align-self: center;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  margin-left: 10px;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  background-color: #a99e9e;
+  color: #ffffff;
+}
+
+.btn-submit {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-submit:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #f44336;
+  margin-bottom: 10px;
+  padding: 8px;
+  background-color: #ffebee;
+  border-radius: 4px;
+}
+
+.select-trim {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.comfirm-container{
+  display: block;
+  background-color: white;
+  border-radius: 10px;
+  color: black;
+  font-family: "Roboto Condensed Medium";
+  padding: 5px;
+  margin-top: 5px;
+}
