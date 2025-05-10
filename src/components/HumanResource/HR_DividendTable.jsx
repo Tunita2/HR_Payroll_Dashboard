@@ -41,12 +41,12 @@ const HR_DividendTable = ({ style }) => {
       });
   }, []);
 
-  const filteredDividend = dividends.filter((divi) => {
+  const filteredDividend = dividends.filter((dividend) => {
     const keyword = searchKeyword.toLowerCase();
     return (
-      divi.employeeName.toLowerCase().includes(keyword) ||
-      divi.dividendID.toString().includes(keyword) ||
-      divi.employeeID.toString().includes(keyword)
+      dividend.employeeName.toLowerCase().includes(keyword) ||
+      dividend.dividendID.toString().includes(keyword) ||
+      dividend.employeeID.toString().includes(keyword)
     );
   });
 
@@ -100,14 +100,14 @@ const HR_DividendTable = ({ style }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredDividend.map((divi, index) => (
+            {filteredDividend.map((dividend, index) => (
               <tr key={index} className="dividend-table-row">
-                <td>{divi.dividendID}</td>
-                <td>{divi.employeeID}</td>
-                <td>{divi.employeeName}</td>
-                <td>{divi.dividendAmount}</td>
-                <td>{divi.dividendDate}</td>
-                <td>{divi.createdAt}</td>
+                <td>{dividend.dividendID}</td>
+                <td>{dividend.employeeID}</td>
+                <td>{dividend.employeeName}</td>
+                <td>{dividend.dividendAmount}</td>
+                <td>{dividend.dividendDate}</td>
+                <td>{dividend.createdAt}</td>
               </tr>
             ))}
           </tbody>
