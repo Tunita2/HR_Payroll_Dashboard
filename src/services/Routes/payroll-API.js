@@ -191,99 +191,122 @@ router.put('/salaries/:id', verifyToken, verifyPayroll, async (req, res) => {
   }
 });
 
-// router.post('/attendance/adding', verifyToken, verifyPayroll, async (req, res) => {
-//   try {
-//     const {
-//       EmployeeID,
-//       WorkDays,
-//       AbsentDays,
-//       LeaveDays,
-//       AttendanceMonth,
-//       CreatedAt
-//     } = req.body;
+// Thêm bản ghi ngày làm việc cho nhân viên 
+router.post('/attendance/adding', verifyToken, verifyPayroll, async (req, res) => {
+  const connection = await promisePool.getConnection();
+  try {
+    const {
+      EmployeeID,
+      WorkDays,
+      AbsentDays,
+      LeaveDays,
+      AttendanceMonth,
+    } = req.body;
 
-//     // Validate required fields
-//     if (!EmployeeID || !AttendanceMonth || isNaN(WorkDays) || isNaN(AbsentDays) || isNaN(LeaveDays) || WorkDays < 0 || AbsentDays < 0 || LeaveDays < 0) {
-//       return res.status(400).json({ error: 'All fields are required' });
-//     }
+    
+    // Validate input
+    if (!EmployeeID || !AttendanceMonth || isNaN(WorkDays) || isNaN(AbsentDays) || isNaN(LeaveDays) || WorkDays < 0 || AbsentDays < 0 || LeaveDays < 0) {
+      return res.status(400).json({ error: 'All fields are required and must be valid numbers' });
+    }
+    // const formattedMonth = new Date(`${AttendanceMonth}-01`);
 
-//     // Check if employee exists
-//     const [employee] = await promisePool.query('SELECT * FROM employees WHERE EmployeeID = ?', [EmployeeID]);
-//     if (employee.length === 0) {
-//       return res.status(404).json({ error: 'Employee not found' });
-//     }
+    // Start transaction
+    await connection.beginTransaction();
 
-//     // Check if there's already a salary record for this employee in this month
-//     const [existingSalary] = await promisePool.query(
-//       'SELECT * FROM salaries WHERE EmployeeID = ? AND DATE_FORMAT(SalaryMonth, "%Y-%m") = DATE_FORMAT(?, "%Y-%m")',
-//       [EmployeeID, SalaryMonth]
-//     );
+    // Check if employee exists
+    const [employee] = await connection.query('SELECT * FROM employees WHERE EmployeeID = ?', [EmployeeID]);
+    if (employee.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ error: 'Employee not found' });
+    }
 
-//     if (existingSalary.length > 0) {
-//       return res.status(409).json({ error: 'A salary record already exists for this employee in the selected month' });
-//     }
+    // Check if attendance already exists for this month
+    const [existingAttendance] = await connection.query(
+      'SELECT * FROM attendance WHERE EmployeeID = ? AND DATE_FORMAT(AttendanceMonth, "%Y-%m") = DATE_FORMAT(?, "%Y-%m")',
+      [EmployeeID, AttendanceMonth]
+    );
 
-//     // Insert new salary record
-//     const [result] = await promisePool.query(
-//       'INSERT INTO salaries (EmployeeID, SalaryMonth, BaseSalary, Bonus, Deductions, NetSalary, CreatedAt) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-//       [EmployeeID, SalaryMonth, BaseSalary, Bonus, Deductions, NetSalary]
-//     );
+    if (existingAttendance.length > 0) {
+      await connection.rollback();
+      return res.status(409).json({ error: 'Attendance already exists for this month' });
+    }
 
-//     // Return success response
-//     res.status(201).json({
-//       message: 'Salary record added successfully',
-//       SalaryID: result.insertId
-//     });
-//   } catch (error) {
-//     console.error('Error adding salary record:', error);
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// });
+    // Insert attendance record
+    const [result] = await connection.query(
+      'INSERT INTO attendance (EmployeeID, WorkDays, AbsentDays, LeaveDays, AttendanceMonth, CreatedAt) VALUES (?, ?, ?, ?, ?, NOW())',
+      [EmployeeID, WorkDays, AbsentDays, LeaveDays, AttendanceMonth]
+    );
 
+    // Commit transaction
+    await connection.commit();
 
-// // Dựa vào id nhân viên để cập nhật bản ghi
-// router.put('/attendance/:id', verifyToken, verifyPayroll, async (req, res) => {
-//   try {
-//     const salaryId = req.params.id;
-//     const { BaseSalary, Bonus, Deductions } = req.body;
+    res.status(201).json({
+      message: 'Attendance record added successfully',
+      AttendanceID: result.insertId
+    });
 
-//     const base = parseFloat(BaseSalary);
-//     const bonus = parseFloat(Bonus);
-//     const deductions = parseFloat(Deductions);
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error adding attendance record:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    connection.release();
+  }
+});
 
-//     if (isNaN(base) || isNaN(bonus) || isNaN(deductions) || base < 0 || bonus < 0 || deductions < 0) {
-//       return res.status(400).json({ message: 'Invalid salary data' });
-//     }
+// Dựa vào id nhân viên để cập nhật bản ghi
+router.put('/attendance/:id', verifyToken, verifyPayroll, async (req, res) => {
+  const connection = await promisePool.getConnection();
+  try {
+    const AttendanceID = req.params.id;
+    const { WorkDays, AbsentDays, LeaveDays } = req.body;
 
-//     // Tính toán NetSalary
-//     const netSalary = base + bonus - deductions;
+    const workDays = parseInt(WorkDays);
+    const absentDays = parseInt(AbsentDays);
+    const leaveDays = parseInt(LeaveDays);
 
-//     const [result] = await promisePool.query(
-//       `UPDATE salaries 
-//       SET BaseSalary = ?, Bonus = ?, Deductions = ?, NetSalary = ? 
-//       WHERE SalaryID = ?`,
-//       [base, bonus, deductions, netSalary, salaryId]
-//     );
+    if (isNaN(workDays) || isNaN(absentDays) || isNaN(leaveDays) || workDays < 0 || absentDays < 0 || leaveDays < 0) {
+      return res.status(400).json({ message: 'Invalid attendance data' });
+    }
 
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ message: 'ID not found' });
-//     }
+    // Start transaction
+    await connection.beginTransaction();
 
-//     // Lấy dữ liệu đã cập nhật để trả về
-//     const [updatedSalary] = await promisePool.query(
-//       'SELECT * FROM salaries WHERE SalaryID = ?',
-//       [salaryId]
-//     );
+    // Update attendance record
+    const [result] = await connection.query(
+      `UPDATE attendance 
+       SET WorkDays = ?, AbsentDays = ?, LeaveDays = ? 
+       WHERE AttendanceID = ?`,
+      [workDays, absentDays, leaveDays, AttendanceID]
+    );
 
-//     res.json({
-//       message: 'Completed updating!',
-//       data: updatedSalary[0]
-//     });
-//   } catch (error) {
-//     console.error("Error updating salary records:", error.response?.data || error.message);
-//     res.status(500).json({ error: "Error to fetch salary records" });
-//   }
-// });
+    if (result.affectedRows === 0) {
+      await connection.rollback();
+      return res.status(404).json({ message: 'Attendance ID not found' });
+    }
+
+    // Lấy lại bản ghi đã update
+    const [updatedAttendance] = await connection.query(
+      'SELECT * FROM attendance WHERE AttendanceID = ?',
+      [AttendanceID]
+    );
+
+    // Commit transaction
+    await connection.commit();
+
+    res.json({
+      message: 'Completed updating!',
+      data: updatedAttendance[0]
+    });
+
+  } catch (error) {
+    await connection.rollback();
+    console.error("Error updating attendance records:", error.response?.data || error.message);
+    res.status(500).json({ error: "Error to fetch attendance records" });
+  } finally {
+    connection.release();
+  }
+});
 
 router.get('/employees', verifyToken, verifyPayroll, async (req, res) => {
   try {

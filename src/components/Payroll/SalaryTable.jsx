@@ -61,6 +61,17 @@ const SalaryTable = () => {
     fetchEmployees();
   }, []);
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Active":
+        return "green";
+      case "Inactive":
+        return "red";
+      default:
+        return "black";
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -377,7 +388,6 @@ const SalaryTable = () => {
           <table className="appli-table">
             <thead>
               <tr>
-                <th>Selection</th>
                 <th>ID</th>
                 <th>Employee ID</th>
                 <th>Full name</th>
@@ -388,32 +398,47 @@ const SalaryTable = () => {
                 <th>Bonus</th>
                 <th>Deductions</th>
                 <th>Net salary</th>
+                <th>Status</th>
+                <th>Select</th>
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((employee, index) => (
-                <tr key={index}
-                  className={`appli-table-row ${selectedEmployeeId === employee.SalaryID ? "selected-row" : ""}`}
-                  onClick={() => handleRowSelect(employee.SalaryID, employee)}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedEmployeeId === employee.SalaryID}
-                      onChange={() => handleRowSelect(employee.SalaryID, employee)}
-                    />
-                  </td>
-                  <td>{employee.SalaryID}</td>
-                  <td>{employee.EmployeeID}</td>
-                  <td>{employee.FullName}</td>
-                  <td>{employee.DepartmentName}</td>
-                  <td>{employee.PositionName}</td>
-                  <td>{formatDate(employee.SalaryMonth)}</td>
-                  <td>{employee.BaseSalary}</td>
-                  <td>{employee.Bonus}</td>
-                  <td>{employee.Deductions}</td>
-                  <td>{employee.NetSalary}</td>
-                </tr>
-              ))}
+              {filteredData.map((employee, index) => {
+                return (
+                  <tr key={index}
+                    className={`appli-table-row ${selectedEmployeeId === employee.SalaryID ? "selected-row" : ""}`}
+                    onClick={() => handleRowSelect(employee.SalaryID, employee)}>
+                    <td>{employee.SalaryID}</td>
+                    <td>{employee.EmployeeID}</td>
+                    <td>{employee.FullName}</td>
+                    <td>{employee.DepartmentName}</td>
+                    <td>{employee.PositionName}</td>
+                    <td>{formatDate(employee.SalaryMonth)}</td>
+                    <td>{employee.BaseSalary}</td>
+                    <td>{employee.Bonus}</td>
+                    <td>{employee.Deductions}</td>
+                    <td>{employee.NetSalary}</td>
+                    <td>
+                      <span style={{
+                        color: getStatusColor(employee.Status),
+                        fontWeight: "bold",
+                        padding: "3px 8px",
+                        borderRadius: "4px",
+                        backgroundColor: `${getStatusColor(employee.Status)}15`
+                      }}>
+                        {employee.Status}
+                      </span>
+                    </td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedEmployeeId === employee.SalaryID}
+                        onChange={() => handleRowSelect(employee.SalaryID, employee)}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

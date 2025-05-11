@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-// import "../../styles/PayrollStyles/schedule.css"
 const styles = {
   // Layout
   app: {
@@ -412,97 +411,6 @@ const Calendar = ({ attendance, month, year, onMonthChange }) => {
   );
 };
 
-// Attendance Form Component
-const AttendanceForm = ({ employeeId, month, year, attendance, onAttendanceUpdate }) => {
-  const [workDays, setWorkDays] = useState(attendance?.WorkDays || '');
-  const [absentDays, setAbsentDays] = useState(attendance?.AbsentDays || '');
-  const [leaveDays, setLeaveDays] = useState(attendance?.LeaveDays || '');
-  
-  // Update form when employee changes
-  useEffect(() => {
-    setWorkDays(attendance?.WorkDays || '');
-    setAbsentDays(attendance?.AbsentDays || '');
-    setLeaveDays(attendance?.LeaveDays || '');
-  }, [attendance, employeeId]);
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    const updatedAttendance = {
-      EmployeeID: employeeId,
-      AttendanceMonth: `${year}-${month + 1}`,
-      WorkDays: parseInt(workDays, 10),
-      AbsentDays: parseInt(absentDays, 10),
-      LeaveDays: parseInt(leaveDays, 10)
-    };
-    
-    // For demo - just show an alert
-    console.log('Submitting attendance data:', updatedAttendance);
-    onAttendanceUpdate(updatedAttendance);
-    
-    alert('Attendance data saved!');
-  };
-  
-  return (
-    <div style={styles.section}>
-      <h2 style={styles.sectionTitle}>Update Attendance</h2>
-      <form onSubmit={handleSubmit}>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Work Days
-            <input
-              type="number"
-              min="0"
-              max="31"
-              value={workDays}
-              onChange={(e) => setWorkDays(e.target.value)}
-              style={styles.input}
-              required
-            />
-          </label>
-        </div>
-        
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Absent Days
-            <input
-              type="number"
-              min="0"
-              max="31"
-              value={absentDays}
-              onChange={(e) => setAbsentDays(e.target.value)}
-              style={styles.input}
-              required
-            />
-          </label>
-        </div>
-        
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Leave Days
-            <input
-              type="number"
-              min="0"
-              max="31"
-              value={leaveDays}
-              onChange={(e) => setLeaveDays(e.target.value)}
-              style={styles.input}
-              required
-            />
-          </label>
-        </div>
-        
-        <button
-          type="submit"
-          style={styles.submitButton}
-        >
-          Save Attendance
-        </button>
-      </form>
-    </div>
-  );
-};
-
 // Attendance Summary Component
 const AttendanceSummary = ({ attendance }) => {
   const workDays = attendance?.WorkDays || 0;
@@ -559,25 +467,9 @@ const Schedules = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  const handleEmployeeChange = (employeeId) => {
-    setSelectedEmployee(employeeId);
-  };
-
   const handleMonthChange = (month, year) => {
     setSelectedMonth(month);
     setSelectedYear(year);
-  };
-
-  const handleAttendanceUpdate = (updatedAttendance) => {
-    // Update attendance data in state
-    setAttendanceData(prev => ({
-      ...prev,
-      [updatedAttendance.EmployeeID]: {
-        WorkDays: updatedAttendance.WorkDays,
-        AbsentDays: updatedAttendance.AbsentDays,
-        LeaveDays: updatedAttendance.LeaveDays
-      }
-    }));
   };
 
   // Get current attendance for selected employee
@@ -590,7 +482,7 @@ const Schedules = () => {
     <div style={styles.app}>
       <StyleSheet />
       <header>
-        <div className='title-header'>Report system</div>
+        <div className='title-header'>Schedule</div>
       </header>
 
       <main style={styles.mainContainer}>
