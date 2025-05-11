@@ -62,7 +62,16 @@ const AttendanceTable = () => {
     fetchEmployees();
   }, []);
 
-
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Active":
+        return "green";
+      case "Inactive":
+        return "red";
+      default:
+        return "black";
+    }
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -100,237 +109,237 @@ const AttendanceTable = () => {
       return searchValue.includes(searchQuery.toLowerCase());
     });
 
-  // const handleRowSelect = (employeeId, employeeData) => {
-  //   if (selectedEmployeeId === employeeId) {
-  //     // If already selected, deselect
-  //     setSelectedEmployeeId(null);
-  //   } else {
-  //     // Otherwise select this employee
-  //     setSelectedEmployeeId(employeeId);
-  //     setSelectedEmployeeData({
-  //       WorkDays: employeeData.WorkDays,
-  //       AbsentDays: employeeData.AbsentDays,
-  //       LeaveDays: employeeData.LeaveDays
-  //     });
-  //   }
-  // };
-  // const handleUpdateClick = () => {
-  //   if (selectedEmployeeId) {
-  //     setShowModal(true);
-  //     // Reset any previous messages
-  //     setUpdateMessage("");
-  //     setUpdateError("");
-  //   } else {
-  //     alert("Please select an employee to update salary");
-  //   }
-  // };
-  // const handleAddClick = () => {
-  //   setShowAddModal(true);
-  //   setNewAttendanceRecord({
-  //     EmployeeID: '',
-  //     FullName: '',
-  //     DepartmentName: '',
-  //     DepartmentID: '',
-  //     PositionName: '',
-  //     PositionID: '',
-  //     WorkDays: '',
-  //     AbsentDays: '',
-  //     LeaveDays: '',
-  //     AttendanceMonth: new Date().toISOString().split('T')[0],
-  //     CreatedAt: new Date().toISOString().split('T')[0],
-  //   });
-  //   setUpdateMessage("");
-  //   setUpdateError("");
-  // };
-  // const handleCloseModal = () => {
-  //   setShowModal(false);
-  // };
+  const handleRowSelect = (employeeId, employeeData) => {
+    if (selectedEmployeeId === employeeId) {
+      // If already selected, deselect
+      setSelectedEmployeeId(null);
+    } else {
+      // Otherwise select this employee
+      setSelectedEmployeeId(employeeId);
+      setSelectedEmployeeData({
+        WorkDays: employeeData.WorkDays,
+        AbsentDays: employeeData.AbsentDays,
+        LeaveDays: employeeData.LeaveDays
+      });
+    }
+  };
+  const handleUpdateClick = () => {
+    if (selectedEmployeeId) {
+      setShowModal(true);
+      // Reset any previous messages
+      setUpdateMessage("");
+      setUpdateError("");
+    } else {
+      alert("Please select an employee to update salary");
+    }
+  };
+  const handleAddClick = () => {
+    setShowAddModal(true);
+    setNewAttendanceRecord({
+      EmployeeID: '',
+      FullName: '',
+      DepartmentName: '',
+      DepartmentID: '',
+      PositionName: '',
+      PositionID: '',
+      WorkDays: '',
+      AbsentDays: '',
+      LeaveDays: '',
+      AttendanceMonth: new Date().toISOString().split('T')[0],
+      CreatedAt: new Date().toISOString().split('T')[0],
+    });
+    setUpdateMessage("");
+    setUpdateError("");
+  };
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
 
-  // const handleCloseAddModal = () => {
-  //   setShowAddModal(false);
-  // };
+  const handleCloseAddModal = () => {
+    setShowAddModal(false);
+  };
 
-  // const handleInputChange = (e) => {
-  //   const { name, value } = e.target;
-  //   // Ensure only numbers and decimal point can be entered
-  //   if (value === '' || /^\d*\.?\d*$/.test(value)) {
-  //     setSelectedEmployeeData({
-  //       ...selectedEmployeeData,
-  //       [name]: value
-  //     });
-  //   }
-  // };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    // Ensure only numbers and decimal point can be entered
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setSelectedEmployeeData({
+        ...selectedEmployeeData,
+        [name]: value
+      });
+    }
+  };
 
-  // const handleAddInputChange = (e) => {
-  //   const { name, value } = e.target;
+  const handleAddInputChange = (e) => {
+    const { name, value } = e.target;
 
-  //   if (name === 'EmployeeID') {
-  //     const selectedEmployee = employees.find(emp => emp.EmployeeID === parseInt(value));
-  //     if (selectedEmployee) {
-  //       setNewAttendanceRecord({
-  //         ...newAttendanceRecord,
-  //         EmployeeID: value,
-  //         FullName: selectedEmployee.FullName || '',
-  //         DepartmentID: selectedEmployee.DepartmentID || '',
-  //         DepartmentName: selectedEmployee.DepartmentName || '',
-  //         PositionID: selectedEmployee.PositionID || '',
-  //         PositionName: selectedEmployee.PositionName || ''
-  //       });
-  //     } else {
-  //       setNewAttendanceRecord({
-  //         ...newAttendanceRecord,
-  //         EmployeeID: value,
-  //         FullName: '',
-  //         DepartmentID: '',
-  //         DepartmentName: '',
-  //         PositionID: '',
-  //         PositionName: ''
-  //       });
-  //     }
-  //   } else if (['WorkDays', 'AbsentDays', 'LeaveDays'].includes(name)) {
-  //     // Ensure only numbers and decimal point can be entered
-  //     if (value === '' || /^\d*\.?\d*$/.test(value)) {
-  //       setNewAttendanceRecord({
-  //         ...newAttendanceRecord,
-  //         [name]: value
-  //       });
-  //     }
-  //   } else {
-  //     setNewAttendanceRecord({
-  //       ...newAttendanceRecord,
-  //       [name]: value
-  //     });
-  //   }
-  // };
+    if (name === 'EmployeeID') {
+      const selectedEmployee = employees.find(emp => emp.EmployeeID === parseInt(value));
+      if (selectedEmployee) {
+        setNewAttendanceRecord({
+          ...newAttendanceRecord,
+          EmployeeID: value,
+          FullName: selectedEmployee.FullName || '',
+          DepartmentID: selectedEmployee.DepartmentID || '',
+          DepartmentName: selectedEmployee.DepartmentName || '',
+          PositionID: selectedEmployee.PositionID || '',
+          PositionName: selectedEmployee.PositionName || ''
+        });
+      } else {
+        setNewAttendanceRecord({
+          ...newAttendanceRecord,
+          EmployeeID: value,
+          FullName: '',
+          DepartmentID: '',
+          DepartmentName: '',
+          PositionID: '',
+          PositionName: ''
+        });
+      }
+    } else if (['WorkDays', 'AbsentDays', 'LeaveDays'].includes(name)) {
+      // Ensure only numbers and decimal point can be entered
+      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+        setNewAttendanceRecord({
+          ...newAttendanceRecord,
+          [name]: value
+        });
+      }
+    } else {
+      setNewAttendanceRecord({
+        ...newAttendanceRecord,
+        [name]: value
+      });
+    }
+  };
 
-  // const validateInputs = () => {
-  //   const { WorkDays, AbsentDays, LeaveDays } = selectedEmployeeData;
+  const validateInputs = () => {
+    const { WorkDays, AbsentDays, LeaveDays } = selectedEmployeeData;
 
-  //   // Check if inputs are not empty and are valid numbers
-  //   if (!WorkDays || isNaN(parseFloat(WorkDays))) {
-  //     setUpdateError("Work Days must be a valid number");
-  //     return false;
-  //   }
+    // Check if inputs are not empty and are valid numbers
+    if (!WorkDays || isNaN(parseFloat(WorkDays))) {
+      setUpdateError("Work Days must be a valid number");
+      return false;
+    }
 
-  //   if (!AbsentDays || isNaN(parseFloat(AbsentDays))) {
-  //     setUpdateError("Absent Days must be a valid number");
-  //     return false;
-  //   }
+    if (!AbsentDays || isNaN(parseFloat(AbsentDays))) {
+      setUpdateError("Absent Days must be a valid number");
+      return false;
+    }
 
-  //   if (!LeaveDays || isNaN(parseFloat(LeaveDays))) {
-  //     setUpdateError("Leave Days must be a valid number");
-  //     return false;
-  //   }
+    if (!LeaveDays || isNaN(parseFloat(LeaveDays))) {
+      setUpdateError("Leave Days must be a valid number");
+      return false;
+    }
 
-  //   return true;
-  // };
+    return true;
+  };
 
-  // const validateAddInputs = () => {
-  //   const { EmployeeID, WorkDays, AbsentDays, LeaveDays, AttendanceMonth } = newAttendanceRecord;
+  const validateAddInputs = () => {
+    const { EmployeeID, WorkDays, AbsentDays, LeaveDays, AttendanceMonth } = newAttendanceRecord;
 
-  //   if (!EmployeeID) {
-  //     setUpdateError("Please select an employee");
-  //     return false;
-  //   }
+    if (!EmployeeID) {
+      setUpdateError("Please select an employee");
+      return false;
+    }
 
-  //   if (!AttendanceMonth) {
-  //     setUpdateError("Please select a salary month");
-  //     return false;
-  //   }
+    if (!AttendanceMonth) {
+      setUpdateError("Please select a salary month");
+      return false;
+    }
 
-  //   if (!WorkDays || isNaN(parseFloat(WorkDays))) {
-  //     setUpdateError("Work Days must be a valid number");
-  //     return false;
-  //   }
+    if (!WorkDays || isNaN(parseFloat(WorkDays))) {
+      setUpdateError("Work Days must be a valid number");
+      return false;
+    }
 
-  //   if (!AbsentDays || isNaN(parseFloat(AbsentDays))) {
-  //     setUpdateError("Absent Days must be a valid number");
-  //     return false;
-  //   }
+    if (!AbsentDays || isNaN(parseFloat(AbsentDays))) {
+      setUpdateError("Absent Days must be a valid number");
+      return false;
+    }
 
-  //   if (!LeaveDays || isNaN(parseFloat(LeaveDays))) {
-  //     setUpdateError("Leave Days must be a valid number");
-  //     return false;
-  //   }
+    if (!LeaveDays || isNaN(parseFloat(LeaveDays))) {
+      setUpdateError("Leave Days must be a valid number");
+      return false;
+    }
 
-  //   return true;
-  // };
+    return true;
+  };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  //   // Validate inputs before submitting
-  //   if (!validateInputs()) {
-  //     return;
-  //   }
+    // Validate inputs before submitting
+    if (!validateInputs()) {
+      return;
+    }
 
-  //   try {
-  //     setLoading(true);
+    try {
+      setLoading(true);
 
-  //     // Call API to update salary
-  //     const response = await axios.put(`payroll/attendance/${selectedEmployeeId}`, selectedEmployeeData);
+      // Call API to update salary
+      const response = await axios.put(`payroll/attendance/${selectedEmployeeId}`, selectedEmployeeData);
 
-  //     // If update successful, show success message and refresh data
-  //     setUpdateMessage("Attendance updated successfully!");
-  //     fetchAttendance(); // Refresh the salary data
+      // If update successful, show success message and refresh data
+      setUpdateMessage("Attendance updated successfully!");
+      fetchAttendance(); // Refresh the salary data
 
-  //     // Close modal after short delay
-  //     setTimeout(() => {
-  //       setShowModal(false);
-  //       setUpdateMessage("");
-  //     }, 1500);
+      // Close modal after short delay
+      setTimeout(() => {
+        setShowModal(false);
+        setUpdateMessage("");
+      }, 1500);
 
-  //   } catch (error) {
-  //     console.error("Error updating attendance:", error);
-  //     setUpdateError(error.response?.data?.error || "Failed to update attendance. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+    } catch (error) {
+      console.error("Error updating attendance:", error);
+      setUpdateError(error.response?.data?.error || "Failed to update attendance. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // const handleAddSubmit = async (e) => {
-  //   e.preventDefault();
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
 
-  //   // Validate inputs trước khi gửi
-  //   if (!validateAddInputs()) {
-  //     return;
-  //   }
+    // Validate inputs trước khi gửi
+    if (!validateAddInputs()) {
+      return;
+    }
 
-  //   try {
-  //     setLoading(true);
+    try {
+      setLoading(true);
 
-  //     const workDays = parseFloat(newAttendanceRecord.WorkDays) || 0;
-  //     const absentDays = parseFloat(newAttendanceRecord.AbsentDays) || 0;
-  //     const leaveDays = parseFloat(newAttendanceRecord.LeaveDays) || 0;
+      const workDays = parseFloat(newAttendanceRecord.WorkDays) || 0;
+      const absentDays = parseFloat(newAttendanceRecord.AbsentDays) || 0;
+      const leaveDays = parseFloat(newAttendanceRecord.LeaveDays) || 0;
 
-  //     // Chuẩn bị dữ liệu gửi lên
-  //     const attendanceData = {
-  //       EmployeeID: newAttendanceRecord.EmployeeID,
-  //       AttendanceMonth: newAttendanceRecord.AttendanceMonth,
-  //       WorkDays: workDays,
-  //       AbsentDays: absentDays,
-  //       LeaveDays: leaveDays,
-  //     };
+      // Chuẩn bị dữ liệu gửi lên
+      const attendanceData = {
+        EmployeeID: newAttendanceRecord.EmployeeID,
+        AttendanceMonth: newAttendanceRecord.AttendanceMonth,
+        WorkDays: workDays,
+        AbsentDays: absentDays,
+        LeaveDays: leaveDays,
+      };
 
-  //     // Gọi API thêm lương
-  //     const response = await axios.post('payroll/attendance/adding', attendanceData);
+      // Gọi API thêm lương
+      const response = await axios.post('payroll/attendance/adding', attendanceData);
 
-  //     // Hiển thị thông báo + reload
-  //     setUpdateMessage("Attendance record added successfully!");
-  //     fetchAttendance(); // Refresh dữ liệu
+      // Hiển thị thông báo + reload
+      setUpdateMessage("Attendance record added successfully!");
+      fetchAttendance(); // Refresh dữ liệu
 
-  //     // Đóng modal sau 1.5s
-  //     setTimeout(() => {
-  //       setShowAddModal(false);
-  //       setUpdateMessage("");
-  //     }, 1500);
+      // Đóng modal sau 1.5s
+      setTimeout(() => {
+        setShowAddModal(false);
+        setUpdateMessage("");
+      }, 1500);
 
-  //   } catch (error) {
-  //     setUpdateError(error.response?.data?.error || "Failed to add attendance record. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+    } catch (error) {
+      setUpdateError(error.response?.data?.error || "Failed to add attendance record. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -345,8 +354,8 @@ const AttendanceTable = () => {
           placeholder="Search attendance records..."
         />
         <div className="button-group">
-          <div className="btn-btn" >Update salary</div>
-          <div className="btn-btn" >Add record</div>
+          <div className="btn-btn" onClick={handleUpdateClick}>Update salary</div>
+          <div className="btn-btn" onClick={handleAddClick}>Add record</div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <label htmlFor="month-filter">Month:</label>
             <select
@@ -377,25 +386,47 @@ const AttendanceTable = () => {
                 <th>Work Days</th>
                 <th>Absent Days</th>
                 <th>Leave Days</th>
+                <th>Status</th>
                 <th>Attendance Month</th>
                 <th>Created At</th>
+                <th>Select</th>
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((employee, index) => (
-                <tr key={index} className="appli-table-row">
-                  <td>{employee.AttendanceID}</td>
-                  <td>{employee.EmployeeID}</td>
-                  <td>{employee.FullName}</td>
-                  <td>{employee.DepartmentName}</td>
-                  <td>{employee.PositionName}</td>
-                  <td>{employee.WorkDays}</td>
-                  <td>{employee.AbsentDays}</td>
-                  <td>{employee.LeaveDays}</td>
-                  <td>{formatDate(employee.AttendanceMonth)}</td>
-                  <td>{formatDate(employee.CreatedAt)}</td>
-                </tr>
-              ))}
+              {filteredData.map((employee, index) => {
+                return (
+                  <tr key={index} className="appli-table-row">
+                    <td>{employee.AttendanceID}</td>
+                    <td>{employee.EmployeeID}</td>
+                    <td>{employee.FullName}</td>
+                    <td>{employee.DepartmentName}</td>
+                    <td>{employee.PositionName}</td>
+                    <td>{employee.WorkDays}</td>
+                    <td>{employee.AbsentDays}</td>
+                    <td>{employee.LeaveDays}</td>
+                    <td>
+                      <span style={{
+                        color: getStatusColor(employee.Status),
+                        fontWeight: "bold",
+                        padding: "3px 8px",
+                        borderRadius: "4px",
+                        backgroundColor: `${getStatusColor(employee.Status)}15`
+                      }}>
+                        {employee.Status}
+                      </span>
+                    </td>
+                    <td>{formatDate(employee.AttendanceMonth)}</td>
+                    <td>{formatDate(employee.CreatedAt)}</td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedEmployeeId === employee.AttendanceID}
+                        onChange={() => handleRowSelect(employee.AttendanceID, employee)}
+                      />
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -403,7 +434,7 @@ const AttendanceTable = () => {
         <div className="no-data">No salary records found for the selected filters</div>
       )}
       {/* Update Salary Modal */}
-      {/* <div className='modal-overlay' style={{ display: showModal ? "flex" : "none" }}>
+      <div className='modal-overlay' style={{ display: showModal ? "flex" : "none" }}>
         <div className="update-salary-modal">
           <h3>Updating Attendance</h3>
           {updateMessage && <div className="update-success">{updateMessage}</div>}
@@ -460,10 +491,10 @@ const AttendanceTable = () => {
             </div>
           </form>
         </div>
-      </div> */}
+      </div>
 
       {/* Add New Salary Record Modal */}
-      {/* <div className='modal-overlay' style={{ display: showAddModal ? "flex" : "none" }}>
+      <div className='modal-overlay' style={{ display: showAddModal ? "flex" : "none" }}>
         <div className="update-salary-modal">
           <h3>Adding new attendance record</h3>
           {updateMessage && <div className="update-success">{updateMessage}</div>}
@@ -507,13 +538,13 @@ const AttendanceTable = () => {
             <div className="form-group-salary">
               <label>Work Days</label>
               <input
-                type='date'
+                type='text'
                 name="WorkDays"
                 value={newAttendanceRecord.WorkDays}
                 onChange={handleAddInputChange}
                 required
               />
-              <span className='dollad'>day(s)</span>
+              <span> day(s)</span>
             </div>
 
             <div className="form-group-salary">
@@ -525,7 +556,7 @@ const AttendanceTable = () => {
                 onChange={handleAddInputChange}
                 required
               />
-              <span className='dollad'>day(s)</span>
+              <span> day(s)</span>
             </div>
 
             <div className="form-group-salary">
@@ -537,13 +568,13 @@ const AttendanceTable = () => {
                 onChange={handleAddInputChange}
                 required
               />
-              <span className='dollad'>day(s)</span>
+              <span> day(s)</span>
             </div>
 
             <div className="form-group-salary">
               <label>Attendance Month</label>
               <input
-                type='text'
+                type='date'
                 name="AttendanceMonth"
                 value={newAttendanceRecord.AttendanceMonth}
                 onChange={handleAddInputChange}
@@ -569,7 +600,7 @@ const AttendanceTable = () => {
             </div>
           </form>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 };
