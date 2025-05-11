@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, request
-from db import get_mysql_connection, get_sqlserver_connection
+from ..db import get_mysql_connection, get_sqlserver_connection
 from datetime import datetime
 import unicodedata
 import re
-from auth import verify_token, verify_hr
+from ..auth import verify_token, verify_hr
 
 employees_bp = Blueprint("employees",__name__)
 
@@ -250,9 +250,12 @@ def delete_employee(employee_id):
         account_count = sql_cursor.fetchone()[0]
 
         mysql_cursor.execute("SELECT COUNT(*) FROM salaries WHERE EmployeeID = %s", (employee_id,))
-        dividend_count_mysql = mysql_cursor.fetchone()[0]
+        salaries_count_mysql = mysql_cursor.fetchone()[0]
 
-        if (dividend_count > 0 or dividend_count_mysql > 0 or account_count > 0) and not force_delete:
+        mysql_cursor.execute("SELECT COUNT(*) FROM attendance WHERE EmployeeID = %s", (employee_id,))
+        attendance_count_mysql = mysql_cursor.fetchone()[0]
+
+        if (dividend_count > 0 or salaries_count_mysql > 0 or account_count > 0 or attendance_count_mysql > 0) and not force_delete:
             return jsonify({
                 "error": "Ràng buộc dữ liệu",
                 "message": f"Nhân viên ID {employee_id} đang được có dữ liệu ràng buộc trong bảng Dividend hoặc salaries.",
@@ -265,6 +268,7 @@ def delete_employee(employee_id):
             sql_conn.commit()
 
             mysql_cursor.execute("DELETE FROM salaries WHERE EmployeeID = %s", (employee_id,))
+            mysql_cursor.execute("DELETE FROM attendance WHERE EmployeeID = %s", (employee_id,))
             mysql_cursor.execute("DELETE FROM employees WHERE EmployeeID = %s", (employee_id,))
             mysql_conn.commit()
 
