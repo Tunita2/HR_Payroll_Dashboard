@@ -277,7 +277,7 @@ const AttendanceTable = () => {
       setLoading(true);
 
       // Call API to update salary
-      const response = await axios.put(`payroll/attendance/${selectedEmployeeId}`, selectedEmployeeData);
+      const response = await axiosInstance.put(`payroll/attendance/${selectedEmployeeId}`, selectedEmployeeData);
 
       // If update successful, show success message and refresh data
       setUpdateMessage("Attendance updated successfully!");
@@ -322,7 +322,7 @@ const AttendanceTable = () => {
       };
 
       // Gọi API thêm lương
-      const response = await axios.post('payroll/attendance/adding', attendanceData);
+      const response = await axiosInstance.post('payroll/attendance/adding', attendanceData);
 
       // Hiển thị thông báo + reload
       setUpdateMessage("Attendance record added successfully!");
