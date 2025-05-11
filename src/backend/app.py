@@ -13,5 +13,8 @@ app.register_blueprint(positions_bp)
 app.register_blueprint(departments_bp)
 app.register_blueprint(report_bp)
 
+if __name__ == "__main__":
+    app.run(debug=True)
+
 
 
