@@ -1,26 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import axiosInstance from '../Admin/axiosInstance';
 import { Link } from 'react-router-dom';
-import "../../styles/PayrollStyles/tableSalaries.css";
-import SearchForPayroll from "../General/SearchForPayroll";
+import axiosInstance from '../axiosInstance';
+import SearchForPayroll from "../../General/SearchForPayroll";
+import "../../../styles/PayrollStyles/tableSalaries.css";
 
-const SalaryTable = () => {
-  const [dataSalary, setSalary] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchCategory, setSearchCategory] = useState("FullName")
-  const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
+const AdminSalaryTable = () => {
+  // Sử dụng component PayrollSalaries nhưng thay đổi đường dẫn của nút "Salary history"
+  const [dataSalary, setDataSalary] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
   const [selectedEmployeeData, setSelectedEmployeeData] = useState({
     BaseSalary: '',
     Bonus: '',
     Deductions: ''
   });
-  const [updateMessage, setUpdateMessage] = useState("");
-  const [updateError, setUpdateError] = useState("");
-  const [employees, setEmployees] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState('');
+  const [updateError, setUpdateError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchCategory, setSearchCategory] = useState('FullName');
+  const [selectedMonth, setSelectedMonth] = useState('all');
   const [newSalaryRecord, setNewSalaryRecord] = useState({
     EmployeeID: '',
     FullName: '',
@@ -34,14 +36,21 @@ const SalaryTable = () => {
     Deductions: ''
   });
 
+  // Fetch data when component mounts
+  useEffect(() => {
+    fetchSalary();
+    fetchEmployees();
+  }, []);
+
   const fetchSalary = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await axiosInstance.get('/payroll/salaries');
-      const sortedData = res.data.sort((a, b) => a.SalaryID - b.SalaryID);
-      setSalary(sortedData);
+      const response = await axiosInstance.get('/payroll/salaries');
+      setDataSalary(response.data);
+      setError(null);
     } catch (err) {
-      console.error("Failed to fetch salary data", err);
+      setError(err.message);
+      setDataSalary([]);
     } finally {
       setLoading(false);
     }
@@ -49,37 +58,27 @@ const SalaryTable = () => {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axiosInstance.get('/payroll/employees');
-      setEmployees(res.data);
+      const response = await axiosInstance.get('/payroll/employees');
+      setEmployees(response.data);
     } catch (err) {
-      console.error("Failed to fetch employees data", err);
+      console.error("Error fetching employees:", err);
     }
   };
 
-  useEffect(() => {
-    fetchSalary();
-    fetchEmployees();
-  }, []);
-
+  // Format date function
   const formatDate = (dateString) => {
-    if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
   };
 
+  // Get month and year from date
   const getMonthYear = (dateString) => {
-    if (!dateString) return "";
     const date = new Date(dateString);
-    return `${date.getMonth() + 1}-${date.getFullYear()}`;
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
   };
 
-  const allMonths = Array.from(
-    new Set(dataSalary.map((item) => getMonthYear(item.SalaryMonth)))
-  );
+  // Get all unique months from salary data
+  const allMonths = [...new Set(dataSalary.map(item => getMonthYear(item.SalaryMonth)))];
 
   const searchCategories = [
     { value: "FullName", label: "Name" },
@@ -97,25 +96,9 @@ const SalaryTable = () => {
       return searchValue.includes(searchQuery.toLowerCase());
     });
 
-  const handleRowSelect = (employeeId, employeeData) => {
-    if (selectedEmployeeId === employeeId) {
-      // If already selected, deselect
-      setSelectedEmployeeId(null);
-    } else {
-      // Otherwise select this employee
-      setSelectedEmployeeId(employeeId);
-      setSelectedEmployeeData({
-        BaseSalary: employeeData.BaseSalary,
-        Bonus: employeeData.Bonus,
-        Deductions: employeeData.Deductions
-      });
-    }
-  };
-
   const handleUpdateClick = () => {
     if (selectedEmployeeId) {
       setShowModal(true);
-      // Reset any previous messages
       setUpdateMessage("");
       setUpdateError("");
     } else {
@@ -141,6 +124,111 @@ const SalaryTable = () => {
     setUpdateError("");
   };
 
+  const handleRowSelect = (salaryId, employeeData) => {
+    if (selectedEmployeeId === salaryId) {
+      // Deselect if already selected
+      setSelectedEmployeeId(null);
+      setSelectedEmployeeData({
+        BaseSalary: '',
+        Bonus: '',
+        Deductions: ''
+      });
+    } else {
+      // Select new employee
+      setSelectedEmployeeId(salaryId);
+      setSelectedEmployeeData({
+        BaseSalary: employeeData.BaseSalary,
+        Bonus: employeeData.Bonus,
+        Deductions: employeeData.Deductions
+      });
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedEmployeeId) {
+      setUpdateError("No employee selected");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axiosInstance.put(`/payroll/salaries/${selectedEmployeeId}`, {
+        BaseSalary: selectedEmployeeData.BaseSalary,
+        Bonus: selectedEmployeeData.Bonus,
+        Deductions: selectedEmployeeData.Deductions
+      });
+
+      if (response.status === 200) {
+        setUpdateMessage("Salary updated successfully");
+        setUpdateError("");
+        // Refresh data
+        fetchSalary();
+        // Close modal after a delay
+        setTimeout(() => {
+          setShowModal(false);
+          setUpdateMessage("");
+        }, 2000);
+      }
+    } catch (err) {
+      setUpdateError(err.response?.data?.message || "Error updating salary");
+      setUpdateMessage("");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await axiosInstance.post('/payroll/salaries', newSalaryRecord);
+
+      if (response.status === 201) {
+        setUpdateMessage("Salary record added successfully");
+        setUpdateError("");
+        // Refresh data
+        fetchSalary();
+        // Close modal after a delay
+        setTimeout(() => {
+          setShowAddModal(false);
+          setUpdateMessage("");
+        }, 2000);
+      }
+    } catch (err) {
+      setUpdateError(err.response?.data?.message || "Error adding salary record");
+      setUpdateMessage("");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddInputChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "EmployeeID" && value) {
+      // Find the selected employee
+      const selectedEmployee = employees.find(emp => emp.EmployeeID === value);
+      if (selectedEmployee) {
+        setNewSalaryRecord({
+          ...newSalaryRecord,
+          [name]: value,
+          FullName: selectedEmployee.FullName,
+          DepartmentName: selectedEmployee.DepartmentName,
+          DepartmentID: selectedEmployee.DepartmentID,
+          PositionName: selectedEmployee.PositionName,
+          PositionID: selectedEmployee.PositionID
+        });
+      }
+    } else {
+      // For other fields or when employee is deselected
+      setNewSalaryRecord({
+        ...newSalaryRecord,
+        [name]: value
+      });
+    }
+  };
+
   const handleCloseModal = () => {
     setShowModal(false);
   };
@@ -160,181 +248,6 @@ const SalaryTable = () => {
     }
   };
 
-  const handleAddInputChange = (e) => {
-    const { name, value } = e.target;
-
-    if (name === 'EmployeeID') {
-      const selectedEmployee = employees.find(emp => emp.EmployeeID === parseInt(value));
-      if (selectedEmployee) {
-        setNewSalaryRecord({
-          ...newSalaryRecord,
-          EmployeeID: value,
-          FullName: selectedEmployee.FullName || '',
-          DepartmentID: selectedEmployee.DepartmentID || '',
-          DepartmentName: selectedEmployee.DepartmentName || '',
-          PositionID: selectedEmployee.PositionID || '',
-          PositionName: selectedEmployee.PositionName || ''
-        });
-      } else {
-        setNewSalaryRecord({
-          ...newSalaryRecord,
-          EmployeeID: value,
-          FullName: '',
-          DepartmentID: '',
-          DepartmentName: '',
-          PositionID: '',
-          PositionName: ''
-        });
-      }
-    } else if (['BaseSalary', 'Bonus', 'Deductions'].includes(name)) {
-      // Ensure only numbers and decimal point can be entered
-      if (value === '' || /^\d*\.?\d*$/.test(value)) {
-        setNewSalaryRecord({
-          ...newSalaryRecord,
-          [name]: value
-        });
-      }
-    } else {
-      setNewSalaryRecord({
-        ...newSalaryRecord,
-        [name]: value
-      });
-    }
-  };
-
-  const validateInputs = () => {
-    const { BaseSalary, Bonus, Deductions } = selectedEmployeeData;
-
-    // Check if inputs are not empty and are valid numbers
-    if (!BaseSalary || isNaN(parseFloat(BaseSalary))) {
-      setUpdateError("Base salary must be a valid number");
-      return false;
-    }
-
-    if (!Bonus || isNaN(parseFloat(Bonus))) {
-      setUpdateError("Bonus must be a valid number");
-      return false;
-    }
-
-    if (!Deductions || isNaN(parseFloat(Deductions))) {
-      setUpdateError("Deductions must be a valid number");
-      return false;
-    }
-
-    return true;
-  };
-
-  const validateAddInputs = () => {
-    const { EmployeeID, SalaryMonth, BaseSalary, Bonus, Deductions } = newSalaryRecord;
-
-    if (!EmployeeID) {
-      setUpdateError("Please select an employee");
-      return false;
-    }
-
-    if (!SalaryMonth) {
-      setUpdateError("Please select a salary month");
-      return false;
-    }
-
-    if (!BaseSalary || isNaN(parseFloat(BaseSalary))) {
-      setUpdateError("Base salary must be a valid number");
-      return false;
-    }
-
-    if (!Bonus || isNaN(parseFloat(Bonus))) {
-      setUpdateError("Bonus must be a valid number");
-      return false;
-    }
-
-    if (!Deductions || isNaN(parseFloat(Deductions))) {
-      setUpdateError("Deductions must be a valid number");
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Validate inputs before submitting
-    if (!validateInputs()) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      // Call API to update salary
-      await axiosInstance.put(`/payroll/salaries/${selectedEmployeeId}`, selectedEmployeeData);
-
-      // If update successful, show success message and refresh data
-      setUpdateMessage("Salary updated successfully!");
-      fetchSalary(); // Refresh the salary data
-
-      // Close modal after short delay
-      setTimeout(() => {
-        setShowModal(false);
-        setUpdateMessage("");
-      }, 1500);
-
-    } catch (error) {
-      console.error("Error updating salary:", error);
-      setUpdateError(error.response?.data?.error || "Failed to update salary. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddSubmit = async (e) => {
-    e.preventDefault();
-
-    // Validate inputs trước khi gửi
-    if (!validateAddInputs()) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      // Tính lương thực nhận
-      const baseSalary = parseFloat(newSalaryRecord.BaseSalary) || 0;
-      const bonus = parseFloat(newSalaryRecord.Bonus) || 0;
-      const deductions = parseFloat(newSalaryRecord.Deductions) || 0;
-      const netSalary = baseSalary + bonus - deductions;
-
-      // Chuẩn bị dữ liệu gửi lên
-      const salaryData = {
-        EmployeeID: newSalaryRecord.EmployeeID,
-        SalaryMonth: newSalaryRecord.SalaryMonth,
-        BaseSalary: baseSalary,
-        Bonus: bonus,
-        Deductions: deductions,
-        NetSalary: netSalary.toFixed(2)
-      };
-
-      // Gọi API thêm lương
-      await axiosInstance.post('/payroll/salaries/adding', salaryData);
-
-      // Hiển thị thông báo + reload
-      setUpdateMessage("Salary record added successfully!");
-      fetchSalary(); // Refresh dữ liệu
-
-      // Đóng modal sau 1.5s
-      setTimeout(() => {
-        setShowAddModal(false);
-        setUpdateMessage("");
-      }, 1500);
-
-    } catch (error) {
-      setUpdateError(error.response?.data?.error || "Failed to add salary record. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
   return (
     <div>
       <div className='main-title'>Salary list</div>
@@ -350,7 +263,7 @@ const SalaryTable = () => {
         <div className="button-group">
           <div className="btn-btn" onClick={handleUpdateClick}>Update salary</div>
           <div className="btn-btn" onClick={handleAddClick}>Add record</div>
-          <Link to={'/payroll/salary/history'} style={{ color: 'white' }}>
+          <Link to={'/admin/salaries/history'} style={{ color: 'white' }}>
             <div className="btn-btn">Salary history</div>
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -596,4 +509,4 @@ const SalaryTable = () => {
   );
 };
 
-export default SalaryTable;
+export default AdminSalaryTable;

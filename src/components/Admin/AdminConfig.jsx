@@ -33,6 +33,7 @@ export const menuConfig = [
     children: [
       { text: "Salaries", path: "/admin/salaries" },
       { text: "Attendances", path: "/admin/attendances" },
+      { text: "Schedules", path: "/admin/schedules" },
     ],
   },
   {

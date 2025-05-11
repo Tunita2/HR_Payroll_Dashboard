@@ -3,7 +3,7 @@ import "../../styles/AdminStyles/AdminDashboard.css";
 
 const AdminDashboard = () => {
   return (
-    <div className="dashboard-title-container"> 
+    <div className="dashboard-title-container">
       <div className="dashboard-description">
         <div><strong>Dashboard</strong></div>
 
@@ -25,6 +25,7 @@ const AdminDashboard = () => {
           <strong>Payroll</strong>
           <div>Salaries - Displays salary information</div>
           <div>Attendances - Displays attendance records</div>
+          <div>Schedules - Displays employee work schedules</div>
         </div>
 
         <div>

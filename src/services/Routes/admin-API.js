@@ -165,6 +165,47 @@ router.get("/salaries", verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
+// API để lấy danh sách chi tiết các bản ghi lương
+router.get("/salaries/list", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { year, month, departmentId } = req.query;
+
+    let query = `
+      SELECT
+          s.SalaryID, s.EmployeeID, e.FullName, d.DepartmentName,
+          p.PositionName, s.SalaryMonth, s.BaseSalary, s.Bonus,
+          s.Deductions, s.NetSalary, s.CreatedAt, e.Status
+      FROM salaries s
+      JOIN employees e ON s.EmployeeID = e.EmployeeID
+      JOIN departments d ON e.DepartmentID = d.DepartmentID
+      JOIN positions p ON e.PositionID = p.PositionID
+    `;
+
+    const queryParams = [];
+
+    if (year && month) {
+      query += ` WHERE YEAR(s.SalaryMonth) = ? AND MONTH(s.SalaryMonth) = ?`;
+      queryParams.push(year, month);
+
+      if (departmentId) {
+        query += ` AND d.DepartmentID = ?`;
+        queryParams.push(departmentId);
+      }
+    } else if (departmentId) {
+      query += ` WHERE d.DepartmentID = ?`;
+      queryParams.push(departmentId);
+    }
+
+    query += ` ORDER BY s.SalaryID DESC`;
+
+    const rows = await fetchMySQLData(query, queryParams);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error fetching salary records:", error);
+    res.status(500).json({ error: "Failed to fetch salary records" });
+  }
+});
+
 router.get("/dividends", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const sqlQuery = `

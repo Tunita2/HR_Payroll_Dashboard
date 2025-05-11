@@ -11,6 +11,7 @@ import PositionTable from "../components/Admin/HumanResource/PositionTable";
 import SalaryTable from "../components/Admin/Payroll/SalaryTable";
 import AttendanceTable from "../components/Admin/Payroll/AttendanceTable";
 import History from "../components/Admin/Payroll/History";
+import Schedules from "../components/Admin/Payroll/Schedules";
 // General
 import Reports from "../components/Admin/Reports";
 // import AlertsAndNotifications from "../components/Admin/AlertsAndNotifications";
@@ -32,6 +33,7 @@ const AdminRoutes = () => {
       <Route path="salaries" element={<SalaryTable />} />
       <Route path="salaries/history" element={<History />} />
       <Route path="attendances" element={<AttendanceTable />} />
+      <Route path="schedules" element={<Schedules />} />
       <Route path="reports" element={<Reports />} />
       <Route path="alerts" element={<Alerts />} />
       <Route path="notifications" element={<Notifications />} />

@@ -46,6 +46,7 @@ const LayoutAdmin = () => {
               location.pathname === "/admin/salaries" ||
               location.pathname === "/admin/salaries/history" ||
               location.pathname === "/admin/attendances" ||
+              location.pathname === "/admin/schedules" ||
               location.pathname === "/admin/reports" ||
               location.pathname === "/admin/alerts" ||
               location.pathname === "/admin/notifications" ? (

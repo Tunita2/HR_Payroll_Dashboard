@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import AdminSalaryTable from "./AdminSalaryTable";
-import axiosInstance from '../axiosInstance';
 import { useNavigate } from 'react-router-dom';
+import AdminSchedules from './AdminSchedules';
+import axiosInstance from '../axiosInstance';
 
-const SalaryTable = () => {
+const Schedules = () => {
   // Initialize state to track if API is accessible
   const [isApiAccessible, setIsApiAccessible] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,14 +18,14 @@ const SalaryTable = () => {
       return;
     }
 
-    // Check if the payroll API endpoint is accessible
+    // Check if the API endpoint is accessible
     const checkApiAccess = async () => {
       try {
-        // Test call to verify payroll API access
-        await axiosInstance.get('/payroll/salaries');
+        // Test call to verify API access
+        await axiosInstance.get('/payroll/employees');
         setIsApiAccessible(true);
       } catch (error) {
-        console.error("Payroll API access error:", error);
+        console.error("API access error:", error);
         setIsApiAccessible(false);
 
         // If error is 401 Unauthorized, redirect to login
@@ -45,9 +45,9 @@ const SalaryTable = () => {
   if (isLoading) {
     return (
       <div>
-        <div className='main-title'>Salary list</div>
+        <div className='main-title'>Schedule Management</div>
         <div className="loading" style={{ padding: '20px', textAlign: 'center' }}>
-          <p>Loading salary data...</p>
+          <p>Loading schedule data...</p>
         </div>
       </div>
     );
@@ -57,18 +57,18 @@ const SalaryTable = () => {
   if (!isApiAccessible) {
     return (
       <div>
-        <div className='main-title'>Salary list</div>
+        <div className='main-title'>Schedule Management</div>
         <div className="error-message" style={{ color: 'red', padding: '20px', textAlign: 'center' }}>
-          <p>Error: Unable to access salary data. Please check your permissions or contact the administrator.</p>
+          <p>Error: Unable to access schedule data. Please check your permissions or contact the administrator.</p>
         </div>
       </div>
     );
   }
 
-  // If API is accessible, render the AdminSalaryTable component
+  // If API is accessible, render the AdminSchedules component
   return (
-    <AdminSalaryTable />
+    <AdminSchedules />
   );
 };
 
-export default SalaryTable;
+export default Schedules;

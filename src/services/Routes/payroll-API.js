@@ -3,10 +3,10 @@ const router = express.Router();
 const promisePool = require("../config/mysql");
 const { verifyToken } = require("../Auth/auth-middleware");
 
-// Middleware kiểm tra quyền payroll
+// Middleware kiểm tra quyền payroll hoặc admin
 function verifyPayroll(req, res, next) {
-  if (req.user?.role !== "payroll") {
-    return res.status(403).json({ error: "Access denied: Payroll staff only" });
+  if (req.user?.role !== "payroll" && req.user?.role !== "admin") {
+    return res.status(403).json({ error: "Access denied: Payroll staff or Admin only" });
   }
   next();
 }
@@ -17,9 +17,9 @@ router.get('/attendance', verifyToken, verifyPayroll, async (req, res) => {
     const { year, month } = req.query;
 
     let query = `
-      SELECT 
-          a.AttendanceID, a.EmployeeID, e.FullName, d.DepartmentName, 
-          p.PositionName, a.WorkDays, a.AbsentDays, a.LeaveDays, 
+      SELECT
+          a.AttendanceID, a.EmployeeID, e.FullName, d.DepartmentName,
+          p.PositionName, a.WorkDays, a.AbsentDays, a.LeaveDays,
           a.AttendanceMonth, a.CreatedAt, e.Status
       FROM attendance a
       JOIN employees e ON a.EmployeeID = e.EmployeeID
@@ -60,9 +60,9 @@ router.get('/salaries', verifyToken, verifyPayroll, async (req, res) => {
     const { year, month } = req.query;
 
     let query = `
-      SELECT 
-          s.SalaryID, s.EmployeeID, e.FullName, d.DepartmentName, 
-          p.PositionName, s.SalaryMonth, s.BaseSalary, s.Bonus, 
+      SELECT
+          s.SalaryID, s.EmployeeID, e.FullName, d.DepartmentName,
+          p.PositionName, s.SalaryMonth, s.BaseSalary, s.Bonus,
           s.Deductions, s.NetSalary, s.CreatedAt, e.Status
       FROM salaries s
       JOIN employees e ON s.EmployeeID = e.EmployeeID
@@ -165,8 +165,8 @@ router.put('/salaries/:id', verifyToken, verifyPayroll, async (req, res) => {
     const netSalary = base + bonus - deductions;
 
     const [result] = await promisePool.query(
-      `UPDATE salaries 
-      SET BaseSalary = ?, Bonus = ?, Deductions = ?, NetSalary = ? 
+      `UPDATE salaries
+      SET BaseSalary = ?, Bonus = ?, Deductions = ?, NetSalary = ?
       WHERE SalaryID = ?`,
       [base, bonus, deductions, netSalary, salaryId]
     );
@@ -259,8 +259,8 @@ router.put('/salaries/:id', verifyToken, verifyPayroll, async (req, res) => {
 //     const netSalary = base + bonus - deductions;
 
 //     const [result] = await promisePool.query(
-//       `UPDATE salaries 
-//       SET BaseSalary = ?, Bonus = ?, Deductions = ?, NetSalary = ? 
+//       `UPDATE salaries
+//       SET BaseSalary = ?, Bonus = ?, Deductions = ?, NetSalary = ?
 //       WHERE SalaryID = ?`,
 //       [base, bonus, deductions, netSalary, salaryId]
 //     );
@@ -288,7 +288,7 @@ router.put('/salaries/:id', verifyToken, verifyPayroll, async (req, res) => {
 router.get('/employees', verifyToken, verifyPayroll, async (req, res) => {
   try {
     const [rows] = await promisePool.query(`
-      SELECT e.*, d.DepartmentName, p.PositionName 
+      SELECT e.*, d.DepartmentName, p.PositionName
       FROM employees e
       LEFT JOIN departments d ON e.DepartmentID = d.DepartmentID
       LEFT JOIN positions p ON e.PositionID = p.PositionID

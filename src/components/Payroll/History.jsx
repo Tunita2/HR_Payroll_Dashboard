@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from './axiosInstance';
+import axios from '../Admin/axiosInstance';
 import { Link } from 'react-router-dom';
 import { MdOutlineArrowBackIosNew } from "react-icons/md";
 import '../../styles/PayrollStyles/history.css';

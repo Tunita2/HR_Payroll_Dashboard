@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react"
 import "../../styles/AdminStyles/Notifications.css"
+import axiosInstance from './axiosInstance'
 
 const Notifications = () => {
   const [activeTab, setActiveTab] = useState("all")
@@ -16,15 +17,13 @@ const Notifications = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const res = await fetch("http://localhost:3001/api/admin/notifications/employees")
-        if (!res.ok) throw new Error("Failed to fetch employees")
-        const data = await res.json()
-        setEmployees(data)
+        const response = await axiosInstance.get("/admin/notifications/employees")
+        setEmployees(response.data)
       } catch (err) {
         console.error("Error fetching employees:", err)
       }
     }
-    
+
     fetchEmployees()
   }, [])
 
@@ -32,15 +31,13 @@ const Notifications = () => {
   useEffect(() => {
     const fetchPayrolls = async () => {
       try {
-        const res = await fetch("http://localhost:3001/api/admin/notifications/payrolls")
-        if (!res.ok) throw new Error("Failed to fetch payrolls")
-        const data = await res.json()
-        setPayrolls(data)
+        const response = await axiosInstance.get("/admin/notifications/payrolls")
+        setPayrolls(response.data)
       } catch (err) {
         console.error("Error fetching payrolls:", err)
       }
     }
-    
+
     fetchPayrolls()
   }, [])
 
@@ -53,7 +50,8 @@ const Notifications = () => {
 
     return employees
       .filter((employee) => {
-        const startDate = new Date(employee.startDate)
+        // Sử dụng HireDate thay vì startDate
+        const startDate = new Date(employee.startDate || employee.HireDate)
         const startMonth = startDate.getMonth()
         const startDay = startDate.getDate()
 
@@ -70,19 +68,25 @@ const Notifications = () => {
         return false
       })
       .map((employee) => {
-        const startDate = new Date(employee.startDate)
+        const startDate = new Date(employee.startDate || employee.HireDate)
         const yearsOfService = currentYear - startDate.getFullYear()
 
         // Only notify for 1, 5, 10, 15, etc. year anniversaries
         if (yearsOfService % 5 === 0 || yearsOfService === 1) {
           return {
-            id: `anniversary-${employee.id}`,
+            id: `anniversary-${employee.id || employee.EmployeeID}`,
             type: "anniversary",
-            title: `Work Anniversary: ${employee.name}`,
-            message: `${employee.name} is approaching their ${yearsOfService} year work anniversary on ${startDate.toLocaleDateString()}.`,
+            title: `Work Anniversary: ${employee.name || employee.Fullname}`,
+            message: `${employee.name || employee.Fullname} is approaching their ${yearsOfService} year work anniversary on ${startDate.toLocaleDateString()}.`,
             date: new Date().toISOString(),
             read: false,
-            data: employee,
+            data: {
+              ...employee,
+              id: employee.id || employee.EmployeeID,
+              name: employee.name || employee.Fullname,
+              email: employee.email || employee.Email,
+              startDate: employee.startDate || employee.HireDate
+            },
           }
         }
 
@@ -98,7 +102,7 @@ const Notifications = () => {
         // Convert values to numbers and ensure they exist
         const discrepancy = Number(payroll.discrepancy) || 0
         const previousAmount = Number(payroll.previousAmount) || 1 // Avoid division by zero
-        
+
         // Consider a discrepancy significant if it's more than 10%
         const discrepancyPercentage = previousAmount > 0 ? (discrepancy / previousAmount) * 100 : 0
         return discrepancyPercentage > 10
@@ -107,7 +111,7 @@ const Notifications = () => {
         const discrepancy = Number(payroll.discrepancy) || 0
         const previousAmount = Number(payroll.previousAmount) || 1
         const discrepancyPercentage = previousAmount > 0 ? (discrepancy / previousAmount) * 100 : 0
-        
+
         return {
           id: `discrepancy-${payroll.id}`,
           type: "discrepancy",
@@ -129,7 +133,7 @@ const Notifications = () => {
   const generatePayrollNotifications = useCallback(() => {
     return payrolls.map((payroll) => {
       const amount = Number(payroll.amount) || 0
-      
+
       return {
         id: `payroll-${payroll.id}`,
         type: "payroll",
@@ -163,8 +167,8 @@ const Notifications = () => {
 
   // Filter notifications based on active tab
   const filteredNotifications = useMemo(() => {
-    return activeTab === "all" 
-      ? notifications 
+    return activeTab === "all"
+      ? notifications
       : notifications.filter((notification) => notification.type === activeTab)
   }, [activeTab, notifications])
 
@@ -181,35 +185,25 @@ const Notifications = () => {
   const sendEmail = useCallback(async (notification) => {
     try {
       console.log(`Sending payroll email to: ${notification.data.employeeName}`)
-      
-      // Here you would integrate with your backend to send the actual email
-      const response = await fetch('http://localhost:3001/api/admin/notifications/send-payroll', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: notification.data.email || 'builetuan3432@gmail.com',
-          subject: `Payroll Notification for ${notification.data.period}`,
-          html: `
-            <h2>Payroll Notification</h2>
-            <p>Dear ${notification.data.employeeName},</p>
-            <p>Your payroll for the period ${notification.data.period} has been processed.</p>
-            <p>Amount: $${notification.data.amount.toFixed(2)}</p>
-            <p>Thank you,</p>
-            <p>Payroll Department</p>
-          `
-        })
+
+      // Sử dụng axiosInstance để gửi yêu cầu với token xác thực
+      const response = await axiosInstance.post('/admin/notifications/send-payroll', {
+        email: notification.data.email || 'builetuan3432@gmail.com',
+        subject: `Payroll Notification for ${notification.data.period}`,
+        html: `
+          <h2>Payroll Notification</h2>
+          <p>Dear ${notification.data.employeeName},</p>
+          <p>Your payroll for the period ${notification.data.period} has been processed.</p>
+          <p>Amount: $${notification.data.amount.toFixed(2)}</p>
+          <p>Thank you,</p>
+          <p>Payroll Department</p>
+        `
       });
-      
-      if (response.ok) {
-        alert(`Payroll email sent to: ${notification.data.employeeName}`);
-      } else {
-        alert('Failed to send email. Please try again.');
-      }
+
+      alert(`Payroll email sent to: ${notification.data.employeeName}`);
     } catch (error) {
       console.error('Error sending email:', error);
-      alert('Error sending email. Please try again.');
+      alert('Failed to send email. Please try again.');
     }
   }, [])
 
@@ -230,7 +224,7 @@ const Notifications = () => {
   const TabNavigation = () => (
     <div className="notifications-tabs">
       {["all", "anniversary", "discrepancy", "payroll"].map(tab => (
-        <button 
+        <button
           key={tab}
           className={activeTab === tab ? "active" : ""}
           onClick={() => setActiveTab(tab)}
@@ -244,7 +238,7 @@ const Notifications = () => {
   // Notification detail section for modal
   const NotificationDetails = () => {
     if (!selectedNotification) return null
-    
+
     switch (selectedNotification.type) {
       case "anniversary":
         return (
@@ -257,7 +251,7 @@ const Notifications = () => {
             <div className="notification-detail-item">
               <span className="detail-label">Start Date:</span>
               <span className="detail-value">
-                {new Date(selectedNotification.data.startDate).toLocaleDateString()}
+                {new Date(selectedNotification.data.startDate || selectedNotification.data.HireDate).toLocaleDateString()}
               </span>
             </div>
             <div className="notification-detail-item">

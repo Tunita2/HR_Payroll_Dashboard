@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from './axiosInstance';
+import axiosInstance from '../Admin/axiosInstance';
 import "../../styles/PayrollStyles/tableAttendance.css";
 import SearchForPayroll from '../General/SearchForPayroll';
 
@@ -37,17 +37,20 @@ const AttendanceTable = () => {
 
   const fetchAttendance = async () => {
     try {
-      const res = await axios.get('payroll/attendance');
+      setLoading(true);
+      const res = await axiosInstance.get('/payroll/attendance');
       const sortedData = res.data.sort((a, b) => a.AttendanceID - b.AttendanceID);
       setAttendance(sortedData);
     } catch (err) {
       console.error("Failed to fetch attendance data", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get('/payroll/employees');
+      const res = await axiosInstance.get('/payroll/employees');
       setEmployees(res.data);
     } catch (err) {
       console.error("Failed to fetch employees data", err);
