@@ -4,9 +4,9 @@
   max-width: 100%;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: #f0f0f5;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(12, 1, 77, 0.15);
 }
 
 /* Header */
@@ -14,11 +14,15 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
+  background-color: #0c014d;
+  padding: 15px;
+  border-radius: 6px;
+  color: white;
 }
 
 .leave-alerts-header h2 {
   margin: 0 0 15px 0;
-  color: #333;
+  color: #ffffff;
   font-size: 1.5rem;
 }
 
@@ -27,6 +31,7 @@
   flex-wrap: wrap;
   gap: 15px;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 /* Search */
@@ -34,9 +39,10 @@
   flex: 1;
   min-width: 200px;
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid #1a1a60;
   border-radius: 4px;
   font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 /* Sort */
@@ -48,20 +54,21 @@
 
 .leave-alerts-sort span {
   font-size: 14px;
-  color: #555;
+  color: #ffffff;
 }
 
 .leave-alerts-sort select {
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid #1a1a60;
   border-radius: 4px;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
+  color: #333;
 }
 
 .leave-alerts-sort-direction {
-  background: #f0f0f0;
-  border: 1px solid #ddd;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid #1a1a60;
   border-radius: 4px;
   width: 30px;
   height: 30px;
@@ -70,6 +77,7 @@
   justify-content: center;
   cursor: pointer;
   font-size: 16px;
+  color: white;
 }
 
 /* Alert List */
@@ -78,6 +86,9 @@
   flex-direction: column;
   gap: 12px;
   margin-bottom: 20px;
+  background-color: #f0f0f5;
+  padding: 15px;
+  border-radius: 6px;
 }
 
 /* Alert Item */
@@ -86,13 +97,13 @@
   background-color: white;
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-left: 5px solid #ccc;
+  box-shadow: 0 1px 3px rgba(12, 1, 77, 0.15);
+  border-left: 5px solid #0c014d;
   position: relative;
 }
 
 .leave-alert-item.critical {
-  border-left-color: #e53935;
+  border-left-color: #ff5252;
 }
 
 .leave-alert-item.high {
@@ -100,7 +111,7 @@
 }
 
 .leave-alert-item.medium {
-  border-left-color: #ffc107;
+  border-left-color: #4a4a80;
 }
 
 .leave-alert-content {
@@ -109,6 +120,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
+  background-color: #f8f8ff;
 }
 
 /* Employee Info */
@@ -120,14 +132,15 @@
 .leave-alert-employee h3 {
   margin: 0 0 5px 0;
   font-size: 16px;
-  color: #333;
+  color: #0c014d;
+  font-weight: 600;
 }
 
 .leave-alert-id,
 .leave-alert-department {
   display: block;
   font-size: 13px;
-  color: #666;
+  color: #333;
   margin-bottom: 3px;
 }
 
@@ -147,12 +160,13 @@
 }
 
 .leave-alert-label {
-  color: #666;
+  color: #0c014d;
+  font-weight: 500;
 }
 
 .leave-alert-days.exceeded {
   font-weight: bold;
-  color: #d32f2f;
+  color: #ff5252;
 }
 
 /* Date */
@@ -160,9 +174,10 @@
   flex: 1;
   min-width: 120px;
   font-size: 13px;
-  color: #777;
+  color: #555;
   display: flex;
   align-items: flex-end;
+  font-style: italic;
 }
 
 /* Dismiss Button */
@@ -181,18 +196,20 @@
 }
 
 .leave-alert-dismiss:hover {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: rgba(12, 1, 77, 0.1);
+  color: #0c014d;
 }
 
 /* Empty State */
 .leave-alerts-empty {
   padding: 30px;
   text-align: center;
-  color: #777;
-  background-color: white;
+  color: #0c014d;
+  background-color: #f0f0f5;
   border-radius: 6px;
-  border: 1px dashed #ddd;
+  border: 1px dashed #0c014d;
+  font-weight: 500;
+  margin-bottom: 15px;
 }
 
 /* Summary */
@@ -203,13 +220,17 @@
   align-items: center;
   margin-top: 15px;
   padding-top: 15px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #1a1a60;
   gap: 15px;
+  background-color: rgba(12, 1, 77, 0.05);
+  padding: 15px;
+  border-radius: 6px;
 }
 
 .leave-alerts-count {
   font-size: 14px;
-  color: #555;
+  color: #0c014d;
+  font-weight: 500;
 }
 
 /* Legend */
@@ -223,7 +244,8 @@
   display: flex;
   align-items: center;
   font-size: 13px;
-  color: #555;
+  color: #0c014d;
+  font-weight: 500;
 }
 
 .legend-item::before {
@@ -236,7 +258,7 @@
 }
 
 .legend-item.critical::before {
-  background-color: #e53935;
+  background-color: #ff5252;
 }
 
 .legend-item.high::before {
@@ -244,7 +266,7 @@
 }
 
 .legend-item.medium::before {
-  background-color: #ffc107;
+  background-color: #4a4a80;
 }
 
 /* Responsive */
