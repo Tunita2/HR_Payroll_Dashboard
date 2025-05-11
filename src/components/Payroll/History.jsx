@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from './axiosInstance';
 import { Link } from 'react-router-dom';
 import { MdOutlineArrowBackIosNew } from "react-icons/md";
 import '../../styles/PayrollStyles/history.css';
@@ -16,12 +16,10 @@ const History = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchCategory, setSearchCategory] = useState('FullName');
 
-  // Fetch employees data on component mount
   useEffect(() => {
     fetchEmployees();
   }, []);
 
-  // Fetch salaries when filters change
   useEffect(() => {
     if (selectedEmployee) {
       if (selectedYear) {
@@ -38,12 +36,8 @@ const History = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/payroll/employees');
-      if (!response.ok) {
-        throw new Error('Failed to fetch employees');
-      }
-      const data = await response.json();
-      setEmployees(data);
+      const response = await axios.get('/payroll/employees');
+      setEmployees(response.data);
     } catch (err) {
       setError(err.message);
     }
@@ -52,12 +46,8 @@ const History = () => {
   const fetchAllSalaries = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/payroll/salaries');
-      if (!response.ok) {
-        throw new Error('Failed to fetch salary data');
-      }
-      const data = await response.json();
-      setSalaries(data);
+      const response = await axios.get('/payroll/salaries');
+      setSalaries(response.data);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -70,12 +60,10 @@ const History = () => {
   const fetchSalariesByYearMonth = async (year, month) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/payroll/salaries?year=${year}&month=${month}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch salary data');
-      }
-      const data = await response.json();
-      setSalaries(data);
+      const response = await axios.get('/payroll/salaries', {
+        params: { year, month }
+      });
+      setSalaries(response.data);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -88,12 +76,8 @@ const History = () => {
   const fetchEmployeeSalaries = async (employeeId) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/payroll/salaries/employee/${employeeId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch employee salary data');
-      }
-      const data = await response.json();
-      setSalaries(data);
+      const response = await axios.get(`/payroll/salaries/employee/${employeeId}`);
+      setSalaries(response.data);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -106,12 +90,8 @@ const History = () => {
   const fetchEmployeeSalariesByYear = async (employeeId, year) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/payroll/salaries/employee/${employeeId}/year/${year}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch employee salary data for the specified year');
-      }
-      const data = await response.json();
-      setSalaries(data);
+      const response = await axios.get(`/payroll/salaries/employee/${employeeId}/year/${year}`);
+      setSalaries(response.data);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -123,7 +103,7 @@ const History = () => {
 
   const handleEmployeeChange = (e) => {
     setSelectedEmployee(e.target.value);
-    setSelectedMonth(''); // Reset month when employee changes
+    setSelectedMonth('');
   };
 
   const handleYearChange = (e) => {
@@ -132,14 +112,14 @@ const History = () => {
 
   const handleMonthChange = (e) => {
     setSelectedMonth(e.target.value);
-    setSelectedEmployee(''); // Reset employee when month changes
+    setSelectedEmployee('');
   };
 
   const resetFilters = () => {
     setSelectedEmployee('');
     setSelectedYear(new Date().getFullYear());
     setSelectedMonth('');
-    setSearchQuery(''); // Reset search query
+    setSearchQuery('');
     fetchAllSalaries();
   };
 
@@ -155,14 +135,12 @@ const History = () => {
     }).format(amount);
   };
 
-  // Available years for filtering
   const years = [];
   const currentYear = new Date().getFullYear();
   for (let i = currentYear; i >= currentYear - 5; i--) {
     years.push(i);
   }
 
-  // Months for filtering
   const months = [
     { value: 1, name: 'January' },
     { value: 2, name: 'February' },
@@ -177,14 +155,15 @@ const History = () => {
     { value: 11, name: 'November' },
     { value: 12, name: 'December' },
   ];
+
   const searchCategories = [
     { value: 'FullName', label: 'Employee Name' },
     { value: 'DepartmentName', label: 'Department' },
     { value: 'PositionName', label: 'Position' }
   ];
+
   const filteredSalaries = salaries.filter(salary => {
     if (!searchQuery) return true;
-
     const searchValue = String(salary[searchCategory] || '').toLowerCase();
     return searchValue.includes(searchQuery.toLowerCase());
   });
@@ -244,7 +223,6 @@ const History = () => {
             id="month-select"
             value={selectedMonth}
             onChange={handleMonthChange}
-            disabled={!selectedYear}
           >
             <option value="">All Months</option>
             {months.map(month => (
@@ -255,8 +233,6 @@ const History = () => {
 
         <button onClick={resetFilters} className="reset-button">Reset Filters</button>
       </div>
-
-
 
       {error && <div className="error-message">{error}</div>}
 

@@ -4,19 +4,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer,
 } from 'recharts';
 import "../../styles/PayrollStyles/reportPayroll.css";
-import axios from 'axios';
-
-// Configure API base URL with port
-const API_BASE_URL = 'http://localhost:3001'; // Change this to your actual backend URL and port
-
-// Create an axios instance with the base URL
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000, // 10 seconds timeout
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+import api from './axiosInstance';
 
 const Reports = () => {
   const [payrollData, setPayrollData] = useState([]);
@@ -65,7 +53,7 @@ const Reports = () => {
   const fetchDepartments = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/payroll/departments');
+      const response = await api.get('/payroll/departments');
       setDepartments(response.data);
     } catch (err) {
       setError("Failed to fetch departments: " + err.message);
@@ -77,7 +65,7 @@ const Reports = () => {
 
   const fetchEmployeeData = async () => {
     try {
-      const response = await api.get('/api/payroll/employees');
+      const response = await api.get('/payroll/employees');
       const employees = response.data;
 
       setTotalEmployees({
@@ -92,7 +80,7 @@ const Reports = () => {
 
   const fetchAttendanceData = async () => {
     try {
-      const response = await api.get(`/api/payroll/attendance?year=${selectedYear}&month=${selectedMonth}`);
+      const response = await api.get(`/payroll/attendance?year=${selectedYear}&month=${selectedMonth}`);
       const data = response.data;
 
       const totalWorkingDays = data.reduce((sum, emp) => sum + (emp.WorkDays || 0), 0);
@@ -120,7 +108,7 @@ const Reports = () => {
   const fetchPayrollData = async () => {
     setLoading(true);
     try {
-      let url = `/api/payroll/salaries?year=${selectedYear}&month=${selectedMonth}`;
+      let url = `/payroll/salaries?year=${selectedYear}&month=${selectedMonth}`;
 
       if (selectedDepartment) {
         url += `&departmentId=${selectedDepartment}`;
@@ -238,7 +226,7 @@ const Reports = () => {
   // Export to Excel function
   const exportToExcel = async () => {
     try {
-      const response = await api.get(`/api/export/excel?year=${selectedYear}&month=${selectedMonth}`, {
+      const response = await api.get(`/export/excel?year=${selectedYear}&month=${selectedMonth}`, {
         responseType: 'blob'
       });
 
