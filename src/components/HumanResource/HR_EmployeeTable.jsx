@@ -22,7 +22,7 @@ const HR_EmployeeTable = ({ style }) => {
     hireDate: "",
     departmentID: "",
     positionID: "",
-    status: "Đang làm việc",
+    status: "Active",
     role: "",
   });
   const [addingEmployee, setAddingEmployee] = useState(false);
@@ -208,7 +208,7 @@ const HR_EmployeeTable = ({ style }) => {
         hireDate: "",
         departmentID: "",
         positionID: "",
-        status: "Đang làm việc",
+        status: "Active",
         role: "",
       });
       fetchEmployees();

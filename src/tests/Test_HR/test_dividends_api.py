@@ -1,4 +1,4 @@
-# tests/test_departments_api.py
+# tests/test_dividends_api.py
 import unittest
 from unittest.mock import patch, MagicMock
 from datetime import datetime
