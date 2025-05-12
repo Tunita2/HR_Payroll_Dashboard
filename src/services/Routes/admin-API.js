@@ -74,7 +74,10 @@ router.get("/departments", verifyToken, verifyAdmin, async (req, res) => {
 
     res.json(mergedData);
   } catch (error) {
-    console.error("Error fetching department overview:", error);
+    // Trong môi trường production, chỉ log lỗi chi tiết
+    if (process.env.NODE_ENV !== 'test') {
+      console.error("Error fetching department overview:", error);
+    }
     res.status(500).json({ error: "Failed to fetch department overview" });
   }
 });
@@ -116,7 +119,9 @@ router.get("/positions", verifyToken, verifyAdmin, async (req, res) => {
 
     res.json(mergedData);
   } catch (error) {
-    console.error("Error fetching position overview:", error);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error("Error fetching position overview:", error);
+    }
     res.status(500).json({ error: "Failed to fetch position overview" });
   }
 });
@@ -138,7 +143,9 @@ router.get("/attendances", verifyToken, verifyAdmin, async (req, res) => {
 
     res.json(mysqlAttendance);
   } catch (error) {
-    console.error("Error fetching attendance overview:", error);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error("Error fetching attendance overview:", error);
+    }
     res.status(500).json({ error: "Failed to fetch attendance overview" });
   }
 });
@@ -160,7 +167,9 @@ router.get("/salaries", verifyToken, verifyAdmin, async (req, res) => {
     const rows = await fetchMySQLData(mysqlQuery);
     res.json(rows);
   } catch (error) {
-    console.error("Error fetching salary records:", error);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error("Error fetching salary records:", error);
+    }
     res.status(500).json({ error: "Failed to fetch salary records" });
   }
 });
@@ -201,7 +210,9 @@ router.get("/salaries/list", verifyToken, verifyAdmin, async (req, res) => {
     const rows = await fetchMySQLData(query, queryParams);
     res.json(rows);
   } catch (error) {
-    console.error("Error fetching salary records:", error);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error("Error fetching salary records:", error);
+    }
     res.status(500).json({ error: "Failed to fetch salary records" });
   }
 });
@@ -220,7 +231,9 @@ router.get("/dividends", verifyToken, verifyAdmin, async (req, res) => {
     const dividendData = await fetchSQLServerData(sqlQuery);
     res.json(dividendData);
   } catch (error) {
-    console.error("Error fetching dividend records:", error);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error("Error fetching dividend records:", error);
+    }
     res.status(500).json({ error: "Failed to fetch dividend records" });
   }
 });

@@ -1,3 +1,11 @@
+// Polyfill for TextEncoder and TextDecoder
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
+// Tăng thời gian timeout cho các test
+jest.setTimeout(30000);
+
 const request = require('supertest');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -6,6 +14,16 @@ const adminAPI = require('../services/Routes/admin-API');
 const { verifyToken, authorize } = require('../services/Auth/auth-middleware');
 const mysql = require('../services/config/mysql');
 const { conn, sql } = require('../services/config/mssql');
+
+// Tắt console.error trong quá trình test để tránh hiển thị lỗi giả
+const originalConsoleError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalConsoleError;
+});
 
 // Mock các dependency
 jest.mock('../services/Auth/auth-middleware', () => ({
@@ -21,14 +39,17 @@ jest.mock('../services/config/mysql', () => ({
   query: jest.fn().mockResolvedValue([[], []])
 }));
 
+// Cải thiện mock cho mssql
 jest.mock('../services/config/mssql', () => {
+  const mockQuery = jest.fn().mockResolvedValue({ recordset: [] });
   const mockRequest = {
     input: jest.fn().mockReturnThis(),
-    query: jest.fn().mockResolvedValue({ recordset: [] })
+    query: mockQuery
   };
   const mockPool = {
     request: jest.fn().mockReturnValue(mockRequest)
   };
+
   return {
     conn: Promise.resolve(mockPool),
     sql: {

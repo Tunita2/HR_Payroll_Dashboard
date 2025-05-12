@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 import "../../styles/AdminStyles/Alerts.css"
+import axiosInstance from './axiosInstance';
 
 // Sample data
 // const sampleData = [
@@ -60,22 +61,19 @@ const Alerts = () => {
   const [sortConfig, setSortConfig] = useState({ key: "daysExceeded", direction: "desc" });
   const [filter, setFilter] = useState("");
 
+
   useEffect(() => {
-    fetch("http://localhost:3001/api/alerts")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Dữ liệu nhận được:", data);
-        setAlerts(data);
-      })
-      .catch((err) => {
-        console.error("Lỗi khi lấy dữ liệu:", err);
-      });
-  }, []);
+    const fetchAlerts = async () => {
+      try {
+        const response = await axiosInstance.get("/admin/alerts")
+        setAlerts(response.data)
+      } catch (err) {
+        console.error("Error fetching alerts:", err)
+      }
+    }
+
+    fetchAlerts()
+  }, [])
 
 
   // Sort alerts
@@ -100,9 +98,9 @@ const Alerts = () => {
     if (!filter) return sortedAlerts
     return sortedAlerts.filter(
       (alert) =>
-        alert.employeeName.toLowerCase().includes(filter.toLowerCase()) ||
-        alert.employeeId.toLowerCase().includes(filter.toLowerCase()) ||
-        alert.department.toLowerCase().includes(filter.toLowerCase()),
+        (alert.employeeName && alert.employeeName.toLowerCase().includes(filter.toLowerCase())) ||
+        (alert.employeeId && alert.employeeId.toLowerCase().includes(filter.toLowerCase())) ||
+        (alert.department && alert.department.toLowerCase().includes(filter.toLowerCase()))
     )
   }, [sortedAlerts, filter])
 
