@@ -59,6 +59,8 @@ const AdminSalaryTable = () => {
   const fetchEmployees = async () => {
     try {
       const response = await axiosInstance.get('/payroll/employees');
+      // Log để debug
+      console.log("Employees data:", response.data);
       setEmployees(response.data);
     } catch (err) {
       console.error("Error fetching employees:", err);
@@ -178,11 +180,65 @@ const AdminSalaryTable = () => {
     }
   };
 
+  const validateAddInputs = () => {
+    const { EmployeeID, SalaryMonth, BaseSalary, Bonus, Deductions } = newSalaryRecord;
+
+    if (!EmployeeID) {
+      setUpdateError("Please select an employee");
+      return false;
+    }
+
+    if (!SalaryMonth) {
+      setUpdateError("Please select a salary month");
+      return false;
+    }
+
+    if (!BaseSalary || isNaN(parseFloat(BaseSalary))) {
+      setUpdateError("Base salary must be a valid number");
+      return false;
+    }
+
+    if (!Bonus || isNaN(parseFloat(Bonus))) {
+      setUpdateError("Bonus must be a valid number");
+      return false;
+    }
+
+    if (!Deductions || isNaN(parseFloat(Deductions))) {
+      setUpdateError("Deductions must be a valid number");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleAddSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate inputs trước khi gửi
+    if (!validateAddInputs()) {
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await axiosInstance.post('/payroll/salaries', newSalaryRecord);
+      // Tính lương thực nhận
+      const baseSalary = parseFloat(newSalaryRecord.BaseSalary) || 0;
+      const bonus = parseFloat(newSalaryRecord.Bonus) || 0;
+      const deductions = parseFloat(newSalaryRecord.Deductions) || 0;
+      const netSalary = baseSalary + bonus - deductions;
+
+      // Chuẩn bị dữ liệu gửi lên
+      const salaryData = {
+        EmployeeID: newSalaryRecord.EmployeeID,
+        SalaryMonth: newSalaryRecord.SalaryMonth,
+        BaseSalary: baseSalary,
+        Bonus: bonus,
+        Deductions: deductions,
+        NetSalary: netSalary.toFixed(2)
+      };
+
+      // Gọi API thêm lương với endpoint đúng
+      const response = await axiosInstance.post('/payroll/salaries/adding', salaryData);
 
       if (response.status === 201) {
         setUpdateMessage("Salary record added successfully");
@@ -196,7 +252,7 @@ const AdminSalaryTable = () => {
         }, 2000);
       }
     } catch (err) {
-      setUpdateError(err.response?.data?.message || "Error adding salary record");
+      setUpdateError(err.response?.data?.error || "Error adding salary record");
       setUpdateMessage("");
     } finally {
       setLoading(false);
@@ -205,10 +261,25 @@ const AdminSalaryTable = () => {
 
   const handleAddInputChange = (e) => {
     const { name, value } = e.target;
+    console.log(`Input change: ${name} = ${value}`);
 
     if (name === "EmployeeID" && value) {
-      // Find the selected employee
-      const selectedEmployee = employees.find(emp => emp.EmployeeID === value);
+      // Log để debug
+      console.log("Looking for employee with ID:", value);
+      console.log("Available employees:", employees);
+
+      // Find the selected employee - convert value to same type for comparison
+      // Ensure we're comparing the same types (string or number)
+      const selectedEmployee = employees.find(emp => {
+        const empIdStr = String(emp.EmployeeID);
+        const valueStr = String(value);
+        const match = empIdStr === valueStr;
+        console.log(`Comparing: ${empIdStr} === ${valueStr} => ${match}`);
+        return match;
+      });
+
+      console.log("Selected employee:", selectedEmployee);
+
       if (selectedEmployee) {
         setNewSalaryRecord({
           ...newSalaryRecord,
@@ -218,6 +289,25 @@ const AdminSalaryTable = () => {
           DepartmentID: selectedEmployee.DepartmentID,
           PositionName: selectedEmployee.PositionName,
           PositionID: selectedEmployee.PositionID
+        });
+      } else {
+        // Nếu không tìm thấy nhân viên, chỉ cập nhật EmployeeID
+        setNewSalaryRecord({
+          ...newSalaryRecord,
+          [name]: value,
+          FullName: '',
+          DepartmentName: '',
+          DepartmentID: '',
+          PositionName: '',
+          PositionID: ''
+        });
+      }
+    } else if (['BaseSalary', 'Bonus', 'Deductions'].includes(name)) {
+      // Ensure only numbers and decimal point can be entered
+      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+        setNewSalaryRecord({
+          ...newSalaryRecord,
+          [name]: value
         });
       }
     } else {
@@ -413,11 +503,15 @@ const AdminSalaryTable = () => {
                 required
               >
                 <option value="">-- Select an employee --</option>
-                {employees.map((emp) => (
-                  <option key={emp.EmployeeID} value={emp.EmployeeID}>
-                    {emp.FullName} - {emp.PositionName} - {emp.DepartmentName}
-                  </option>
-                ))}
+                {employees.length > 0 ? (
+                  employees.map((emp) => (
+                    <option key={emp.EmployeeID} value={String(emp.EmployeeID)}>
+                      {emp.FullName} - {emp.PositionName} - {emp.DepartmentName}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>No employees available</option>
+                )}
               </select>
             </div>
 

@@ -189,7 +189,7 @@
 }
 
 .update-salary-modal {
-  background-color: rgba(30, 4, 144, 0.6);
+  background-color: #0c014d;
   border-radius: 8px;
   padding: 20px;
   width: 450px;
@@ -208,7 +208,7 @@
   margin-bottom: 16px;
   margin-top: 10px;
 }
-.form-group-salary input {
+.form-group-salary input, .form-group-salary select {
   flex: 1;
   background-color: rgba(0, 0, 0, 0);
   color: white;
@@ -216,6 +216,16 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+}
+
+.form-group-salary select {
+  appearance: auto; /* Đảm bảo hiển thị dropdown mặc định */
+}
+
+.form-group-salary select option {
+  background-color: #0c014d;
+  color: white;
+  padding: 8px;
 }
 span.dollad {
   padding: 0 10px;
@@ -255,4 +265,22 @@ span.dollad {
 .btn-submit:disabled {
   background-color: #a5d6a7;
   cursor: not-allowed;
+}
+
+.update-success {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.update-error {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
 }
