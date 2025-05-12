@@ -5,40 +5,11 @@ from functools import wraps
 # JWT Secret Key - phải giống với secret key trong Node.js
 JWT_SECRET = "123456"
 
-# def verify_token(f):
-#     @wraps(f)
-#     def decorated(*args, **kwargs):
-#         token = None
-        
-#         # Kiểm tra token trong header Authorization
-#         if 'Authorization' in request.headers:
-#             auth_header = request.headers['Authorization']
-#             try:
-#                 token = auth_header.split(" ")[1]  # Bearer TOKEN format
-#             except IndexError:
-#                 return jsonify({'error': 'Token không hợp lệ'}), 401
-        
-#         if not token:
-#             return jsonify({'error': 'Token không tồn tại'}), 401
-        
-        
-#         try:
-#             # Giải mã token
-#             payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-#             request.user = payload
-#         except jwt.ExpiredSignatureError:
-#             return jsonify({'error': 'Token đã hết hạn'}), 401
-#         except jwt.InvalidTokenError:
-#             return jsonify({'error': 'Token không hợp lệ'}), 401
-        
-#         return f(*args, **kwargs)
-    
-#     return decorated
-
 def verify_token(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
+        print("🔥 verify_token thật đang chạy")
 
         # Kiểm tra token trong header Authorization
         if 'Authorization' in request.headers:

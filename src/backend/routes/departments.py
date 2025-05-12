@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
-from db import get_mysql_connection, get_sqlserver_connection
+from ..db import get_mysql_connection, get_sqlserver_connection
 from datetime import datetime
-from auth import verify_token, verify_hr
+from ..auth import verify_token, verify_hr
 
 departments_bp = Blueprint("departmens",__name__)
 

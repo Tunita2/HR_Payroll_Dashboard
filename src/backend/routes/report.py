@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from db import get_mysql_connection, get_sqlserver_connection
-from auth import verify_token, verify_hr
+from ..db import get_mysql_connection, get_sqlserver_connection
+from ..auth import verify_token, verify_hr
 
 report_bp = Blueprint("report",__name__)
 

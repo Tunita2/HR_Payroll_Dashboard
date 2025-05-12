@@ -6,14 +6,13 @@ import SearchBar from "../General/SearchBar";
 const HR_EmployeeTable = ({ style }) => {
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [positions, setPositions] = useState([]); // Dữ liệu phòng ban
+  const [positions, setPositions] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
-
   const [newEmployee, setNewEmployee] = useState({
     fullName: "",
     dateOfBirth: "",
@@ -28,6 +27,23 @@ const HR_EmployeeTable = ({ style }) => {
   });
   const [addingEmployee, setAddingEmployee] = useState(false);
   const [addError, setAddError] = useState(null);
+
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [updatedDepartmentID, setUpdatedDepartmentID] = useState("");
+  const [updatedPositionID, setUpdatedPositionID] = useState("");
+  const [updatedStatus, setUpdatedStatus] = useState("");
+  const [updatingEmployee, setUpdatingEmployee] = useState(false);
+  const [updateError, setUpdateError] = useState(null);
+  const [isUpdatingMode, setIsUpdatingMode] = useState(false);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteIdOrName, setDeleteIdOrName] = useState("");
+  const [deleteError, setDeleteError] = useState(null);
+  const [deleteStep, setDeleteStep] = useState("input"); // hoặc "confirm"
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+
+  const userRole = localStorage.getItem("role");
 
   useEffect(() => {
     fetchEmployees();
@@ -213,17 +229,6 @@ const HR_EmployeeTable = ({ style }) => {
     );
   });
 
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-
-  const [updatedDepartmentID, setUpdatedDepartmentID] = useState("");
-  const [updatedPositionID, setUpdatedPositionID] = useState("");
-  const [updatedStatus, setUpdatedStatus] = useState("");
-
-  const [updatingEmployee, setUpdatingEmployee] = useState(false);
-  const [updateError, setUpdateError] = useState(null);
-  const [isUpdatingMode, setIsUpdatingMode] = useState(false);
-
   const handleOpenUpdate = () => {
     if (!isUpdatingMode) {
       setIsUpdatingMode(true);
@@ -295,14 +300,6 @@ const HR_EmployeeTable = ({ style }) => {
       setUpdatingEmployee(false);
     }
   };
-
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [employeeToDelete, setEmployeeToDelete] = useState(null);
-  const [deleteIdOrName, setDeleteIdOrName] = useState("");
-  const [deleteError, setDeleteError] = useState(null);
-
-  const [deleteStep, setDeleteStep] = useState("input"); // hoặc "confirm"
-  const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
   const handleDeleteEmployee = async () => {
     if (!deleteIdOrName.trim()) {
@@ -408,12 +405,14 @@ const HR_EmployeeTable = ({ style }) => {
           >
             <strong>Update</strong>
           </button>
-          <button
-            className="table-button delete"
-            onClick={() => setShowDeleteModal(true)}
-          >
-            <strong>Delete</strong>
-          </button>
+          {userRole === "admin" && (
+            <button
+              className="table-button delete"
+              onClick={() => setShowDeleteModal(true)}
+            >
+              <strong>Delete</strong>
+            </button>
+          )}
         </div>
       </div>
 
@@ -641,7 +640,7 @@ const HR_EmployeeTable = ({ style }) => {
 
       {showUpdateModal && (
         <div className="modal-overlay">
-          <div className="add-department-modal">
+          <div className="add-employee-modal">
             <h3>Update Employee Info</h3>
             {updateError && <div className="error-message">{updateError}</div>}
             <form onSubmit={handleUpdateEmployee}>
