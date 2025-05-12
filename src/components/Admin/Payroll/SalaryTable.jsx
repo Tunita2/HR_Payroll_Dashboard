@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminSalaryTable from "./AdminSalaryTable";
 import axiosInstance from '../axiosInstance';
 import { useNavigate } from 'react-router-dom';

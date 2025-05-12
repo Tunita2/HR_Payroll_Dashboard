@@ -79,6 +79,18 @@ const AdminSalaryTable = () => {
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
   };
 
+  // Get status color based on employee status
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Active":
+        return "green";
+      case "Inactive":
+        return "red";
+      default:
+        return "black";
+    }
+  };
+
   // Get all unique months from salary data
   const allMonths = [...new Set(dataSalary.map(item => getMonthYear(item.SalaryMonth)))];
 
@@ -380,7 +392,6 @@ const AdminSalaryTable = () => {
           <table className="appli-table">
             <thead>
               <tr>
-                <th>Selection</th>
                 <th>ID</th>
                 <th>Employee ID</th>
                 <th>Full name</th>
@@ -391,6 +402,8 @@ const AdminSalaryTable = () => {
                 <th>Bonus</th>
                 <th>Deductions</th>
                 <th>Net salary</th>
+                <th>Status</th>
+                <th>Select</th>
               </tr>
             </thead>
             <tbody>
@@ -398,13 +411,6 @@ const AdminSalaryTable = () => {
                 <tr key={index}
                   className={`appli-table-row ${selectedEmployeeId === employee.SalaryID ? "selected-row" : ""}`}
                   onClick={() => handleRowSelect(employee.SalaryID, employee)}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedEmployeeId === employee.SalaryID}
-                      onChange={() => handleRowSelect(employee.SalaryID, employee)}
-                    />
-                  </td>
                   <td>{employee.SalaryID}</td>
                   <td>{employee.EmployeeID}</td>
                   <td>{employee.FullName}</td>
@@ -415,6 +421,24 @@ const AdminSalaryTable = () => {
                   <td>{employee.Bonus}</td>
                   <td>{employee.Deductions}</td>
                   <td>{employee.NetSalary}</td>
+                  <td>
+                    <span style={{
+                      color: getStatusColor(employee.Status),
+                      fontWeight: "bold",
+                      padding: "3px 8px",
+                      borderRadius: "4px",
+                      backgroundColor: `${getStatusColor(employee.Status)}15`
+                    }}>
+                      {employee.Status}
+                    </span>
+                  </td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedEmployeeId === employee.SalaryID}
+                      onChange={() => handleRowSelect(employee.SalaryID, employee)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>

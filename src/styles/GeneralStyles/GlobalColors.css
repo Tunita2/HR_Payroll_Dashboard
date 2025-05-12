@@ -1,0 +1,164 @@
+/* GlobalColors.css - Định nghĩa màu sắc nhất quán cho toàn bộ ứng dụng */
+
+:root {
+  /* Màu sắc chính */
+  --primary-bg-color: #0c014d;
+  --secondary-bg-color: #121843;
+  --tertiary-bg-color: #232538;
+
+  /* Màu chữ */
+  --primary-text-color: #ffffff;
+  --secondary-text-color: #a1a1aa;
+  --muted-text-color: rgba(255, 255, 255, 0.7);
+
+  /* Màu viền */
+  --border-color: #3d2a8e;
+  --border-light-color: rgba(61, 42, 142, 0.5);
+
+  /* Màu nút và tương tác */
+  --button-bg-color: #3b82f6;
+  --button-hover-color: rgba(59, 130, 246, 0.8);
+  --button-text-color: #ffffff;
+
+  /* Màu trạng thái */
+  --success-color: #4ade80;
+  --success-bg-color: rgba(34, 197, 94, 0.2);
+  --error-color: #f87171;
+  --error-bg-color: rgba(239, 68, 68, 0.2);
+  --warning-color: #fcd34d;
+  --warning-bg-color: rgba(245, 158, 11, 0.1);
+  --info-color: #93c5fd;
+  --info-bg-color: rgba(59, 130, 246, 0.1);
+
+  /* Màu bảng */
+  --table-header-bg: rgba(18, 24, 67, 0.8);
+  --table-row-hover: rgba(255, 255, 255, 0.05);
+  --table-border: rgba(255, 255, 255, 0.2);
+
+  /* Màu card */
+  --card-bg-color: #121843;
+  --card-border-color: #3d2a8e;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* Màu form */
+  --input-bg-color: rgba(18, 24, 67, 0.5);
+  --input-border-color: #3d2a8e;
+  --input-text-color: #ffffff;
+  --input-placeholder-color: rgba(255, 255, 255, 0.5);
+
+  /* Màu overlay */
+  --overlay-bg-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Áp dụng màu nền và chữ mặc định cho toàn bộ ứng dụng */
+body {
+  background-color: var(--primary-bg-color);
+  color: var(--primary-text-color);
+}
+
+/* Áp dụng màu sắc cho các thành phần chung */
+
+/* Bảng */
+table {
+  background-color: var(--secondary-bg-color);
+  border-color: var(--border-color);
+  color: var(--primary-text-color);
+}
+
+th {
+  background-color: var(--table-header-bg);
+  color: var(--primary-text-color);
+  border-color: var(--table-border);
+}
+
+td {
+  color: var(--primary-text-color);
+  border-color: var(--table-border);
+}
+
+tr:hover {
+  background-color: var(--table-row-hover);
+}
+
+/* Card */
+.card {
+  background-color: var(--card-bg-color);
+  border-color: var(--card-border-color);
+  box-shadow: var(--card-shadow);
+  color: var(--primary-text-color);
+}
+
+.card-title {
+  color: var(--primary-text-color);
+  border-bottom-color: var(--border-color);
+}
+
+/* Nút */
+.btn-btn,
+.button,
+button[type="submit"],
+.tab-button,
+.filter-button {
+  background-color: #0c014d;
+  color: var(--button-text-color);
+}
+
+.btn-btn:hover,
+.button:hover,
+button[type="submit"]:hover,
+.tab-button:hover,
+.filter-button:hover {
+  background-color: var(--button-hover-color);
+}
+
+/* Form */
+input, select, textarea {
+  background-color: var(--input-bg-color);
+  border-color: var(--input-border-color);
+  color: var(--input-text-color);
+}
+
+input::placeholder, select::placeholder, textarea::placeholder {
+  color: var(--input-placeholder-color);
+}
+
+/* Trạng thái */
+.status-active, .positive, .status-paid {
+  color: var(--success-color);
+  background-color: var(--success-bg-color);
+}
+
+.status-inactive, .negative, .status-none {
+  color: var(--error-color);
+  background-color: var(--error-bg-color);
+}
+
+/* Modal */
+.modal-overlay {
+  background-color: var(--overlay-bg-color);
+}
+
+.modal-content, .update-salary-modal {
+  background-color: var(--secondary-bg-color);
+  border-color: var(--border-color);
+  color: var(--primary-text-color);
+}
+
+/* Biểu đồ */
+.recharts-text {
+  fill: var(--primary-text-color) !important;
+}
+
+.recharts-legend-item-text {
+  color: var(--primary-text-color) !important;
+}
+
+.recharts-tooltip-label {
+  color: var(--primary-text-color) !important;
+}
+
+.recharts-default-tooltip {
+  background-color: var(--secondary-bg-color) !important;
+  border-color: var(--border-color) !important;
+  color: var(--primary-text-color) !important;
+}

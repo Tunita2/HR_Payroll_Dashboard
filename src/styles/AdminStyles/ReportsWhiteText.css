@@ -1,0 +1,164 @@
+/* CSS để chỉnh tất cả chữ trong trang reports thành màu trắng */
+
+/* Chỉnh màu chữ cho tất cả các phần tử */
+.dashboard {
+  color: #ffffff !important;
+}
+
+.container {
+  color: #ffffff !important;
+}
+
+.main-content {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các tab */
+.tab-button {
+  color: #ffffff !important;
+}
+
+.filter-button {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các card */
+.card {
+  color: #ffffff !important;
+}
+
+.card-title {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các bảng */
+.table-container {
+  color: #ffffff !important;
+}
+
+table {
+  color: #ffffff !important;
+}
+
+th {
+  color: #ffffff !important;
+}
+
+td {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các biểu đồ */
+.recharts-text {
+  fill: #ffffff !important;
+}
+
+.recharts-legend-item-text {
+  color: #ffffff !important;
+}
+
+.recharts-tooltip-label {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử khác */
+.stats-title {
+  color: #ffffff !important;
+}
+
+.stats-value {
+  color: #ffffff !important;
+}
+
+.stats-item {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong biểu đồ */
+.recharts-cartesian-axis-tick-value {
+  fill: #ffffff !important;
+}
+
+.recharts-legend-item {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong tooltip */
+.recharts-tooltip-item-name,
+.recharts-tooltip-item-value {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong bảng */
+.positive {
+  color: #4ade80 !important;
+}
+
+.negative {
+  color: #f87171 !important;
+}
+
+.status-paid {
+  color: #4ade80 !important;
+}
+
+.status-none {
+  color: #f87171 !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong grid */
+.grid-container {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong stats grid */
+.stats-grid {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong biểu đồ */
+.recharts-default-tooltip {
+  background-color: rgba(12, 1, 77, 0.8) !important;
+  border-color: #3d2a8e !important;
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong tooltip */
+.recharts-tooltip-wrapper {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong legend */
+.recharts-default-legend {
+  color: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong axis */
+.recharts-cartesian-axis-line {
+  stroke: #ffffff !important;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong pie chart */
+.recharts-pie-label-text {
+  fill: #ffffff !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong bar chart */
+.recharts-bar-rectangle {
+  stroke: none !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong line chart */
+.recharts-line-curve {
+  stroke-width: 2 !important;
+}
+
+/* Chỉnh màu chữ cho các phần tử trong area chart */
+.recharts-area-curve {
+  stroke-width: 2 !important;
+}

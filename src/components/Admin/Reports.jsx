@@ -2,6 +2,7 @@ import { useState, useEffect} from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Calendar, Users, DollarSign, BarChart2 } from 'lucide-react';
 import '../../styles/AdminStyles/Reports.css';
+import '../../styles/AdminStyles/ReportsWhiteText.css';
 import axiosInstance from './axiosInstance';
 
 export default function Dashboard() {
