@@ -1,3 +1,2 @@
-trỏ tới HR_Payroll_Dashboard
-/e/SystemIntegrationPractices_(ki2_nam3)/Group_Project/CEO_MEMO_project_ver1.3/HR_Payroll_Dashboard (Minh-New)
-python -m src.backend.app
+Bước 1 : cd HR_Payroll_Dashboard/src
+Bước 2 : python -m backend.app

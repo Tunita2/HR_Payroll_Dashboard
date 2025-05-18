@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Test_HR.test_employees_api.TestGetEmployeesAPI-20250519012637" tests="4" file="Test_HR/test_employees_api.py" time="0.018" timestamp="2025-05-19T01:26:38" failures="0" errors="0" skipped="0">
+	<testcase classname="Test_HR.test_employees_api.TestGetEmployeesAPI" name="test_add_employee_success" time="0.004" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_employees_api.py" line="99">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+✅ New ID with OUTPUT INSERTED: 1
+✅ Inserted into MySQL successfully
+]]></system-out>
+	</testcase>
+	<testcase classname="Test_HR.test_employees_api.TestGetEmployeesAPI" name="test_delete_employee_success" time="0.004" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_employees_api.py" line="218">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+]]></system-out>
+	</testcase>
+	<testcase classname="Test_HR.test_employees_api.TestGetEmployeesAPI" name="test_get_employees_success" time="0.003" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_employees_api.py" line="30">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+✅ Connected to DB successfully
+[{'employeeID': 1, 'fullName': 'Nguyễn Văn A', 'dateOfBirth': '01-05-1990', 'gender': 'Nam', 'phoneNumber': '0123456789', 'email': 'a@example.com', 'hireDate': '01-06-2020', 'departmentName': 'Phòng Kỹ thuật', 'positionName': 'Kỹ sư', 'status': 'Active', 'createdAt': '01-06-2020 00:00:00', 'updatedAt': '01-06-2021 00:00:00'}, {'employeeID': 2, 'fullName': 'Trần Thị B', 'dateOfBirth': '15-07-1992', 'gender': 'Nữ', 'phoneNumber': '0987654321', 'email': 'b@example.com', 'hireDate': '01-01-2021', 'departmentName': 'Phòng Nhân sự', 'positionName': 'Nhân viên', 'status': 'Inactive', 'createdAt': '01-01-2021 00:00:00', 'updatedAt': '01-01-2022 00:00:00'}]
+]]></system-out>
+	</testcase>
+	<testcase classname="Test_HR.test_employees_api.TestGetEmployeesAPI" name="test_update_employee_success" time="0.007" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_employees_api.py" line="173">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+]]></system-out>
+	</testcase>
+</testsuite>

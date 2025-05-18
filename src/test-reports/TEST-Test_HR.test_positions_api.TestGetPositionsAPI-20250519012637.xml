@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Test_HR.test_positions_api.TestGetPositionsAPI-20250519012637" tests="4" file="Test_HR/test_positions_api.py" time="0.013" timestamp="2025-05-19T01:26:38" failures="0" errors="0" skipped="0">
+	<testcase classname="Test_HR.test_positions_api.TestGetPositionsAPI" name="test_add_positions_success" time="0.004" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_positions_api.py" line="49">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+Received data: {'positionName': 'Giám đốc'}
+✅ New ID with OUTPUT INSERTED: 0
+✅ Inserted into MySQL successfully
+]]></system-out>
+	</testcase>
+	<testcase classname="Test_HR.test_positions_api.TestGetPositionsAPI" name="test_delete_position_success" time="0.003" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_positions_api.py" line="114">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+]]></system-out>
+	</testcase>
+	<testcase classname="Test_HR.test_positions_api.TestGetPositionsAPI" name="test_get_positions_success" time="0.002" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_positions_api.py" line="30">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+✅ Connected to DB successfully
+]]></system-out>
+	</testcase>
+	<testcase classname="Test_HR.test_positions_api.TestGetPositionsAPI" name="test_update_department_success" time="0.004" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_positions_api.py" line="78">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+]]></system-out>
+	</testcase>
+</testsuite>

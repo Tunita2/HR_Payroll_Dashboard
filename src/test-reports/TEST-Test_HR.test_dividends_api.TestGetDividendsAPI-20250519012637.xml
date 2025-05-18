@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Test_HR.test_dividends_api.TestGetDividendsAPI-20250519012637" tests="4" file="Test_HR/test_dividends_api.py" time="0.010" timestamp="2025-05-19T01:26:38" failures="0" errors="0" skipped="0">
+	<testcase classname="Test_HR.test_dividends_api.TestGetDividendsAPI" name="test_add_departments_success" time="0.003" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_dividends_api.py" line="71">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+✅ New ID with OUTPUT INSERTED: 123
+]]></system-out>
+	</testcase>
+	<testcase classname="Test_HR.test_dividends_api.TestGetDividendsAPI" name="test_delete_dividend_success" time="0.002" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_dividends_api.py" line="126">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+]]></system-out>
+	</testcase>
+	<testcase classname="Test_HR.test_dividends_api.TestGetDividendsAPI" name="test_get_dividends_success" time="0.003" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_dividends_api.py" line="27">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+✅ Connected to DB successfully
+]]></system-out>
+	</testcase>
+	<testcase classname="Test_HR.test_dividends_api.TestGetDividendsAPI" name="test_update_dividends_success" time="0.002" timestamp="2025-05-19T01:26:38" file="tests\Test_HR\test_dividends_api.py" line="100">
+		<system-out><![CDATA[🔥 verify_token thật đang chạy
+User role: hr
+]]></system-out>
+	</testcase>
+</testsuite>
