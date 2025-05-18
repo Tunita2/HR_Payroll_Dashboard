@@ -9,10 +9,10 @@ JWT_SECRET = "123456"
 class TestGetEmployeesAPI(unittest.TestCase):
     def setUp(self):
         # Giả lập verify_token và verify_hr
-        patcher1 = patch("backend.routes.departments.verify_token", new=lambda f: f)  # Giữ nguyên xác thực token
-        patcher2 = patch("backend.routes.departments.verify_hr", new=lambda f: f)  # Giữ nguyên xác thực role
-        patcher3 = patch("backend.routes.departments.get_sqlserver_connection")
-        patcher4 = patch("backend.routes.departments.get_mysql_connection")
+        patcher1 = patch("backend.routes.employees.verify_token", new=lambda f: f)  # Giữ nguyên xác thực token
+        patcher2 = patch("backend.routes.employees.verify_hr", new=lambda f: f)  # Giữ nguyên xác thực role
+        patcher3 = patch("backend.routes.employees.get_sqlserver_connection")
+        patcher4 = patch("backend.routes.employees.get_mysql_connection")
 
         self.addCleanup(patcher1.stop)
         self.addCleanup(patcher2.stop)
@@ -32,20 +32,16 @@ class TestGetEmployeesAPI(unittest.TestCase):
         mock_cursor = MagicMock()
 
         # Mô phỏng dữ liệu từ bảng Departments
-        def mock_execute(sql):
-            if "FROM Departments" in sql:
-                return [(1, "Phòng Kỹ thuật"), (2, "Phòng Nhân sự")]
-            elif "FROM Positions" in sql:
-                return [(1, "Kỹ sư"), (2, "Nhân viên")]
-            elif "FROM Employees" in sql:
-                return [
-                    (1, "Nguyễn Văn A", datetime(1990, 5, 1), "Nam", "0123456789", "a@example.com", datetime(2020, 6, 1), 1, 1, "Đang làm việc", datetime(2020, 6, 1), datetime(2021, 6, 1)),
-                    (2, "Trần Thị B", datetime(1992, 7, 15), "Nữ", "0987654321", "b@example.com", datetime(2021, 1, 1), 2, 2, "Nghỉ việc", datetime(2021, 1, 1), datetime(2022, 1, 1))
-                ]
-            return []
+        mock_cursor.fetchall.side_effect = [
+            [(1, "Phòng Kỹ thuật"), (2, "Phòng Nhân sự")], # Dữ liệu Departments
+            [(1, "Kỹ sư"), (2, "Nhân viên")],             # Dữ liệu Positions
+            [                                             # Dữ liệu Employees
+                (1, "Nguyễn Văn A", datetime(1990, 5, 1), "Nam", "0123456789", "a@example.com", datetime(2020, 6, 1), 1, 1, "Active", datetime(2020, 6, 1), datetime(2021, 6, 1)),
+                (2, "Trần Thị B", datetime(1992, 7, 15), "Nữ", "0987654321", "b@example.com", datetime(2021, 1, 1), 2, 2, "Inactive", datetime(2021, 1, 1), datetime(2022, 1, 1))
+            ]
+        ]   
 
-        mock_cursor.execute = mock_execute
-        mock_cursor.fetchall.return_value = []
+        mock_cursor.execute.return_value = None
 
         # Giả lập kết nối SQL Server
         mock_conn = MagicMock()
@@ -64,10 +60,10 @@ class TestGetEmployeesAPI(unittest.TestCase):
 
         # Kiểm tra dữ liệu trả về
         data = response.get_json()
-        print(data)  # In kết quả trả về từ API
+        # print(data)  # In kết quả trả về từ API
         self.assertEqual(len(data), 2)  # Kiểm tra chỉ có 2 nhân viên trả về
 
-        # Kiểm tra thông tin nhân viên đầu tiên
+        # # Kiểm tra thông tin nhân viên đầu tiên
         employee = data[0]
         self.assertEqual(employee["employeeID"], 1)
         self.assertEqual(employee["fullName"], "Nguyễn Văn A")
@@ -78,11 +74,11 @@ class TestGetEmployeesAPI(unittest.TestCase):
         self.assertEqual(employee["hireDate"], "01-06-2020")
         self.assertEqual(employee["departmentName"], "Phòng Kỹ thuật")
         self.assertEqual(employee["positionName"], "Kỹ sư")
-        self.assertEqual(employee["status"], "Đang làm việc")
+        self.assertEqual(employee["status"], "Active")
         self.assertEqual(employee["createdAt"], "01-06-2020 00:00:00")
         self.assertEqual(employee["updatedAt"], "01-06-2021 00:00:00")
 
-        # Kiểm tra thông tin nhân viên thứ hai
+        # # Kiểm tra thông tin nhân viên thứ hai
         employee = data[1]
         self.assertEqual(employee["employeeID"], 2)
         self.assertEqual(employee["fullName"], "Trần Thị B")
@@ -93,7 +89,7 @@ class TestGetEmployeesAPI(unittest.TestCase):
         self.assertEqual(employee["hireDate"], "01-01-2021")
         self.assertEqual(employee["departmentName"], "Phòng Nhân sự")
         self.assertEqual(employee["positionName"], "Nhân viên")
-        self.assertEqual(employee["status"], "Nghỉ việc")
+        self.assertEqual(employee["status"], "Inactive")
         self.assertEqual(employee["createdAt"], "01-01-2021 00:00:00")
         self.assertEqual(employee["updatedAt"], "01-01-2022 00:00:00")
 
@@ -170,9 +166,9 @@ class TestGetEmployeesAPI(unittest.TestCase):
         
         # Kiểm tra các phương thức đã được gọi đúng
         mock_sqlserver_cursor.execute.assert_called()
-        mock_sqlserver_cursor.commit.assert_called()
+        mock_sqlserver_conn.commit.assert_called()
         mock_mysql_cursor.execute.assert_called()
-        mock_mysql_cursor.commit.assert_called()
+        mock_mysql_conn.commit.assert_called()
 
     def test_update_employee_success(self):
         # Mô phỏng kết nối và cursor cho SQL Server
@@ -236,9 +232,19 @@ class TestGetEmployeesAPI(unittest.TestCase):
         token_payload = {"role": "hr"}
         token = pyjwt.encode(token_payload, JWT_SECRET, algorithm="HS256")
 
-        # Giả lập có nhân viên trong cả SQL Server và MySQL
-        mock_sqlserver_cursor.fetchone.return_value = [1]  # Nhân viên tồn tại
-        mock_mysql_cursor.fetchone.return_value = [1]  # Nhân viên tồn tại
+        mock_sqlserver_cursor.fetchone.side_effect = [
+            [0], # Kết quả COUNT(*) Dividends
+            [0], # Kết quả COUNT(*) accounts
+            # Thêm các kết quả fetchone khác nếu API gọi fetchone sau các lệnh execute khác (ví dụ kiểm tra tồn tại)
+            # Ví dụ: [1] nếu có kiểm tra tồn tại nhân viên trước khi xóa
+        ]
+
+        mock_mysql_cursor.fetchone.side_effect = [
+            [0], # Kết quả COUNT(*) salaries
+            [0], # Kết quả COUNT(*) attendance
+             # Thêm các kết quả fetchone khác tương tự
+        ]
+
 
         # Mô phỏng xóa thành công trong SQL Server và MySQL
         mock_sqlserver_cursor.rowcount = 1

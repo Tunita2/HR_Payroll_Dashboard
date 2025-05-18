@@ -40,6 +40,7 @@ def get_employees():
         cursor.execute("SELECT EmployeeID, FullName,DateOfBirth,Gender,PhoneNumber,Email,HireDate,DepartmentID,PositionID,Status, CreatedAt, UpdatedAt FROM Employees")
         employees = []
 
+
         for row in cursor.fetchall():
             employee = {
                 "employeeID": row[0],
@@ -57,6 +58,9 @@ def get_employees():
             }
             employees.append(employee)
 
+        cursor.close()
+        conn.close()
+        print (employees)
         return jsonify(employees)
     except Exception as e:
         print("❌ Failed to connect to DB:", e)
