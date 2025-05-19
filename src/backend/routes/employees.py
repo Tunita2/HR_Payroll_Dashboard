@@ -282,14 +282,18 @@ def delete_employee(employee_id):
             else:
                 errors.append("Không tìm thấy nhân viên trong MySQL")
 
-        sql_cursor.close()
-        sql_conn.close()
-        
-        mysql_cursor.close()
-        mysql_conn.close()
-
     except Exception as e:
         errors.append(f"Lỗi hệ thống: {str(e)}")
+
+    finally:
+        if sql_cursor:
+            sql_cursor.close()
+        if sql_conn:
+            sql_conn.close()
+        if mysql_cursor:
+            mysql_cursor.close()
+        if mysql_conn:
+            mysql_conn.close()
 
     # Xử lý kết quả
     if sqlserver_deleted or mysql_deleted:

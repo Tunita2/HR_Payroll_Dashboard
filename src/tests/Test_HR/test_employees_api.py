@@ -170,6 +170,42 @@ class TestGetEmployeesAPI(unittest.TestCase):
         mock_mysql_cursor.execute.assert_called()
         mock_mysql_conn.commit.assert_called()
 
+    def test_add_employee_missing_fields(self):
+        # Dữ liệu test bị thiếu trường 'email' và 'status'
+        incomplete_employee_data = {
+            "fullName": "Nguyễn Văn D",
+            "dateOfBirth": "2000-01-01",
+            "gender": "Nữ",
+            "phoneNumber": "0909090909",
+            "hireDate": "2023-05-01",
+            "departmentID": 2,
+            "positionID": 2,
+            "role": "employee"
+            # email and status are missing
+        }
+
+        token_payload = {"role": "hr"}
+        token = pyjwt.encode(token_payload, JWT_SECRET, algorithm="HS256")
+
+        # Gửi yêu cầu POST đến API /api/employee/add
+        response = self.client.post("/api/employee/add",
+                                    json=incomplete_employee_data,
+                                    headers={"Authorization": f"Bearer {token}"})
+
+        # Kiểm tra mã trạng thái trả về là 400
+        self.assertEqual(response.status_code, 400)
+
+        # Kiểm tra nội dung lỗi trả về
+        data = response.get_json()
+        self.assertIn("error", data)
+        self.assertIn("Missing fields", data["error"])
+        self.assertIn("email", data["error"])
+        self.assertIn("status", data["error"])
+
+        # Kiểm tra rằng không có thao tác nào trên database được gọi
+        self.mock_get_sqlserver_conn.assert_not_called()
+        self.mock_get_mysql_conn.assert_not_called()
+
     def test_update_employee_success(self):
         # Mô phỏng kết nối và cursor cho SQL Server
         mock_sqlserver_cursor = MagicMock()
@@ -214,6 +250,42 @@ class TestGetEmployeesAPI(unittest.TestCase):
         self.assertEqual(data["updatedFields"], list(update_data.keys()))
         self.assertIn("message", data)
         self.assertEqual(data["message"], "Employee updated successfully")
+
+    def test_update_employee_no_valid_fields(self):
+        # Mô phỏng kết nối và cursor cho SQL Server (will not be called)
+        mock_sqlserver_conn = MagicMock()
+        self.mock_get_sqlserver_conn.return_value = mock_sqlserver_conn
+
+        # Mô phỏng kết nối và cursor cho MySQL (will not be called)
+        mock_mysql_conn = MagicMock()
+        self.mock_get_mysql_conn.return_value = mock_mysql_conn
+
+
+        employee_id = 1
+        # Data with fields not allowed for update
+        update_data = {
+            "fullName": "New Name",
+            "dateOfBirth": "2000-01-01",
+            "email": "new@example.com",
+            "extra_field": "some value"
+        }
+
+        token_payload = {"role": "hr"}
+        token = pyjwt.encode(token_payload, JWT_SECRET, algorithm="HS256")
+
+        response = self.client.put(f"/api/employee/update/{employee_id}",
+                                 json=update_data,
+                                 headers={"Authorization": f"Bearer {token}"})
+
+        # Kiểm tra mã trạng thái trả về là 400
+        self.assertEqual(response.status_code, 400)
+        data = response.get_json()
+        self.assertIn("error", data)
+        self.assertEqual(data["error"], "No valid fields provided for update")
+
+        # Kiểm tra rằng không có thao tác nào trên database được gọi
+        self.mock_get_sqlserver_conn.assert_not_called()
+        self.mock_get_mysql_conn.assert_not_called()
 
     def test_delete_employee_success(self):
         # Mô phỏng kết nối và cursor cho SQL Server
@@ -260,3 +332,130 @@ class TestGetEmployeesAPI(unittest.TestCase):
         self.assertIn("message", data)
         self.assertEqual(data["message"], f"Đã xoá nhân viên {employee_id} thành công")
             
+    def test_delete_employee_with_dependencies(self):
+        # Mô phỏng kết nối và cursor cho SQL Server
+        mock_sqlserver_cursor = MagicMock()
+        mock_sqlserver_conn = MagicMock()
+        mock_sqlserver_conn.cursor.return_value = mock_sqlserver_cursor
+        self.mock_get_sqlserver_conn.return_value = mock_sqlserver_conn
+
+        # Mô phỏng kết nối và cursor cho MySQL
+        mock_mysql_cursor = MagicMock()
+        mock_mysql_conn = MagicMock()
+        mock_mysql_conn.cursor.return_value = mock_mysql_cursor
+        self.mock_get_mysql_conn.return_value = mock_mysql_conn
+
+        employee_id = 2
+        token_payload = {"role": "hr"}
+        token = pyjwt.encode(token_payload, JWT_SECRET, algorithm="HS256")
+
+        # Mô phỏng có dependencies (một hoặc nhiều COUNT(*) trả về > 0)
+        mock_sqlserver_cursor.fetchone.side_effect = [
+            [0], # COUNT(*) Dividends - no dependency here
+            [1]  # COUNT(*) accounts - dependency exists here
+             # Add more results if checking other tables in SQL Server
+        ]
+
+        mock_mysql_cursor.fetchone.side_effect = [
+            [5], # COUNT(*) salaries - dependency exists here
+            [0]  # COUNT(*) attendance - no dependency here
+             # Add more results if checking other tables in MySQL
+        ]
+
+        # Gửi yêu cầu DELETE đến API /api/employee/delete mà không có force=true
+        response = self.client.delete(f"/api/employee/delete/{employee_id}",
+                                      headers={"Authorization": f"Bearer {token}"})
+
+        # Kiểm tra mã trạng thái trả về là 409 Conflict
+        self.assertEqual(response.status_code, 409)
+        data = response.get_json()
+        self.assertIn("error", data)
+        self.assertEqual(data["error"], "Ràng buộc dữ liệu")
+        self.assertIn("message", data)
+        self.assertIn(f"Nhân viên ID {employee_id} đang được có dữ liệu ràng buộc", data["message"])
+        self.assertIn("hasDependencies", data)
+        self.assertTrue(data["hasDependencies"])
+
+        # Verify that DELETE queries were NOT called
+        sqlserver_calls = mock_sqlserver_cursor.execute.call_args_list
+        mysql_calls = mock_mysql_cursor.execute.call_args_list
+
+        # Check that no DELETE statements were executed
+        self.assertFalse(any("DELETE FROM" in call[0][0] for call in sqlserver_calls))
+        self.assertFalse(any("DELETE FROM" in call[0][0] for call in mysql_calls))
+
+        # Check that commit was not called on either connection
+        mock_sqlserver_conn.commit.assert_not_called()
+        mock_mysql_conn.commit.assert_not_called()
+
+        # Connections and cursors should still be closed in the `finally` block or equivalent error handling in the route
+        mock_sqlserver_cursor.close.assert_called_once()
+        mock_sqlserver_conn.close.assert_called_once()
+        mock_mysql_cursor.close.assert_called_once()
+        mock_mysql_conn.close.assert_called_once()
+
+
+    def test_delete_employee_with_dependencies_force_delete(self):
+        # Mô phỏng kết nối và cursor cho SQL Server
+        mock_sqlserver_cursor = MagicMock()
+        mock_sqlserver_conn = MagicMock()
+        mock_sqlserver_conn.cursor.return_value = mock_sqlserver_cursor
+        self.mock_get_sqlserver_conn.return_value = mock_sqlserver_conn
+
+        # Mô phỏng kết nối và cursor cho MySQL
+        mock_mysql_cursor = MagicMock()
+        mock_mysql_conn = MagicMock()
+        mock_mysql_conn.cursor.return_value = mock_mysql_cursor
+        self.mock_get_mysql_conn.return_value = mock_mysql_conn
+
+        employee_id = 3
+        token_payload = {"role": "hr"}
+        token = pyjwt.encode(token_payload, JWT_SECRET, algorithm="HS256")
+
+        # Mô phỏng có dependencies
+        mock_sqlserver_cursor.fetchone.side_effect = [
+            [1], # COUNT(*) Dividends - dependency exists
+            [2]  # COUNT(*) accounts - dependency exists
+        ]
+
+        mock_mysql_cursor.fetchone.side_effect = [
+            [3], # COUNT(*) salaries - dependency exists
+            [4]  # COUNT(*) attendance - dependency exists
+        ]
+
+        # Simulate successful deletion by setting rowcount
+        mock_sqlserver_cursor.rowcount = 1
+        mock_mysql_cursor.rowcount = 1
+
+        # Gửi yêu cầu DELETE đến API /api/employee/delete với force=true
+        response = self.client.delete(f"/api/employee/delete/{employee_id}?force=true",
+                                      headers={"Authorization": f"Bearer {token}"})
+
+        # Kiểm tra mã trạng thái trả về là 200
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertIn("message", data)
+        self.assertEqual(data["message"], f"Đã xoá nhân viên {employee_id} thành công")
+
+        # Verify delete queries WERE called because force=true
+        sql_delete_calls = [
+             unittest.mock.call("DELETE FROM Dividends WHERE EmployeeID = ?", (employee_id,)),
+             unittest.mock.call("DELETE FROM accounts WHERE EmployeeID = ?", (employee_id,)),
+             unittest.mock.call("DELETE FROM Employees WHERE EmployeeID = ?", (employee_id,))
+         ]
+        # Using assert_has_calls with any_order=True is more robust
+        mock_sqlserver_cursor.execute.assert_has_calls(sql_delete_calls, any_order=True)
+        mock_sqlserver_conn.commit.assert_called_once()
+
+        mysql_delete_calls = [
+            unittest.mock.call("DELETE FROM salaries WHERE EmployeeID = %s", (employee_id,)),
+            unittest.mock.call("DELETE FROM attendance WHERE EmployeeID = %s", (employee_id,)),
+            unittest.mock.call("DELETE FROM employees WHERE EmployeeID = %s", (employee_id,))
+        ]
+        mock_mysql_cursor.execute.assert_has_calls(mysql_delete_calls, any_order=True)
+        mock_mysql_conn.commit.assert_called_once()
+
+        mock_sqlserver_cursor.close.assert_called_once()
+        mock_sqlserver_conn.close.assert_called_once()
+        mock_mysql_cursor.close.assert_called_once()
+        mock_mysql_conn.close.assert_called_once()
